@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Insurance Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Font Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Cairo', sans-serif;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background-color: #f8fafc;
+            overflow-x: hidden !important;
+            width: 100%;
+        }
+        input[type="date"] {
+            -webkit-appearance: none;
+            appearance: none;
+            min-height: 44px;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="text-slate-800 pb-12 antialiased select-none">
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white pt-4 pb-4 px-4 shadow-md sticky top-0 z-30">
+        <div class="max-w-2xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-2.5 cursor-pointer" ondblclick="openApiModal()" title="انقر مرتين لفتح إعدادات الـ API">
+                <div class="w-9 h-9 rounded-xl bg-teal-500/20 border border-teal-400/30 flex items-center justify-center text-teal-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                </div>
+                <div>
+                    <h1 class="text-base font-bold tracking-wide">Insurance Dashboard</h1>
+                    <p class="text-[11px] text-slate-400 font-medium">متابعة صرف وصفات التأمين الدورية</p>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-2">
+                <button onclick="openApiModal()" id="apiKeyBtn" title="إعداد مفتاح Gemini" class="w-9 h-9 rounded-xl bg-slate-700/60 hover:bg-slate-700 border border-slate-600 flex items-center justify-center text-amber-400 transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                </button>
+                <button onclick="exportToExcel()" title="تصدير إلى Excel" class="w-9 h-9 rounded-xl bg-slate-700/60 hover:bg-slate-700 border border-slate-600 flex items-center justify-center text-slate-200 transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Action Buttons Bar -->
+        <div class="max-w-2xl mx-auto grid grid-cols-2 gap-2.5 mt-3.5">
+            <button type="button" onclick="startLiveCamera('main')" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 active:scale-[0.98] text-white font-bold py-2 px-3 rounded-xl shadow-sm flex items-center justify-center gap-2 text-xs transition-all border border-amber-400/30">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span>تصوير مجمّع (OCR ذكي)</span>
+            </button>
+            <button onclick="openAddModal()" class="bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 active:scale-[0.98] text-white font-bold py-2 px-3 rounded-xl shadow-sm flex items-center justify-center gap-2 text-xs transition-all border border-sky-400/30">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <span>إضافة وصفة</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-2xl mx-auto px-3.5 mt-3 space-y-3">
+
+        <!-- Due Alert Banner -->
+        <div id="alertBanner" class="bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl p-3 flex items-center justify-between shadow-sm transition-all hidden">
+            <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
+                <p class="text-xs font-bold" id="alertBannerText">تنبيه: يوجد وصفات مستحقة أو متأخرة الصرف حالياً.</p>
+            </div>
+            <button onclick="filterStatus('due')" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-sm transition-all active:scale-95">عرض</button>
+        </div>
+
+        <!-- KPI 3-Cards Summary -->
+        <div class="grid grid-cols-3 gap-2">
+            <div class="bg-white border border-slate-200/80 rounded-2xl p-2.5 text-center shadow-sm">
+                <div class="text-[11px] text-slate-500 font-semibold mb-0.5">إجمالي الوصفات</div>
+                <div class="text-lg font-extrabold text-slate-800" id="totalCount">0</div>
+            </div>
+            <div class="bg-white border border-rose-200/80 rounded-2xl p-2.5 text-center shadow-sm">
+                <div class="text-[11px] text-rose-600 font-semibold mb-0.5">متأخرة ومستحقة</div>
+                <div class="text-lg font-extrabold text-rose-600" id="dueCount">0</div>
+            </div>
+            <div class="bg-white border border-emerald-200/80 rounded-2xl p-2.5 text-center shadow-sm">
+                <div class="text-[11px] text-emerald-600 font-semibold mb-0.5">لم يحن موعدها</div>
+                <div class="text-lg font-extrabold text-emerald-600" id="validCount">0</div>
+            </div>
+        </div>
+
+        <!-- Search & Filter Controls -->
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-3 shadow-sm space-y-2.5">
+            <div class="relative">
+                <input type="text" id="searchInput" placeholder="ابحث برقم الهوية / الإقامة" oninput="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-xl pr-9 pl-3 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 transition-colors">
+                <svg class="w-4 h-4 text-slate-400 absolute right-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <select id="companyFilter" onchange="applyFilters()" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-sky-500">
+                    <option value="">كل الشركات</option>
+                    <option value="تكافل الراجحي">تكافل الراجحي</option>
+                    <option value="بوبا">بوبا</option>
+                    <option value="التعاونية">التعاونية</option>
+                    <option value="ميدغلف">ميدغلف</option>
+                </select>
+
+                <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-[11px] font-bold">
+                    <button onclick="filterStatus('all')" id="tabAll" class="px-2.5 py-1 rounded-lg bg-white text-slate-800 shadow-xs transition-all">الكل</button>
+                    <button onclick="filterStatus('due')" id="tabDue" class="px-2.5 py-1 rounded-lg text-slate-500 transition-all">المستحقة</button>
+                    <button onclick="filterStatus('valid')" id="tabValid" class="px-2.5 py-1 rounded-lg text-slate-500 transition-all">لم يحن موعدها</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prescriptions Container -->
+        <div id="prescriptionsContainer" class="space-y-2"></div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-10 bg-white border border-slate-200/80 rounded-2xl p-6">
+            <svg class="w-12 h-12 text-slate-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <p class="text-xs text-slate-500 font-semibold">لا توجد وصفات تطابق خيارات البحث</p>
+        </div>
+    </main>
+
+    <!-- LIVE CAMERA MODAL (شاشة الكاميرا الخلفية الحية) -->
+    <div id="cameraModal" class="fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-between p-4 hidden">
+        <div class="w-full max-w-lg flex items-center justify-between text-white pt-2">
+            <span class="text-xs font-bold flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                <span>كاميرا مسح الروشتات</span>
+            </span>
+            <button type="button" onclick="stopLiveCamera()" class="p-1 rounded-lg bg-white/20 text-white hover:bg-white/30">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <div class="relative w-full max-w-lg flex-1 my-3 bg-black rounded-2xl overflow-hidden flex items-center justify-center border border-white/10 shadow-2xl">
+            <video id="cameraVideo" autoplay playsinline class="w-full h-full object-cover"></video>
+            <!-- Focus Target Frame -->
+            <div class="absolute inset-6 border-2 border-dashed border-amber-400/70 rounded-xl pointer-events-none flex items-center justify-center">
+                <span class="bg-black/60 text-amber-300 text-[10px] px-2.5 py-1 rounded-full">وجّه العدسة على الوصفة</span>
+            </div>
+            <canvas id="cameraCanvas" class="hidden"></canvas>
+        </div>
+
+        <div class="w-full max-w-lg flex flex-col items-center gap-3 pb-4">
+            <!-- Capture Trigger Button -->
+            <button type="button" onclick="captureLivePhoto()" class="w-18 h-18 rounded-full border-4 border-white bg-amber-500 flex items-center justify-center shadow-lg active:scale-95 transition-all">
+                <div class="w-13 h-13 rounded-full bg-white"></div>
+            </button>
+            
+            <!-- Fallback File Upload if Camera permission fails -->
+            <label class="text-[11px] text-slate-300 hover:text-white underline cursor-pointer">
+                أو اختر صورة من الجهاز
+                <input type="file" accept="image/*" class="hidden" onchange="handleFallbackImageUpload(this)">
+            </label>
+        </div>
+    </div>
+
+    <!-- Modal: Add / Edit Prescription -->
+    <div id="prescriptionModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 hidden">
+        <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[92vh]">
+            <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
+                <h3 class="text-xs font-bold flex items-center gap-2" id="modalTitle">
+                    <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <span>بيانات الوصفة</span>
+                </h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- OCR Capture button inside Add Modal -->
+            <div class="px-4 pt-3 pb-1 bg-amber-50/60 border-b border-amber-100 flex items-center justify-between">
+                <span class="text-[11px] font-bold text-amber-900">تعبئة البيانات تلقائياً بالكاميرا:</span>
+                <button type="button" onclick="startLiveCamera('single')" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-1 px-3 rounded-lg text-[11px] flex items-center gap-1.5 transition-all shadow-2xs">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+                    <span id="singleScanText">فتح الكاميرا ومسح الوصفة</span>
+                </button>
+            </div>
+
+            <form id="prescriptionForm" onsubmit="handleFormSubmit(event)" class="p-4 space-y-3 overflow-y-auto custom-scrollbar text-xs">
+                <input type="hidden" id="editIndex" value="-1">
+
+                <div>
+                    <label class="block text-slate-700 font-bold mb-1">اسم العميل *</label>
+                    <input type="text" id="patientName" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-sky-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">رقم الهوية / الإقامة *</label>
+                        <input type="text" id="nationalId" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-sky-500">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">شركة التأمين *</label>
+                        <select id="insuranceCompany" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs focus:outline-none focus:border-sky-500">
+                            <option value="تكافل الراجحي">تكافل الراجحي</option>
+                            <option value="بوبا">بوبا</option>
+                            <option value="التعاونية">التعاونية</option>
+                            <option value="ميدغلف">ميدغلف</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">رقم الجوال</label>
+                        <input type="tel" id="phoneNumber" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-sky-500">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">الدورة التأمينية *</label>
+                        <select id="cycleDuration" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs focus:outline-none focus:border-sky-500">
+                            <option value="84" selected>84</option>
+                            <option value="28">28</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-slate-700 font-bold mb-1">تاريخ آخر صرف *</label>
+                    <input type="date" id="dispenseDate" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-sky-500">
+                </div>
+
+                <div>
+                    <label class="block text-slate-700 font-bold mb-1">الملاحظات</label>
+                    <input type="text" id="patientRemarks" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-sky-500">
+                </div>
+
+                <div>
+                    <label class="block text-slate-700 font-bold mb-1">قائمة الأدوية والمستلزمات *</label>
+                    <textarea id="medicationsList" rows="3" required class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:outline-none focus:border-sky-500 leading-relaxed"></textarea>
+                </div>
+
+                <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold transition-colors">إلغاء</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold transition-all shadow-sm">حفظ الوصفة</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Gemini API Key Setting -->
+    <div id="apiKeyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 hidden">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden">
+            <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
+                <h3 class="text-xs font-bold flex items-center gap-2">
+                    <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                    <span>إعداد مفتاح Google Gemini API</span>
+                </h3>
+                <button onclick="closeApiModal()" class="text-slate-400 hover:text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-4 space-y-3 text-xs">
+                <p class="text-slate-600 leading-relaxed">
+                    لتفعيل القراءة الذكية للروشتات وسحب الأسماء والأدوية تلقائياً، أدخل مفتاحك المجاني من 
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-sky-600 underline font-bold">Google AI Studio</a>:
+                </p>
+                <div>
+                    <label class="block text-slate-700 font-bold mb-1">Gemini API Key</label>
+                    <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-amber-500">
+                </div>
+                <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                    <span id="apiStatusBadge" class="text-[11px] font-bold text-slate-400">غير مضبوط</span>
+                    <div class="flex gap-2">
+                        <button onclick="closeApiModal()" class="px-3 py-1.5 rounded-xl text-slate-600 font-semibold">إغلاق</button>
+                        <button onclick="saveApiKey()" class="px-4 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold transition-all shadow-sm">حفظ المفتاح</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Batch Capture Review / Date Picker & Gemini OCR Progress -->
+    <div id="batchProcessModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 hidden">
+        <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
+                <h3 class="text-xs font-bold flex items-center gap-2">
+                    <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+                    <span>معالجة الروشتة بالذكاء الاصطناعي</span>
+                </h3>
+                <button onclick="closeBatchModal()" class="text-slate-400 hover:text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="p-4 space-y-3.5 text-xs overflow-y-auto custom-scrollbar">
+                <!-- Status & Progress -->
+                <div id="ocrProgressBlock" class="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-3">
+                    <div class="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin flex-shrink-0"></div>
+                    <div>
+                        <div class="font-bold text-amber-900" id="ocrStatusText">جاري قراءة وتحليل بيانات الروشتة عبر Gemini...</div>
+                        <div class="text-[11px] text-amber-700" id="ocrProgressSub">يرجى الانتظار ثوانٍ معدودة</div>
+                    </div>
+                </div>
+
+                <!-- Dispense Date Confirmation -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
+                    <label class="block font-bold text-slate-800">تاريخ صرف هذه الوصفة:</label>
+                    <div class="flex items-center gap-2">
+                        <input type="date" id="batchDispenseDate" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-amber-500">
+                        <button type="button" onclick="setBatchDateToday()" class="bg-slate-200 hover:bg-slate-300 font-bold px-3 py-1.5 rounded-xl transition-colors">صُرفت اليوم</button>
+                    </div>
+                </div>
+
+                <!-- Extracted Items Preview -->
+                <div>
+                    <h4 class="font-bold text-slate-700 mb-2">البيانات المستخرجة:</h4>
+                    <div id="batchExtractedList" class="space-y-2 max-h-56 overflow-y-auto custom-scrollbar"></div>
+                </div>
+
+                <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+                    <button type="button" onclick="closeBatchModal()" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold">إلغاء</button>
+                    <button type="button" id="confirmBatchAddBtn" onclick="confirmBatchAdd()" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold transition-all shadow-sm">حفظ وإضافة للمنظومة</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Custom Delete Confirmation -->
+    <div id="deleteConfirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 hidden">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-xl p-4 text-center space-y-3">
+            <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </div>
+            <h4 class="font-bold text-slate-800 text-sm">تأكيد حذف الوصفة</h4>
+            <p class="text-xs text-slate-500 leading-relaxed" id="deleteModalMessage">هل أنت متأكد من حذف هذه الوصفة نهائياً من المنظومة؟</p>
+            <div class="flex items-center justify-center gap-2 pt-2">
+                <button onclick="closeDeleteModal()" class="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors">إلغاء</button>
+                <button onclick="executeDelete()" class="flex-1 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition-colors shadow-sm">نعم، احذف</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs font-bold px-4 py-2.5 rounded-2xl shadow-lg flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-3">
+        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+        <span id="toastMsg">تمت العملية بنجاح</span>
+    </div>
+
+    <script>
+        const initialPatients = [
+            {
+                name: "سعد حمود سالم السبيعي",
+                id: "1001466596",
+                company: "تكافل الراجحي",
+                phone: "0545215235",
+                cycle: 84,
+                dispenseDate: "2026-08-02",
+                remarks: "",
+                meds: ["Ryzodeg 100U FlexTouch 5x3ml", "Xigduo 10/1000mg XR 28 Tablet", "Amlodipine / Valsartan 10/160mg F.C. Tablet"]
+            },
+            {
+                name: "عبدالله سعيد محمد الغامدي",
+                id: "1044972360",
+                company: "تكافل الراجحي",
+                phone: "055230840",
+                cycle: 84,
+                dispenseDate: "2026-08-05",
+                remarks: "",
+                meds: ["Diamicron 30MR Tablet", "Glucophage 500mg 50 Tab", "Blopress 8 Plus Tablets"]
+            },
+            {
+                name: "عبدالسلام محمد سعيد",
+                id: "2163780766",
+                company: "تكافل الراجحي",
+                phone: "0503878354",
+                cycle: 84,
+                dispenseDate: "2026-08-07",
+                remarks: "",
+                meds: ["Atacand 16mg 28 Tab", "Dapagliflozin 10mg"]
+            },
+            {
+                name: "فاطمة عامر الشهري",
+                id: "1037107404",
+                company: "تكافل الراجحي",
+                phone: "0505137757",
+                cycle: 84,
+                dispenseDate: "2026-08-01",
+                remarks: "",
+                meds: ["Co-Diovan 160/12.5mg 28 Tablet", "Synjardi 12.5/1000mg 60 Tabs"]
+            },
+            {
+                name: "خليل إبراهيم الدوسري",
+                id: "1071855447",
+                company: "تكافل الراجحي",
+                phone: "0566448291",
+                cycle: 84,
+                dispenseDate: "2026-09-28",
+                remarks: "",
+                meds: ["Coversyl 5mg Tab 30S", "Glucare 500mg XR 60 Tablet", "Crevast 5mg Film-Coated Tablet"]
+            },
+            {
+                name: "محمد غريب القايدي",
+                id: "1039715600",
+                company: "تكافل الراجحي",
+                phone: "0503254721",
+                cycle: 84,
+                dispenseDate: "2026-08-03",
+                remarks: "",
+                meds: ["Sevikar 20/5mg 28 Tablet", "Xigduo 10/1000mg XR 28 Tablet", "Atozet 10/10mg 30 Tablet"]
+            },
+            {
+                name: "صالح ناصر عرق",
+                id: "1022586158",
+                company: "تكافل الراجحي",
+                phone: "0505272020",
+                cycle: 84,
+                dispenseDate: "2026-08-02",
+                remarks: "",
+                meds: ["Coversyl 10mg Tablet 30Pcs", "Diamicron 60mg MR Tablet", "Janumet XR", "Xigduo 10/1000mg XR 28 Tablet"]
+            },
+            {
+                name: "سامي عبدالعزيز طه محمد",
+                id: "2629310349",
+                company: "تكافل الراجحي",
+                phone: "0546953664",
+                cycle: 84,
+                dispenseDate: "2026-08-04",
+                remarks: "",
+                meds: ["Amlodipine / Valsartan / Hydrochlorothiazide 5/160/12.5mg", "Lijen Met", "Nebilet 5mg Tab"]
+            },
+            {
+                name: "ظهير خان صلاح الدين",
+                id: "2081126753",
+                company: "تكافل الراجحي",
+                phone: "0508017305",
+                cycle: 84,
+                dispenseDate: "2026-08-02",
+                remarks: "",
+                meds: ["Twynsta", "Xigduo 5/1000mg XR", "Exforge HCT 5/160/12.5mg"]
+            },
+            {
+                name: "شبيب محمد علي السبيعي",
+                id: "1023001330",
+                company: "تكافل الراجحي",
+                phone: "057404896",
+                cycle: 84,
+                dispenseDate: "2026-08-09",
+                remarks: "",
+                meds: ["Diovan 80mg 28 Tab", "Glucare 750mg XR 60 Tablet"]
+            },
+            {
+                name: "شمشه سالم خلف الهويمل",
+                id: "1010404422",
+                company: "تكافل الراجحي",
+                phone: "0505441597",
+                cycle: 84,
+                dispenseDate: "2026-08-01",
+                remarks: "",
+                meds: ["Coveram 10/10mg Tab 30S", "Duetact 30/2mg 30 Tablets", "FreeStyle Libre 2 Sensor", "Glyxambi"]
+            },
+            {
+                name: "نوير منصور معجب الدوسري",
+                id: "1010525614",
+                company: "تكافل الراجحي",
+                phone: "055228690",
+                cycle: 84,
+                dispenseDate: "2026-08-02",
+                remarks: "",
+                meds: ["Blopress 8mg 28/ Tab", "Glucophage 500mg 50 Tab", "Januvia 100mg 28 Tablet"]
+            }
+        ];
+
+        let patients = [];
+        let currentStatusFilter = 'all';
+        let deleteTargetIndex = null;
+        let batchExtractedItems = [];
+        let activeMediaStream = null;
+        let currentCameraTarget = 'main'; // 'main' or 'single'
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('insurance_patients_db');
+            if (saved) {
+                try {
+                    patients = JSON.parse(saved);
+                } catch(e) {
+                    patients = initialPatients;
+                }
+            } else {
+                patients = initialPatients;
+                saveToStorage();
+            }
+            updateApiKeyBadge();
+            renderList();
+        });
+
+        function saveToStorage() {
+            localStorage.setItem('insurance_patients_db', JSON.stringify(patients));
+        }
+
+        function getTwoPartName(fullName) {
+            if (!fullName) return '';
+            const parts = fullName.trim().split(/\s+/);
+            if (parts.length <= 2) return fullName;
+            return `${parts[0]} ${parts[parts.length - 1]}`;
+        }
+
+        function getPrescriptionStatus(dispenseDateStr, cycleDays) {
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+
+            const dispenseDate = new Date(dispenseDateStr);
+            dispenseDate.setHours(0, 0, 0, 0);
+
+            const dueDate = new Date(dispenseDate);
+            dueDate.setDate(dueDate.getDate() + parseInt(cycleDays, 10));
+
+            const diffTime = dueDate.getTime() - now.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            const dueDateFormatted = dueDate.toISOString().split('T')[0];
+
+            if (diffDays < 0) {
+                return {
+                    state: 'overdue',
+                    text: `متأخر (${Math.abs(diffDays)} يوم)`,
+                    cssBadge: 'bg-rose-50 text-rose-700 border-rose-200',
+                    cssBorder: 'border-rose-200 hover:border-rose-300',
+                    isDue: true,
+                    dueDate: dueDateFormatted
+                };
+            } else if (diffDays === 0) {
+                return {
+                    state: 'today',
+                    text: `مستحق اليوم`,
+                    cssBadge: 'bg-rose-600 text-white border-rose-600 font-bold',
+                    cssBorder: 'border-rose-300 ring-1 ring-rose-300',
+                    isDue: true,
+                    dueDate: dueDateFormatted
+                };
+            } else if (diffDays <= 4) {
+                return {
+                    state: 'due_soon',
+                    text: `متبقي ${diffDays} يوم`,
+                    cssBadge: 'bg-amber-50 text-amber-700 border-amber-200 font-bold',
+                    cssBorder: 'border-amber-200 hover:border-amber-300',
+                    isDue: true,
+                    dueDate: dueDateFormatted
+                };
+            } else {
+                return {
+                    state: 'valid',
+                    text: `متبقي ${diffDays} يوم`,
+                    cssBadge: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                    cssBorder: 'border-slate-200 hover:border-slate-300',
+                    isDue: false,
+                    dueDate: dueDateFormatted
+                };
+            }
+        }
+
+        function renderList() {
+            const container = document.getElementById('prescriptionsContainer');
+            const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
+            const compVal = document.getElementById('companyFilter').value;
+
+            container.innerHTML = '';
+
+            let total = patients.length;
+            let dueCount = 0;
+            let validCount = 0;
+            let visibleCount = 0;
+
+            patients.forEach((p, idx) => {
+                const status = getPrescriptionStatus(p.dispenseDate, p.cycle || 84);
+                if (status.isDue) dueCount++;
+                else validCount++;
+
+                const matchSearch = !searchVal || 
+                    (p.id && p.id.toLowerCase().includes(searchVal)) || 
+                    (p.name && p.name.toLowerCase().includes(searchVal));
+
+                const matchComp = !compVal || p.company === compVal;
+
+                let matchStatus = true;
+                if (currentStatusFilter === 'due') matchStatus = status.isDue;
+                if (currentStatusFilter === 'valid') matchStatus = !status.isDue;
+
+                if (matchSearch && matchComp && matchStatus) {
+                    visibleCount++;
+                    const card = createCustomerCard(p, idx, status);
+                    container.appendChild(card);
+                }
+            });
+
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('dueCount').textContent = dueCount;
+            document.getElementById('validCount').textContent = validCount;
+
+            const alertBanner = document.getElementById('alertBanner');
+            if (dueCount > 0) {
+                alertBanner.classList.remove('hidden');
+                document.getElementById('alertBannerText').textContent = `تنبيه: يوجد ${dueCount} وصفة مستحقة أو متأخرة الصرف حالياً.`;
+            } else {
+                alertBanner.classList.add('hidden');
+            }
+
+            document.getElementById('emptyState').classList.toggle('hidden', visibleCount > 0);
+        }
+
+        function createCustomerCard(patient, index, status) {
+            const card = document.createElement('div');
+            card.className = `bg-white rounded-2xl border ${status.cssBorder} shadow-2xs transition-all overflow-hidden`;
+
+            const twoName = getTwoPartName(patient.name);
+            const medsListHtml = (patient.meds || []).map(m => `<li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span><span>${m}</span></li>`).join('');
+
+            card.innerHTML = `
+                <div onclick="toggleCard(${index})" class="p-3.5 sm:p-4 min-h-[82px] cursor-pointer flex items-center justify-between gap-2.5">
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <div id="chevron-${index}" class="w-7 h-7 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 transition-transform duration-200">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <span class="text-[11px] px-2.5 py-1 rounded-xl border font-bold ${status.cssBadge}">
+                            ${status.text}
+                        </span>
+                    </div>
+
+                    <div class="flex-shrink-0">
+                        <span class="text-[11px] font-bold text-teal-800 bg-teal-50 border border-teal-200 px-2.5 py-1 rounded-xl">
+                            ${patient.company || 'تأمين'}
+                        </span>
+                    </div>
+
+                    <div class="text-right flex-1 min-w-0 pr-1">
+                        <h3 class="text-xs sm:text-sm font-bold text-slate-900 truncate">${twoName}</h3>
+                        <p class="text-[11px] text-slate-500 font-mono mt-0.5">الهوية : ${patient.id}</p>
+                    </div>
+                </div>
+
+                <div id="details-${index}" class="hidden border-t border-slate-100 bg-slate-50/50 p-4 space-y-3.5">
+                    <div class="bg-amber-50/80 border border-amber-200/90 rounded-2xl p-3">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                <span>ملاحظة الصيدلي:</span>
+                            </span>
+                        </div>
+                        <input type="text" value="${patient.remarks || ''}" onchange="updateRemarks(${index}, this.value)" placeholder="اكتب ملاحظة للمتابعة هنا..." class="w-full bg-white/90 border border-amber-200 rounded-xl px-2.5 py-1.5 text-xs text-amber-950 focus:outline-none focus:border-amber-400">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="bg-white p-2.5 rounded-xl border border-slate-200">
+                            <span class="text-[10px] text-slate-400 block font-semibold">الاسم بالكامل</span>
+                            <span class="font-bold text-slate-800">${patient.name}</span>
+                        </div>
+                        <div class="bg-white p-2.5 rounded-xl border border-slate-200">
+                            <span class="text-[10px] text-slate-400 block font-semibold">رقم الجوال</span>
+                            <span class="font-bold text-slate-800 font-mono">${patient.phone || 'غير مسجل'}</span>
+                        </div>
+                        <div class="bg-white p-2.5 rounded-xl border border-slate-200">
+                            <span class="text-[10px] text-slate-400 block font-semibold">تاريخ آخر صرف</span>
+                            <span class="font-bold text-slate-800 font-mono">${patient.dispenseDate}</span>
+                        </div>
+                        <div class="bg-white p-2.5 rounded-xl border border-slate-200">
+                            <span class="text-[10px] text-slate-400 block font-semibold">تاريخ الاستحقاق</span>
+                            <span class="font-bold text-emerald-700 font-mono">${status.dueDate}</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-3 rounded-2xl border border-slate-200">
+                        <div class="text-xs font-bold text-slate-700 mb-1.5">الأدوية والمستلزمات المقررة للدورة:</div>
+                        <ul class="text-xs text-slate-600 space-y-1 pr-1 font-medium">
+                            ${medsListHtml}
+                        </ul>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-2 pt-1">
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="promptDelete(${index}, event)" title="حذف الوصفة" class="w-8 h-8 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 flex items-center justify-center transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                            <button onclick="openEditModal(${index}, event)" title="تعديل الوصفة" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 flex items-center justify-center transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                            </button>
+                        </div>
+
+                        <button onclick="renewDispenseToday(${index}, event)" class="flex-1 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-bold text-xs py-2 px-3 rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            <span>تم صرف دورة جديدة اليوم</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        function toggleCard(index) {
+            const details = document.getElementById(`details-${index}`);
+            const chevron = document.getElementById(`chevron-${index}`);
+            if (details.classList.contains('hidden')) {
+                details.classList.remove('hidden');
+                chevron.classList.add('rotate-180');
+            } else {
+                details.classList.add('hidden');
+                chevron.classList.remove('rotate-180');
+            }
+        }
+
+        function renewDispenseToday(index, event) {
+            event.stopPropagation();
+            const todayStr = new Date().toISOString().split('T')[0];
+            patients[index].dispenseDate = todayStr;
+            saveToStorage();
+            renderList();
+            showToast(`تم تجديد دورة الصرف للمريض (${getTwoPartName(patients[index].name)}) بدءاً من اليوم`);
+        }
+
+        function updateRemarks(index, val) {
+            patients[index].remarks = val.trim();
+            saveToStorage();
+            showToast('تم حفظ الملاحظة');
+        }
+
+        function promptDelete(index, event) {
+            event.stopPropagation();
+            deleteTargetIndex = index;
+            const p = patients[index];
+            document.getElementById('deleteModalMessage').textContent = `هل أنت متأكد من حذف وصفة المريض (${getTwoPartName(p.name)}) نهائياً؟`;
+            document.getElementById('deleteConfirmModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            deleteTargetIndex = null;
+            document.getElementById('deleteConfirmModal').classList.add('hidden');
+        }
+
+        function executeDelete() {
+            if (deleteTargetIndex !== null && patients[deleteTargetIndex]) {
+                const deletedName = getTwoPartName(patients[deleteTargetIndex].name);
+                patients.splice(deleteTargetIndex, 1);
+                saveToStorage();
+                closeDeleteModal();
+                renderList();
+                showToast(`تم حذف وصفة (${deletedName}) بنجاح`);
+            }
+        }
+
+        function filterStatus(status) {
+            currentStatusFilter = status;
+            ['tabAll', 'tabDue', 'tabValid'].forEach(id => {
+                const btn = document.getElementById(id);
+                btn.className = "px-2.5 py-1 rounded-lg text-slate-500 transition-all";
+            });
+
+            if (status === 'all') document.getElementById('tabAll').className = "px-2.5 py-1 rounded-lg bg-white text-slate-800 shadow-xs transition-all font-bold";
+            if (status === 'due') document.getElementById('tabDue').className = "px-2.5 py-1 rounded-lg bg-white text-rose-600 shadow-xs transition-all font-bold";
+            if (status === 'valid') document.getElementById('tabValid').className = "px-2.5 py-1 rounded-lg bg-white text-emerald-600 shadow-xs transition-all font-bold";
+
+            renderList();
+        }
+
+        function applyFilters() {
+            renderList();
+        }
+
+        function openAddModal() {
+            document.getElementById('editIndex').value = "-1";
+            document.getElementById('modalTitle').querySelector('span').textContent = "إضافة وصفة جديدة";
+            document.getElementById('prescriptionForm').reset();
+            document.getElementById('cycleDuration').value = "84";
+            document.getElementById('dispenseDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('prescriptionModal').classList.remove('hidden');
+        }
+
+        function openEditModal(index, event) {
+            event.stopPropagation();
+            const p = patients[index];
+            document.getElementById('editIndex').value = index;
+            document.getElementById('modalTitle').querySelector('span').textContent = "تعديل بيانات الوصفة";
+            
+            document.getElementById('patientName').value = p.name || '';
+            document.getElementById('nationalId').value = p.id || '';
+            document.getElementById('insuranceCompany').value = p.company || 'تكافل الراجحي';
+            document.getElementById('phoneNumber').value = p.phone || '';
+            document.getElementById('cycleDuration').value = p.cycle || '84';
+            document.getElementById('dispenseDate').value = p.dispenseDate || '';
+            document.getElementById('patientRemarks').value = p.remarks || '';
+            document.getElementById('medicationsList').value = (p.meds || []).join('\n');
+
+            document.getElementById('prescriptionModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('prescriptionModal').classList.add('hidden');
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const idx = parseInt(document.getElementById('editIndex').value, 10);
+            const meds = document.getElementById('medicationsList').value.split('\n').map(m => m.trim()).filter(Boolean);
+
+            const newPatientData = {
+                name: document.getElementById('patientName').value.trim(),
+                id: document.getElementById('nationalId').value.trim(),
+                company: document.getElementById('insuranceCompany').value,
+                phone: document.getElementById('phoneNumber').value.trim(),
+                cycle: parseInt(document.getElementById('cycleDuration').value, 10) || 84,
+                dispenseDate: document.getElementById('dispenseDate').value,
+                remarks: document.getElementById('patientRemarks').value.trim(),
+                meds: meds
+            };
+
+            if (idx >= 0) {
+                patients[idx] = newPatientData;
+                showToast('تم تحديث بيانات الوصفة بنجاح');
+            } else {
+                patients.unshift(newPatientData);
+                showToast('تمت إضافة الوصفة الجديدة بنجاح');
+            }
+
+            saveToStorage();
+            closeModal();
+            renderList();
+        }
+
+        // ==========================================
+        // Gemini Vision API Integration (OCR)
+        // ==========================================
+
+        function getGeminiApiKey() {
+            return localStorage.getItem('gemini_api_key') || '';
+        }
+
+        function openApiModal() {
+            document.getElementById('geminiApiKeyInput').value = getGeminiApiKey();
+            updateApiKeyBadge();
+            document.getElementById('apiKeyModal').classList.remove('hidden');
+        }
+
+        function closeApiModal() {
+            document.getElementById('apiKeyModal').classList.add('hidden');
+        }
+
+        function saveApiKey() {
+            const key = document.getElementById('geminiApiKeyInput').value.trim();
+            if (key) {
+                localStorage.setItem('gemini_api_key', key);
+                showToast('تم حفظ مفتاح Gemini API بنجاح');
+            } else {
+                localStorage.removeItem('gemini_api_key');
+                showToast('تمت إزالة المفتاح');
+            }
+            updateApiKeyBadge();
+            closeApiModal();
+        }
+
+        function updateApiKeyBadge() {
+            const key = getGeminiApiKey();
+            const btn = document.getElementById('apiKeyBtn');
+            const badge = document.getElementById('apiStatusBadge');
+            
+            if (key) {
+                btn.classList.add('hidden');
+                badge.textContent = "مضبوط ومفعل ✅";
+                badge.className = "text-[11px] font-bold text-emerald-600";
+            } else {
+                btn.classList.remove('hidden');
+                badge.textContent = "غير مضبوط ⚠️";
+                badge.className = "text-[11px] font-bold text-amber-500";
+            }
+        }
+
+        // ==========================================
+        // Live Camera Stream (فتح الكاميرا الخلفية مباشرة)
+        // ==========================================
+
+        async function startLiveCamera(target = 'main') {
+            const apiKey = getGeminiApiKey();
+            if (!apiKey) {
+                alert('يرجى إدخال مفتاح Gemini API أولاً لتفعيل القراءة الذكية للروشتات.');
+                openApiModal();
+                return;
+            }
+
+            currentCameraTarget = target;
+            const modal = document.getElementById('cameraModal');
+            const video = document.getElementById('cameraVideo');
+
+            modal.classList.remove('hidden');
+
+            try {
+                // Request environment (back) camera specifically
+                const constraints = {
+                    video: {
+                        facingMode: { ideal: "environment" },
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    },
+                    audio: false
+                };
+
+                activeMediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = activeMediaStream;
+                await video.play();
+            } catch (err) {
+                console.warn('getUserMedia back camera direct access failed, trying general camera:', err);
+                try {
+                    activeMediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                    video.srcObject = activeMediaStream;
+                    await video.play();
+                } catch (fallbackErr) {
+                    console.error('All camera attempts failed:', fallbackErr);
+                    alert('تعذر فتح الكاميرا مباشرة. يرجى التأكد من السماح بالوصول للكاميرا في إعدادات المتصفح، أو استخدام خيار اختيار صورة من الجهاز بالأسفل.');
+                }
+            }
+        }
+
+        function stopLiveCamera() {
+            if (activeMediaStream) {
+                activeMediaStream.getTracks().forEach(track => track.stop());
+                activeMediaStream = null;
+            }
+            const video = document.getElementById('cameraVideo');
+            if (video) video.srcObject = null;
+            document.getElementById('cameraModal').classList.add('hidden');
+        }
+
+        // Snap Live Photo from Video
+        function captureLivePhoto() {
+            const video = document.getElementById('cameraVideo');
+            const canvas = document.getElementById('cameraCanvas');
+            if (!video || !video.videoWidth) {
+                alert('الكاميرا لم تبدأ بعد، انتظر ثانية واحدة ثم حاول مرة أخرى.');
+                return;
+            }
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const base64Image = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+            stopLiveCamera();
+
+            if (currentCameraTarget === 'main') {
+                processCapturedImageMain(base64Image);
+            } else {
+                processCapturedImageSingle(base64Image);
+            }
+        }
+
+        // Fallback File Picker Handler inside Live Camera Screen
+        function handleFallbackImageUpload(input) {
+            const file = input.files && input.files[0];
+            if (!file) return;
+
+            stopLiveCamera();
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                const base64Image = reader.result.split(',')[1];
+                if (currentCameraTarget === 'main') {
+                    processCapturedImageMain(base64Image);
+                } else {
+                    processCapturedImageSingle(base64Image);
+                }
+            };
+            input.value = '';
+        }
+
+        // Process OCR for Main Dashboard Batch Button
+        async function processCapturedImageMain(base64Image) {
+            const apiKey = getGeminiApiKey();
+            document.getElementById('batchDispenseDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('batchExtractedList').innerHTML = '';
+            document.getElementById('ocrProgressBlock').classList.remove('hidden');
+            document.getElementById('confirmBatchAddBtn').disabled = true;
+            document.getElementById('confirmBatchAddBtn').classList.add('opacity-50');
+            document.getElementById('batchProcessModal').classList.remove('hidden');
+
+            batchExtractedItems = [];
+
+            try {
+                document.getElementById('ocrStatusText').textContent = 'جاري تحليل صورة الوصفة وقراءة بياناتها...';
+                const extracted = await extractPrescriptionWithGemini(apiKey, base64Image);
+                if (extracted) {
+                    batchExtractedItems.push(extracted);
+                    renderBatchExtractedItem(extracted, 0);
+                }
+            } catch (err) {
+                console.error('OCR Error:', err);
+                alert('تعذر قراءة بيانات الوصفة تلقائياً. تأكد من وضوح الصورة وصلاحية المفتاح.');
+            }
+
+            document.getElementById('ocrProgressBlock').classList.add('hidden');
+            document.getElementById('confirmBatchAddBtn').disabled = false;
+            document.getElementById('confirmBatchAddBtn').classList.remove('opacity-50');
+        }
+
+        // Process OCR inside "إضافة وصفة" Modal
+        async function processCapturedImageSingle(base64Image) {
+            const apiKey = getGeminiApiKey();
+            const scanText = document.getElementById('singleScanText');
+            scanText.textContent = 'جاري المسح...';
+
+            try {
+                const extracted = await extractPrescriptionWithGemini(apiKey, base64Image);
+                if (extracted) {
+                    if (extracted.name) document.getElementById('patientName').value = extracted.name;
+                    if (extracted.id) document.getElementById('nationalId').value = extracted.id;
+                    if (extracted.company) {
+                        const compSelect = document.getElementById('insuranceCompany');
+                        for (let opt of compSelect.options) {
+                            if (extracted.company.includes(opt.value)) {
+                                compSelect.value = opt.value;
+                                break;
+                            }
+                        }
+                    }
+                    if (extracted.meds && extracted.meds.length) {
+                        document.getElementById('medicationsList').value = extracted.meds.join('\n');
+                    }
+                    showToast('تم استخراج وتعبئة بيانات الوصفة بنجاح ✅');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('حدث خطأ أثناء قراءة الروشتة. يرجى التأكد من وضوح الصورة.');
+            } finally {
+                scanText.textContent = 'فتح الكاميرا ومسح الوصفة';
+            }
+        }
+
+        async function extractPrescriptionWithGemini(apiKey, base64Image) {
+            const prompt = `أنت صيدلي خبير. استخرج بيانات الوصفة الطبية المرفقة بدقة وأعدها فقط في كائن JSON صالح بالشكل التالي دون أي markdown إضافي:
+{
+  "name": "اسم المريض (ثنائي أو ثلاثي)",
+  "id": "رقم الهوية أو الإقامة المكون من 10 أرقام إن وجد",
+  "company": "اسم شركة التأمين (تكافل الراجحي / بوبا / التعاونية / ميدغلف)",
+  "meds": ["دواء 1 مع الجرعة والشكل الصيدلاني", "دواء 2 مع الجرعة والشكل الصيدلاني"]
+}`;
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [
+                            { text: prompt },
+                            { inline_data: { mime_type: "image/jpeg", data: base64Image } }
+                        ]
+                    }],
+                    generationConfig: {
+                        temperature: 0.1,
+                        response_mime_type: "application/json"
+                    }
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Gemini API Error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const rawText = data.candidates[0].content.parts[0].text;
+            return JSON.parse(rawText);
+        }
+
+        function renderBatchExtractedItem(item, idx) {
+            const container = document.getElementById('batchExtractedList');
+            const row = document.createElement('div');
+            row.className = "bg-white p-2.5 rounded-xl border border-slate-200 flex items-center justify-between text-xs";
+            row.innerHTML = `
+                <div>
+                    <span class="font-bold text-slate-800">${item.name || 'مريض غير معروف'}</span>
+                    <span class="text-slate-400 font-mono text-[11px] block">الهوية: ${item.id || '---'}</span>
+                </div>
+                <div class="text-left">
+                    <span class="text-teal-700 bg-teal-50 px-2 py-0.5 rounded-lg border border-teal-200 text-[10px] font-bold block mb-1">${item.company || 'تكافل الراجحي'}</span>
+                    <span class="text-slate-500 text-[10px]">${(item.meds || []).length} أصناف</span>
+                </div>
+            `;
+            container.appendChild(row);
+        }
+
+        function setBatchDateToday() {
+            document.getElementById('batchDispenseDate').value = new Date().toISOString().split('T')[0];
+        }
+
+        function closeBatchModal() {
+            document.getElementById('batchProcessModal').classList.add('hidden');
+        }
+
+        function confirmBatchAdd() {
+            if (!batchExtractedItems.length) {
+                closeBatchModal();
+                return;
+            }
+
+            const selectedDispenseDate = document.getElementById('batchDispenseDate').value || new Date().toISOString().split('T')[0];
+
+            batchExtractedItems.forEach(item => {
+                patients.unshift({
+                    name: item.name || 'عميل جديد',
+                    id: item.id || '',
+                    company: item.company || 'تكافل الراجحي',
+                    phone: '',
+                    cycle: 84,
+                    dispenseDate: selectedDispenseDate,
+                    remarks: '',
+                    meds: item.meds || []
+                });
+            });
+
+            saveToStorage();
+            closeBatchModal();
+            renderList();
+            showToast(`تمت إضافة الوصفة بنجاح إلى المنظومة`);
+            batchExtractedItems = [];
+        }
+
+        function exportToExcel() {
+            let csvContent = "\uFEFFم,رقم الهوية / الإقامة,اسم العميل,شركة التأمين,رقم الجوال,مدة الدورة,تاريخ آخر صرف,تاريخ الاستحقاق,الحالة,الأدوية,الملاحظات\n";
+
+            patients.forEach((p, idx) => {
+                const status = getPrescriptionStatus(p.dispenseDate, p.cycle || 84);
+                const medsString = (p.meds || []).join(' | ').replace(/"/g, '""');
+                const row = [
+                    idx + 1,
+                    `"${p.id || ''}"`,
+                    `"${p.name || ''}"`,
+                    `"${p.company || ''}"`,
+                    `"${p.phone || ''}"`,
+                    p.cycle || 84,
+                    `"${p.dispenseDate || ''}"`,
+                    `"${status.dueDate || ''}"`,
+                    `"${status.text}"`,
+                    `"${medsString}"`,
+                    `"${(p.remarks || '').replace(/"/g, '""')}"`
+                ];
+                csvContent += row.join(",") + "\n";
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Insurance_Dashboard_Export_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('تم تصدير ملف الإكسيل بنجاح');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.remove('opacity-0', 'translate-y-3', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-3', 'pointer-events-none');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
