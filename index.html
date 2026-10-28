@@ -1038,7 +1038,7 @@
             }
         }
 
-        // Direct, Validated Gemini Vision Call
+        // Direct, Validated Gemini Vision Call (Updated for Latest Models & Payload Specs)
         async function extractPrescriptionWithGemini(apiKey, base64Image) {
             const prompt = `أنت صيدلي خبير ومحترف. استخرج بيانات الوصفة الطبية المرفقة بدقة تامة. أعد النتيجة فقط في صيغة JSON بالبنية التالية دون أي نصوص تمهيدية ودون علامات markdown:
 {
@@ -1048,11 +1048,11 @@
   "meds": ["دواء 1 مع الجرعة والشكل الصيدلاني", "دواء 2 مع الجرعة والشكل الصيدلاني"]
 }`;
 
-            // Verified Google Gemini official endpoint
+            // Official stable endpoints for Gemini Vision
             const endpoints = [
                 `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
                 `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${apiKey}`
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`
             ];
 
             let lastError = null;
@@ -1066,11 +1066,12 @@
                             contents: [{
                                 parts: [
                                     { text: prompt },
-                                    { inline_data: { mime_type: "image/jpeg", data: base64Image } }
+                                    { inlineData: { mimeType: "image/jpeg", data: base64Image } }
                                 ]
                             }],
                             generationConfig: {
-                                temperature: 0.1
+                                temperature: 0.1,
+                                responseMimeType: "application/json"
                             }
                         })
                     });
@@ -1078,7 +1079,7 @@
                     if (!response.ok) {
                         const errData = await response.json().catch(() => ({}));
                         lastError = new Error(errData.error?.message || `HTTP ${response.status}`);
-                        continue; // try next endpoint if model alias failed
+                        continue;
                     }
 
                     const data = await response.json();
