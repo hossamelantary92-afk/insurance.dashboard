@@ -50,7 +50,7 @@
 
             <!-- Actions -->
             <div class="flex items-center gap-2">
-                <button onclick="exportToExcel()" title="تصدير إلى Excel" class="w-9 h-9 rounded-xl bg-slate-700/60 hover:bg-slate-700 border border-slate-600 flex items-center justify-center text-slate-200 transition-all">
+                <button onclick="exportToExcel()" title="تصدير النتائج المعروضة إلى Excel" class="w-9 h-9 rounded-xl bg-slate-700/60 hover:bg-slate-700 border border-slate-600 flex items-center justify-center text-slate-200 transition-all">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 </button>
             </div>
@@ -96,7 +96,7 @@
         <!-- Search & Filter Controls -->
         <div class="bg-white border border-slate-200/80 rounded-2xl p-3 shadow-sm space-y-2.5">
             <div class="relative">
-                <input type="text" id="searchInput" placeholder="ابحث برقم الهوية / الإقامة أو اسم العميل" oninput="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-xl pr-9 pl-3 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 transition-colors">
+                <input type="text" id="searchInput" placeholder="ابحث برقم الهوية / الإقامة" oninput="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-xl pr-9 pl-3 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 transition-colors">
                 <svg class="w-4 h-4 text-slate-400 absolute right-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
             
@@ -189,7 +189,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-slate-700 font-bold mb-1">قائمة الأدوية والمستلزمات * (كل صنف في سطر)</label>
+                    <label class="block text-slate-700 font-bold mb-1">قائمة الأدوية والمستلزمات *</label>
                     <textarea id="medicationsList" rows="3" required placeholder="مثال:&#10;Glucophage 500mg&#10;Januvia 100mg" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:outline-none focus:border-sky-500 leading-relaxed"></textarea>
                 </div>
 
@@ -369,6 +369,15 @@
             localStorage.setItem('insurance_patients_db', JSON.stringify(patients));
         }
 
+        function formatDateToDisplay(isoDateStr) {
+            if (!isoDateStr) return '';
+            const parts = isoDateStr.split('-');
+            if (parts.length === 3) {
+                return `${parts[2]} - ${parts[1]} - ${parts[0]}`;
+            }
+            return isoDateStr;
+        }
+
         function getTwoPartName(fullName) {
             if (!fullName) return '';
             const parts = fullName.trim().split(/\s+/);
@@ -389,7 +398,8 @@
             const diffTime = dueDate.getTime() - now.getTime();
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-            const dueDateFormatted = dueDate.toISOString().split('T')[0];
+            const dueDateISO = dueDate.toISOString().split('T')[0];
+            const dueDateFormatted = formatDateToDisplay(dueDateISO);
 
             if (diffDays < 0) {
                 return {
@@ -398,7 +408,8 @@
                     text: `متأخر (${Math.abs(diffDays)} يوم)`,
                     cssBadge: 'bg-rose-50 text-rose-700 border-rose-200',
                     isDue: true,
-                    dueDate: dueDateFormatted
+                    dueDate: dueDateFormatted,
+                    dueDateISO: dueDateISO
                 };
             } else if (diffDays === 0) {
                 return {
@@ -407,7 +418,8 @@
                     text: `مستحق اليوم`,
                     cssBadge: 'bg-rose-600 text-white border-rose-600 font-bold',
                     isDue: true,
-                    dueDate: dueDateFormatted
+                    dueDate: dueDateFormatted,
+                    dueDateISO: dueDateISO
                 };
             } else if (diffDays <= 4) {
                 return {
@@ -416,7 +428,8 @@
                     text: `متبقي ${diffDays} يوم`,
                     cssBadge: 'bg-amber-50 text-amber-700 border-amber-200 font-bold',
                     isDue: true,
-                    dueDate: dueDateFormatted
+                    dueDate: dueDateFormatted,
+                    dueDateISO: dueDateISO
                 };
             } else {
                 return {
@@ -425,50 +438,56 @@
                     text: `متبقي ${diffDays} يوم`,
                     cssBadge: 'bg-emerald-50 text-emerald-700 border-emerald-200',
                     isDue: false,
-                    dueDate: dueDateFormatted
+                    dueDate: dueDateFormatted,
+                    dueDateISO: dueDateISO
                 };
             }
         }
 
-        function renderList() {
-            const container = document.getElementById('prescriptionsContainer');
+        // Get currently filtered & sorted items
+        function getFilteredAndSortedItems() {
             const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
             const compVal = document.getElementById('companyFilter').value;
 
-            container.innerHTML = '';
-
-            let total = patients.length;
-            let dueCount = 0;
-            let validCount = 0;
-
             const items = patients.map((patient, originalIndex) => {
                 const status = getPrescriptionStatus(patient.dispenseDate, patient.cycle || 84);
-                if (status.isDue) dueCount++;
-                else validCount++;
                 return { patient, originalIndex, status };
             });
 
-            // Sorting: Overdue first -> Today -> Remaining 1, 2, 3, 4 days -> Valid ascending
+            // Sorting: Overdue -> Today -> Remaining 1..4 -> Valid
             items.sort((a, b) => a.status.diffDays - b.status.diffDays);
 
-            let visibleCount = 0;
-
-            items.forEach(({ patient, originalIndex, status }) => {
-                const matchSearch = !searchVal || 
-                    (patient.id && patient.id.toLowerCase().includes(searchVal)) || 
-                    (patient.name && patient.name.toLowerCase().includes(searchVal));
-
+            return items.filter(({ patient, status }) => {
+                const matchSearch = !searchVal || (patient.id && patient.id.toLowerCase().includes(searchVal));
                 const matchComp = !compVal || patient.company === compVal;
 
                 let matchStatus = true;
                 if (currentStatusFilter === 'due') matchStatus = status.isDue;
                 if (currentStatusFilter === 'valid') matchStatus = !status.isDue;
 
-                if (matchSearch && matchComp && matchStatus) {
-                    visibleCount++;
-                    const card = createCustomerCard(patient, originalIndex, status);
-                    container.appendChild(card);
-                }
+                return matchSearch && matchComp && matchStatus;
+            });
+        }
+
+        function renderList() {
+            const container = document.getElementById('prescriptionsContainer');
+            container.innerHTML = '';
+
+            let total = patients.length;
+            let dueCount = 0;
+            let validCount = 0;
+
+            patients.forEach(patient => {
+                const status = getPrescriptionStatus(patient.dispenseDate, patient.cycle || 84);
+                if (status.isDue) dueCount++;
+                else validCount++;
+            });
+
+            const filteredItems = getFilteredAndSortedItems();
+
+            filteredItems.forEach(({ patient, originalIndex, status }) => {
+                const card = createCustomerCard(patient, originalIndex, status);
+                container.appendChild(card);
             });
 
             document.getElementById('totalCount').textContent = total;
@@ -483,7 +502,7 @@
                 alertBanner.classList.add('hidden');
             }
 
-            document.getElementById('emptyState').classList.toggle('hidden', visibleCount > 0);
+            document.getElementById('emptyState').classList.toggle('hidden', filteredItems.length > 0);
         }
 
         function createCustomerCard(patient, index, status) {
@@ -492,6 +511,7 @@
 
             const twoName = getTwoPartName(patient.name);
             const medsListHtml = (patient.meds || []).map(m => `<li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span><span>${m}</span></li>`).join('');
+            const displayDispenseDate = formatDateToDisplay(patient.dispenseDate);
 
             card.innerHTML = `
                 <div onclick="toggleCard(${index})" class="p-3.5 sm:p-4 min-h-[82px] cursor-pointer flex items-center justify-between gap-2.5">
@@ -541,7 +561,7 @@
                         </div>
                         <div class="bg-white p-2.5 rounded-xl border border-slate-200">
                             <span class="text-[10px] text-slate-400 block font-semibold">تاريخ آخر صرف</span>
-                            <span class="font-bold text-slate-800 font-mono">${patient.dispenseDate}</span>
+                            <span class="font-bold text-slate-800 font-mono">${displayDispenseDate}</span>
                         </div>
                         <div class="bg-white p-2.5 rounded-xl border border-slate-200">
                             <span class="text-[10px] text-slate-400 block font-semibold">تاريخ الاستحقاق</span>
@@ -709,37 +729,55 @@
             renderList();
         }
 
+        // Custom Export: Exports ONLY the currently filtered/displayed items
         function exportToExcel() {
+            const filteredItems = getFilteredAndSortedItems();
+
+            if (!filteredItems.length) {
+                alert('لا توجد وصفات تطابق التصفية الحالية لتصديرها.');
+                return;
+            }
+
             let csvContent = "\uFEFFم,رقم الهوية / الإقامة,اسم العميل,شركة التأمين,رقم الجوال,مدة الدورة,تاريخ آخر صرف,تاريخ الاستحقاق,الحالة,الأدوية,الملاحظات\n";
 
-            patients.forEach((p, idx) => {
-                const status = getPrescriptionStatus(p.dispenseDate, p.cycle || 84);
-                const medsString = (p.meds || []).join(' | ').replace(/"/g, '""');
+            filteredItems.forEach(({ patient, status }, idx) => {
+                const medsString = (patient.meds || []).join(' | ').replace(/"/g, '""');
+                const displayDispenseDate = formatDateToDisplay(patient.dispenseDate);
                 const row = [
                     idx + 1,
-                    `"${p.id || ''}"`,
-                    `"${p.name || ''}"`,
-                    `"${p.company || ''}"`,
-                    `"${p.phone || ''}"`,
-                    p.cycle || 84,
-                    `"${p.dispenseDate || ''}"`,
-                    `"${status.dueDate || ''}"`,
+                    `"${patient.id || ''}"`,
+                    `"${patient.name || ''}"`,
+                    `"${patient.company || ''}"`,
+                    `"${patient.phone || ''}"`,
+                    patient.cycle || 84,
+                    `"${displayDispenseDate}"`,
+                    `"${status.dueDate}"`,
                     `"${status.text}"`,
                     `"${medsString}"`,
-                    `"${(p.remarks || '').replace(/"/g, '""')}"`
+                    `"${(patient.remarks || '').replace(/"/g, '""')}"`
                 ];
                 csvContent += row.join(",") + "\n";
             });
+
+            // Dynamic filename based on applied filters
+            const compVal = document.getElementById('companyFilter').value;
+            let statusSuffix = "الكل";
+            if (currentStatusFilter === 'due') statusSuffix = "المستحقة";
+            if (currentStatusFilter === 'valid') statusSuffix = "غير_المستحقة";
+
+            const companyPart = compVal ? compVal.replace(/\s+/g, '_') : 'كل_الشركات';
+            const todayStr = formatDateToDisplay(new Date().toISOString().split('T')[0]).replace(/\s+/g, '');
+            const fileName = `Insurance_${companyPart}_${statusSuffix}_${todayStr}.csv`;
 
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
             link.setAttribute("href", url);
-            link.setAttribute("download", `Insurance_Dashboard_Export_${new Date().toISOString().split('T')[0]}.csv`);
+            link.setAttribute("download", fileName);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            showToast('تم تصدير ملف الإكسيل بنجاح');
+            showToast(`تم تصدير ${filteredItems.length} وصفة إلى إكسيل بنجاح 📊`);
         }
 
         function showToast(msg) {
