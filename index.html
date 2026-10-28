@@ -35,8 +35,8 @@
 </head>
 <body class="text-slate-800 pb-12 antialiased select-none">
 
-    <!-- Header -->
-    <header class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white pt-4 pb-4 px-4 shadow-md sticky top-0 z-30">
+    <!-- Fixed Sticky Header -->
+    <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md text-white pt-3.5 pb-3 px-4 shadow-md border-b border-slate-800/80">
         <div class="max-w-2xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-2.5 cursor-pointer" ondblclick="openApiModal()" title="انقر مرتين لفتح إعدادات الـ API">
                 <div class="w-9 h-9 rounded-xl bg-teal-500/20 border border-teal-400/30 flex items-center justify-center text-teal-300">
@@ -60,10 +60,10 @@
         </div>
 
         <!-- Action Buttons Bar -->
-        <div class="max-w-2xl mx-auto grid grid-cols-2 gap-2.5 mt-3.5">
+        <div class="max-w-2xl mx-auto grid grid-cols-2 gap-2.5 mt-3">
             <button type="button" onclick="startLiveCamera('main')" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 active:scale-[0.98] text-white font-bold py-2 px-3 rounded-xl shadow-sm flex items-center justify-center gap-2 text-xs transition-all border border-amber-400/30">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                <span>تصوير مجمّع (OCR ذكي)</span>
+                <span>تصوير مجمّع</span>
             </button>
             <button onclick="openAddModal()" class="bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 active:scale-[0.98] text-white font-bold py-2 px-3 rounded-xl shadow-sm flex items-center justify-center gap-2 text-xs transition-all border border-sky-400/30">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
@@ -134,42 +134,38 @@
         </div>
     </main>
 
-    <!-- LIVE CAMERA MODAL (شاشة الكاميرا الخلفية الحية) -->
-    <div id="cameraModal" class="fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-between p-4 hidden">
+    <!-- LIVE CAMERA MODAL: z-[70] -->
+    <div id="cameraModal" class="fixed inset-0 bg-black/95 z-[70] flex flex-col items-center justify-between p-4 hidden">
         <div class="w-full max-w-lg flex items-center justify-between text-white pt-2">
             <span class="text-xs font-bold flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                <span>كاميرا مسح الروشتات</span>
+                <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
+                <span>كاميرا قراءة الوصفة الطبية</span>
             </span>
-            <button type="button" onclick="stopLiveCamera()" class="p-1 rounded-lg bg-white/20 text-white hover:bg-white/30">
+            <button type="button" onclick="stopLiveCamera()" class="p-1.5 rounded-xl bg-white/20 text-white hover:bg-white/30 transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
         </div>
 
         <div class="relative w-full max-w-lg flex-1 my-3 bg-black rounded-2xl overflow-hidden flex items-center justify-center border border-white/10 shadow-2xl">
             <video id="cameraVideo" autoplay playsinline class="w-full h-full object-cover"></video>
-            <!-- Focus Target Frame -->
-            <div class="absolute inset-6 border-2 border-dashed border-amber-400/70 rounded-xl pointer-events-none flex items-center justify-center">
-                <span class="bg-black/60 text-amber-300 text-[10px] px-2.5 py-1 rounded-full">وجّه العدسة على الوصفة</span>
+            <div class="absolute inset-5 border-2 border-dashed border-amber-400/80 rounded-2xl pointer-events-none flex items-center justify-center shadow-inner">
+                <span class="bg-black/70 text-amber-300 text-[11px] font-bold px-3 py-1 rounded-full border border-amber-400/30">ضع الوصفة داخل الإطار</span>
             </div>
             <canvas id="cameraCanvas" class="hidden"></canvas>
         </div>
 
-        <div class="w-full max-w-lg flex flex-col items-center gap-3 pb-4">
-            <!-- Capture Trigger Button -->
+        <div class="w-full max-w-lg flex flex-col items-center gap-3 pb-3">
             <button type="button" onclick="captureLivePhoto()" class="w-18 h-18 rounded-full border-4 border-white bg-amber-500 flex items-center justify-center shadow-lg active:scale-95 transition-all">
-                <div class="w-13 h-13 rounded-full bg-white"></div>
+                <div class="w-13 h-13 rounded-full bg-white shadow-xs"></div>
             </button>
-            
-            <!-- Fallback File Upload if Camera permission fails -->
-            <label class="text-[11px] text-slate-300 hover:text-white underline cursor-pointer">
-                أو اختر صورة من الجهاز
+            <label class="text-[11px] text-slate-300 hover:text-white underline cursor-pointer py-1">
+                أو اختر صورة من ألبوم الصور
                 <input type="file" accept="image/*" class="hidden" onchange="handleFallbackImageUpload(this)">
             </label>
         </div>
     </div>
 
-    <!-- Modal: Add / Edit Prescription -->
+    <!-- Modal: Add / Edit Prescription (z-50) -->
     <div id="prescriptionModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 hidden">
         <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[92vh]">
             <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
@@ -182,10 +178,10 @@
                 </button>
             </div>
 
-            <!-- OCR Capture button inside Add Modal -->
-            <div class="px-4 pt-3 pb-1 bg-amber-50/60 border-b border-amber-100 flex items-center justify-between">
+            <!-- OCR Camera in Add Modal -->
+            <div class="px-4 pt-3 pb-2 bg-amber-50/70 border-b border-amber-100 flex items-center justify-between">
                 <span class="text-[11px] font-bold text-amber-900">تعبئة البيانات تلقائياً بالكاميرا:</span>
-                <button type="button" onclick="startLiveCamera('single')" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-1 px-3 rounded-lg text-[11px] flex items-center gap-1.5 transition-all shadow-2xs">
+                <button type="button" onclick="startLiveCamera('single')" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold py-1.5 px-3 rounded-xl text-[11px] flex items-center gap-1.5 transition-all shadow-xs">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
                     <span id="singleScanText">فتح الكاميرا ومسح الوصفة</span>
                 </button>
@@ -252,8 +248,8 @@
         </div>
     </div>
 
-    <!-- Modal: Gemini API Key Setting -->
-    <div id="apiKeyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 hidden">
+    <!-- Modal: Gemini API Key Setting (z-[65]) -->
+    <div id="apiKeyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[65] flex items-center justify-center p-3 hidden">
         <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden">
             <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
                 <h3 class="text-xs font-bold flex items-center gap-2">
@@ -266,7 +262,7 @@
             </div>
             <div class="p-4 space-y-3 text-xs">
                 <p class="text-slate-600 leading-relaxed">
-                    لتفعيل القراءة الذكية للروشتات وسحب الأسماء والأدوية تلقائياً، أدخل مفتاحك المجاني من 
+                    أدخل مفتاحك المجاني من 
                     <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-sky-600 underline font-bold">Google AI Studio</a>:
                 </p>
                 <div>
@@ -284,8 +280,8 @@
         </div>
     </div>
 
-    <!-- Modal: Batch Capture Review / Date Picker & Gemini OCR Progress -->
-    <div id="batchProcessModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 hidden">
+    <!-- Modal: Batch Review & Progress (z-[65]) -->
+    <div id="batchProcessModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[65] flex items-center justify-center p-3 hidden">
         <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
                 <h3 class="text-xs font-bold flex items-center gap-2">
@@ -298,7 +294,6 @@
             </div>
 
             <div class="p-4 space-y-3.5 text-xs overflow-y-auto custom-scrollbar">
-                <!-- Status & Progress -->
                 <div id="ocrProgressBlock" class="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-3">
                     <div class="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin flex-shrink-0"></div>
                     <div>
@@ -307,7 +302,6 @@
                     </div>
                 </div>
 
-                <!-- Dispense Date Confirmation -->
                 <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
                     <label class="block font-bold text-slate-800">تاريخ صرف هذه الوصفة:</label>
                     <div class="flex items-center gap-2">
@@ -316,7 +310,6 @@
                     </div>
                 </div>
 
-                <!-- Extracted Items Preview -->
                 <div>
                     <h4 class="font-bold text-slate-700 mb-2">البيانات المستخرجة:</h4>
                     <div id="batchExtractedList" class="space-y-2 max-h-56 overflow-y-auto custom-scrollbar"></div>
@@ -330,8 +323,8 @@
         </div>
     </div>
 
-    <!-- Modal: Custom Delete Confirmation -->
-    <div id="deleteConfirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 hidden">
+    <!-- Modal: Delete Confirmation (z-[65]) -->
+    <div id="deleteConfirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[65] flex items-center justify-center p-3 hidden">
         <div class="bg-white w-full max-w-sm rounded-2xl shadow-xl p-4 text-center space-y-3">
             <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
@@ -345,8 +338,8 @@
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs font-bold px-4 py-2.5 rounded-2xl shadow-lg flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-3">
+    <!-- Toast Notification (z-[80]) -->
+    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-[80] bg-slate-900 text-white text-xs font-bold px-4 py-2.5 rounded-2xl shadow-lg flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-3">
         <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
         <span id="toastMsg">تمت العملية بنجاح</span>
     </div>
@@ -480,7 +473,7 @@
         let deleteTargetIndex = null;
         let batchExtractedItems = [];
         let activeMediaStream = null;
-        let currentCameraTarget = 'main'; // 'main' or 'single'
+        let currentCameraTarget = 'main';
 
         window.addEventListener('DOMContentLoaded', () => {
             const saved = localStorage.getItem('insurance_patients_db');
@@ -529,7 +522,6 @@
                     state: 'overdue',
                     text: `متأخر (${Math.abs(diffDays)} يوم)`,
                     cssBadge: 'bg-rose-50 text-rose-700 border-rose-200',
-                    cssBorder: 'border-rose-200 hover:border-rose-300',
                     isDue: true,
                     dueDate: dueDateFormatted
                 };
@@ -538,7 +530,6 @@
                     state: 'today',
                     text: `مستحق اليوم`,
                     cssBadge: 'bg-rose-600 text-white border-rose-600 font-bold',
-                    cssBorder: 'border-rose-300 ring-1 ring-rose-300',
                     isDue: true,
                     dueDate: dueDateFormatted
                 };
@@ -547,7 +538,6 @@
                     state: 'due_soon',
                     text: `متبقي ${diffDays} يوم`,
                     cssBadge: 'bg-amber-50 text-amber-700 border-amber-200 font-bold',
-                    cssBorder: 'border-amber-200 hover:border-amber-300',
                     isDue: true,
                     dueDate: dueDateFormatted
                 };
@@ -556,7 +546,6 @@
                     state: 'valid',
                     text: `متبقي ${diffDays} يوم`,
                     cssBadge: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                    cssBorder: 'border-slate-200 hover:border-slate-300',
                     isDue: false,
                     dueDate: dueDateFormatted
                 };
@@ -614,7 +603,8 @@
 
         function createCustomerCard(patient, index, status) {
             const card = document.createElement('div');
-            card.className = `bg-white rounded-2xl border ${status.cssBorder} shadow-2xs transition-all overflow-hidden`;
+            // Unified neutral subtle gray border for all cards
+            card.className = `bg-white rounded-2xl border border-slate-200/90 hover:border-slate-300 shadow-2xs transition-all overflow-hidden`;
 
             const twoName = getTwoPartName(patient.name);
             const medsListHtml = (patient.meds || []).map(m => `<li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span><span>${m}</span></li>`).join('');
@@ -643,14 +633,21 @@
                 </div>
 
                 <div id="details-${index}" class="hidden border-t border-slate-100 bg-slate-50/50 p-4 space-y-3.5">
+                    <!-- Remarks Container with Direct Save Button -->
                     <div class="bg-amber-50/80 border border-amber-200/90 rounded-2xl p-3">
-                        <div class="flex items-center justify-between mb-1">
+                        <div class="flex items-center justify-between mb-1.5">
                             <span class="text-xs font-bold text-amber-900 flex items-center gap-1.5">
                                 <svg class="w-3.5 h-3.5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                 <span>ملاحظة الصيدلي:</span>
                             </span>
                         </div>
-                        <input type="text" value="${patient.remarks || ''}" onchange="updateRemarks(${index}, this.value)" placeholder="اكتب ملاحظة للمتابعة هنا..." class="w-full bg-white/90 border border-amber-200 rounded-xl px-2.5 py-1.5 text-xs text-amber-950 focus:outline-none focus:border-amber-400">
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="remark-input-${index}" value="${patient.remarks || ''}" placeholder="اكتب ملاحظة للمتابعة هنا..." class="flex-1 bg-white/90 border border-amber-200 rounded-xl px-2.5 py-1.5 text-xs text-amber-950 focus:outline-none focus:border-amber-400">
+                            <button type="button" onclick="saveDirectRemark(${index}, event)" class="bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-bold text-xs px-3 py-1.5 rounded-xl shadow-xs transition-all flex items-center gap-1 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                                <span>حفظ الملاحظة</span>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2 text-xs">
@@ -720,10 +717,14 @@
             showToast(`تم تجديد دورة الصرف للمريض (${getTwoPartName(patients[index].name)}) بدءاً من اليوم`);
         }
 
-        function updateRemarks(index, val) {
-            patients[index].remarks = val.trim();
-            saveToStorage();
-            showToast('تم حفظ الملاحظة');
+        function saveDirectRemark(index, event) {
+            if (event) event.stopPropagation();
+            const input = document.getElementById(`remark-input-${index}`);
+            if (input && patients[index]) {
+                patients[index].remarks = input.value.trim();
+                saveToStorage();
+                showToast(`تم حفظ الملاحظة لـ (${getTwoPartName(patients[index].name)}) بنجاح 💾`);
+            }
         }
 
         function promptDelete(index, event) {
@@ -774,6 +775,7 @@
             document.getElementById('prescriptionForm').reset();
             document.getElementById('cycleDuration').value = "84";
             document.getElementById('dispenseDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('singleScanText').textContent = "فتح الكاميرا ومسح الوصفة";
             document.getElementById('prescriptionModal').classList.remove('hidden');
         }
 
@@ -829,7 +831,7 @@
         }
 
         // ==========================================
-        // Gemini Vision API Integration (OCR)
+        // Gemini API Configuration
         // ==========================================
 
         function getGeminiApiKey() {
@@ -876,7 +878,7 @@
         }
 
         // ==========================================
-        // Live Camera Stream (فتح الكاميرا الخلفية مباشرة)
+        // Live Camera Stream
         // ==========================================
 
         async function startLiveCamera(target = 'main') {
@@ -888,13 +890,17 @@
             }
 
             currentCameraTarget = target;
+            
+            if (target === 'single') {
+                document.getElementById('prescriptionModal').classList.add('hidden');
+            }
+
             const modal = document.getElementById('cameraModal');
             const video = document.getElementById('cameraVideo');
 
             modal.classList.remove('hidden');
 
             try {
-                // Request environment (back) camera specifically
                 const constraints = {
                     video: {
                         facingMode: { ideal: "environment" },
@@ -915,7 +921,7 @@
                     await video.play();
                 } catch (fallbackErr) {
                     console.error('All camera attempts failed:', fallbackErr);
-                    alert('تعذر فتح الكاميرا مباشرة. يرجى التأكد من السماح بالوصول للكاميرا في إعدادات المتصفح، أو استخدام خيار اختيار صورة من الجهاز بالأسفل.');
+                    alert('تعذر فتح الكاميرا مباشرة. يرجى التأكد من السماح بالوصول للكاميرا في المتصفح أو اختيار صورة من الألبوم.');
                 }
             }
         }
@@ -928,14 +934,17 @@
             const video = document.getElementById('cameraVideo');
             if (video) video.srcObject = null;
             document.getElementById('cameraModal').classList.add('hidden');
+
+            if (currentCameraTarget === 'single') {
+                document.getElementById('prescriptionModal').classList.remove('hidden');
+            }
         }
 
-        // Snap Live Photo from Video
         function captureLivePhoto() {
             const video = document.getElementById('cameraVideo');
             const canvas = document.getElementById('cameraCanvas');
             if (!video || !video.videoWidth) {
-                alert('الكاميرا لم تبدأ بعد، انتظر ثانية واحدة ثم حاول مرة أخرى.');
+                alert('الكاميرا لم تبدأ بعد، انتظر ثانية واحدة ثم حاول مجدداً.');
                 return;
             }
 
@@ -954,7 +963,6 @@
             }
         }
 
-        // Fallback File Picker Handler inside Live Camera Screen
         function handleFallbackImageUpload(input) {
             const file = input.files && input.files[0];
             if (!file) return;
@@ -973,7 +981,6 @@
             input.value = '';
         }
 
-        // Process OCR for Main Dashboard Batch Button
         async function processCapturedImageMain(base64Image) {
             const apiKey = getGeminiApiKey();
             document.getElementById('batchDispenseDate').value = new Date().toISOString().split('T')[0];
@@ -1002,11 +1009,12 @@
             document.getElementById('confirmBatchAddBtn').classList.remove('opacity-50');
         }
 
-        // Process OCR inside "إضافة وصفة" Modal
         async function processCapturedImageSingle(base64Image) {
-            const apiKey = getGeminiApiKey();
+            document.getElementById('prescriptionModal').classList.remove('hidden');
             const scanText = document.getElementById('singleScanText');
-            scanText.textContent = 'جاري المسح...';
+            scanText.textContent = 'جاري المسح والاستخراج...';
+
+            const apiKey = getGeminiApiKey();
 
             try {
                 const extracted = await extractPrescriptionWithGemini(apiKey, base64Image);
