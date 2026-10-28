@@ -729,7 +729,7 @@
             renderList();
         }
 
-        // Custom Export: Exports ONLY the currently filtered/displayed items
+        // Custom Export with exact naming rules
         function exportToExcel() {
             const filteredItems = getFilteredAndSortedItems();
 
@@ -759,15 +759,21 @@
                 csvContent += row.join(",") + "\n";
             });
 
-            // Dynamic filename based on applied filters
+            // Dynamic filename naming rule
             const compVal = document.getElementById('companyFilter').value;
-            let statusSuffix = "الكل";
-            if (currentStatusFilter === 'due') statusSuffix = "المستحقة";
-            if (currentStatusFilter === 'valid') statusSuffix = "غير_المستحقة";
+            let fileName = "";
 
-            const companyPart = compVal ? compVal.replace(/\s+/g, '_') : 'كل_الشركات';
-            const todayStr = formatDateToDisplay(new Date().toISOString().split('T')[0]).replace(/\s+/g, '');
-            const fileName = `Insurance_${companyPart}_${statusSuffix}_${todayStr}.csv`;
+            if (compVal) {
+                fileName = `وصفات شركة ${compVal}.csv`;
+            } else {
+                if (currentStatusFilter === 'due') {
+                    fileName = "كل الوصفات المستحقة.csv";
+                } else if (currentStatusFilter === 'valid') {
+                    fileName = "كل الوصفات الغير مستحقة.csv";
+                } else {
+                    fileName = "كل الوصفات.csv";
+                }
+            }
 
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
@@ -777,7 +783,7 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            showToast(`تم تصدير ${filteredItems.length} وصفة إلى إكسيل بنجاح 📊`);
+            showToast(`تم تصدير (${fileName.replace('.csv', '')}) بنجاح 📊`);
         }
 
         function showToast(msg) {
