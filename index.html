@@ -601,9 +601,9 @@
             document.getElementById('emptyState').classList.toggle('hidden', visibleCount > 0);
         }
 
+        // Card rendering: Right side for Name & ID, Left side for badges & details
         function createCustomerCard(patient, index, status) {
             const card = document.createElement('div');
-            // Unified neutral subtle gray border for all cards
             card.className = `bg-white rounded-2xl border border-slate-200/90 hover:border-slate-300 shadow-2xs transition-all overflow-hidden`;
 
             const twoName = getTwoPartName(patient.name);
@@ -611,29 +611,30 @@
 
             card.innerHTML = `
                 <div onclick="toggleCard(${index})" class="p-3.5 sm:p-4 min-h-[82px] cursor-pointer flex items-center justify-between gap-2.5">
+                    
+                    <!-- Right Section: Name & National ID -->
+                    <div class="text-right flex-1 min-w-0 pl-2">
+                        <h3 class="text-xs sm:text-sm font-bold text-slate-900 truncate">${twoName}</h3>
+                        <p class="text-[11px] text-slate-500 font-mono mt-1">الهوية: ${patient.id}</p>
+                    </div>
+
+                    <!-- Left Section: Company, Status Badge & Chevron -->
                     <div class="flex items-center gap-2 flex-shrink-0">
-                        <div id="chevron-${index}" class="w-7 h-7 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 transition-transform duration-200">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </div>
+                        <span class="text-[11px] font-bold text-teal-800 bg-teal-50 border border-teal-200 px-2 py-1 rounded-xl">
+                            ${patient.company || 'تأمين'}
+                        </span>
                         <span class="text-[11px] px-2.5 py-1 rounded-xl border font-bold ${status.cssBadge}">
                             ${status.text}
                         </span>
+                        <div id="chevron-${index}" class="w-7 h-7 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 transition-transform duration-200">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
                     </div>
 
-                    <div class="flex-shrink-0">
-                        <span class="text-[11px] font-bold text-teal-800 bg-teal-50 border border-teal-200 px-2.5 py-1 rounded-xl">
-                            ${patient.company || 'تأمين'}
-                        </span>
-                    </div>
-
-                    <div class="text-right flex-1 min-w-0 pr-1">
-                        <h3 class="text-xs sm:text-sm font-bold text-slate-900 truncate">${twoName}</h3>
-                        <p class="text-[11px] text-slate-500 font-mono mt-0.5">الهوية : ${patient.id}</p>
-                    </div>
                 </div>
 
+                <!-- Expanded Details Container -->
                 <div id="details-${index}" class="hidden border-t border-slate-100 bg-slate-50/50 p-4 space-y-3.5">
-                    <!-- Remarks Container with Direct Save Button -->
                     <div class="bg-amber-50/80 border border-amber-200/90 rounded-2xl p-3">
                         <div class="flex items-center justify-between mb-1.5">
                             <span class="text-xs font-bold text-amber-900 flex items-center gap-1.5">
@@ -1000,8 +1001,8 @@
                     renderBatchExtractedItem(extracted, 0);
                 }
             } catch (err) {
-                console.error('OCR Error:', err);
-                alert('تعذر قراءة بيانات الوصفة تلقائياً. تأكد من وضوح الصورة وصلاحية المفتاح.');
+                console.error('OCR Error Details:', err);
+                alert(`تعذر قراءة بيانات الوصفة تلقائياً.\nالسبب: ${err.message || 'خطأ غير معروف في الاتصال بـ Gemini'}`);
             }
 
             document.getElementById('ocrProgressBlock').classList.add('hidden');
@@ -1037,22 +1038,22 @@
                 }
             } catch (err) {
                 console.error(err);
-                alert('حدث خطأ أثناء قراءة الروشتة. يرجى التأكد من وضوح الصورة.');
+                alert(`حدث خطأ أثناء قراءة الروشتة.\nالسبب: ${err.message || 'تأكد من وضوح الصورة وصلاحية المفتاح'}`);
             } finally {
                 scanText.textContent = 'فتح الكاميرا ومسح الوصفة';
             }
         }
 
         async function extractPrescriptionWithGemini(apiKey, base64Image) {
-            const prompt = `أنت صيدلي خبير. استخرج بيانات الوصفة الطبية المرفقة بدقة وأعدها فقط في كائن JSON صالح بالشكل التالي دون أي markdown إضافي:
+            const prompt = `أنت صيدلي خبير ومحترف. استخرج بيانات الوصفة الطبية المرفقة بدقة تامة. أعد النتيجة فقط في صيغة JSON بالبنية التالية دون أي نصوص تمهيدية ودون علامات markdown:
 {
-  "name": "اسم المريض (ثنائي أو ثلاثي)",
-  "id": "رقم الهوية أو الإقامة المكون من 10 أرقام إن وجد",
-  "company": "اسم شركة التأمين (تكافل الراجحي / بوبا / التعاونية / ميدغلف)",
+  "name": "اسم المريض (ثنائي أو ثلاثي إن وجد)",
+  "id": "رقم الهوية أو الإقامة (10 أرقام)",
+  "company": "تكافل الراجحي",
   "meds": ["دواء 1 مع الجرعة والشكل الصيدلاني", "دواء 2 مع الجرعة والشكل الصيدلاني"]
 }`;
 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -1065,18 +1066,37 @@
                         ]
                     }],
                     generationConfig: {
-                        temperature: 0.1,
-                        response_mime_type: "application/json"
+                        temperature: 0.2
                     }
                 })
             });
 
             if (!response.ok) {
-                throw new Error(`Gemini API Error: ${response.status}`);
+                const errData = await response.json().catch(() => ({}));
+                const errMsg = errData.error?.message || `كود الخطأ ${response.status}`;
+                throw new Error(`خطأ في خادم Gemini: ${errMsg}`);
             }
 
             const data = await response.json();
-            const rawText = data.candidates[0].content.parts[0].text;
+            
+            if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
+                throw new Error('لم يقم النموذج بإعادة أي نصوص من الصورة');
+            }
+
+            let rawText = data.candidates[0].content.parts[0].text.trim();
+
+            if (rawText.startsWith('```json')) {
+                rawText = rawText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+            } else if (rawText.startsWith('```')) {
+                rawText = rawText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+            }
+
+            const firstBrace = rawText.indexOf('{');
+            const lastBrace = rawText.lastIndexOf('}');
+            if (firstBrace !== -1 && lastBrace !== -1) {
+                rawText = rawText.substring(firstBrace, lastBrace + 1);
+            }
+
             return JSON.parse(rawText);
         }
 
@@ -1085,9 +1105,9 @@
             const row = document.createElement('div');
             row.className = "bg-white p-2.5 rounded-xl border border-slate-200 flex items-center justify-between text-xs";
             row.innerHTML = `
-                <div>
+                <div class="text-right">
                     <span class="font-bold text-slate-800">${item.name || 'مريض غير معروف'}</span>
-                    <span class="text-slate-400 font-mono text-[11px] block">الهوية: ${item.id || '---'}</span>
+                    <span class="text-slate-400 font-mono text-[11px] block mt-0.5">الهوية: ${item.id || '---'}</span>
                 </div>
                 <div class="text-left">
                     <span class="text-teal-700 bg-teal-50 px-2 py-0.5 rounded-lg border border-teal-200 text-[10px] font-bold block mb-1">${item.company || 'تكافل الراجحي'}</span>
