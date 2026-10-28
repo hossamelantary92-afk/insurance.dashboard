@@ -59,7 +59,7 @@
             </div>
         </div>
 
-        <!-- Action Button Bar (Only Add Prescription) -->
+        <!-- Action Button Bar (Add Prescription Only) -->
         <div class="max-w-2xl mx-auto mt-3">
             <button onclick="openAddModal()" class="w-full bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 active:scale-[0.99] text-white font-bold py-2.5 px-4 rounded-xl shadow-sm flex items-center justify-center gap-2 text-xs transition-all border border-sky-400/30">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
@@ -99,7 +99,7 @@
         <!-- Search & Filter Controls -->
         <div class="bg-white border border-slate-200/80 rounded-2xl p-3 shadow-sm space-y-2.5">
             <div class="relative">
-                <input type="text" id="searchInput" placeholder="ابحث برقم الهوية / الإقامة" oninput="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-xl pr-9 pl-3 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 transition-colors">
+                <input type="text" id="searchInput" placeholder="ابحث برقم الهوية / الإقامة أو اسم العميل" oninput="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-xl pr-9 pl-3 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 transition-colors">
                 <svg class="w-4 h-4 text-slate-400 absolute right-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
             
@@ -150,14 +150,11 @@
             <canvas id="cameraCanvas" class="hidden"></canvas>
         </div>
 
-        <div class="w-full max-w-lg flex flex-col items-center gap-3 pb-3">
+        <!-- Camera Controls: Shutter Button Only -->
+        <div class="w-full max-w-lg flex flex-col items-center justify-center pb-5">
             <button type="button" onclick="captureLivePhoto()" class="w-18 h-18 rounded-full border-4 border-white bg-amber-500 flex items-center justify-center shadow-lg active:scale-95 transition-all">
                 <div class="w-13 h-13 rounded-full bg-white shadow-xs"></div>
             </button>
-            <label class="text-[11px] text-slate-300 hover:text-white underline cursor-pointer py-1">
-                أو اختر صورة من ألبوم الصور
-                <input type="file" accept="image/*" class="hidden" onchange="handleFallbackImageUpload(this)">
-            </label>
         </div>
     </div>
 
@@ -185,13 +182,11 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
-                    <!-- Button 1: Camera Scan -->
                     <button type="button" onclick="startLiveCamera()" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold py-2 px-2.5 rounded-xl text-[11px] flex items-center justify-center gap-1.5 transition-all shadow-xs">
                         <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
                         <span id="singleScanText">افتح الكاميرا وامسح الوصفة</span>
                     </button>
 
-                    <!-- Button 2: Upload File/Photo -->
                     <label class="bg-white hover:bg-amber-100/60 border border-amber-300 text-amber-900 active:scale-95 font-bold py-2 px-2.5 rounded-xl text-[11px] flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer">
                         <svg class="w-4 h-4 text-amber-700 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                         <span>ارفع صورة الوصفة</span>
@@ -487,6 +482,7 @@
 
             if (diffDays < 0) {
                 return {
+                    diffDays: diffDays,
                     state: 'overdue',
                     text: `متأخر (${Math.abs(diffDays)} يوم)`,
                     cssBadge: 'bg-rose-50 text-rose-700 border-rose-200',
@@ -495,6 +491,7 @@
                 };
             } else if (diffDays === 0) {
                 return {
+                    diffDays: diffDays,
                     state: 'today',
                     text: `مستحق اليوم`,
                     cssBadge: 'bg-rose-600 text-white border-rose-600 font-bold',
@@ -503,6 +500,7 @@
                 };
             } else if (diffDays <= 4) {
                 return {
+                    diffDays: diffDays,
                     state: 'due_soon',
                     text: `متبقي ${diffDays} يوم`,
                     cssBadge: 'bg-amber-50 text-amber-700 border-amber-200 font-bold',
@@ -511,6 +509,7 @@
                 };
             } else {
                 return {
+                    diffDays: diffDays,
                     state: 'valid',
                     text: `متبقي ${diffDays} يوم`,
                     cssBadge: 'bg-emerald-50 text-emerald-700 border-emerald-200',
@@ -530,18 +529,26 @@
             let total = patients.length;
             let dueCount = 0;
             let validCount = 0;
-            let visibleCount = 0;
 
-            patients.forEach((p, idx) => {
-                const status = getPrescriptionStatus(p.dispenseDate, p.cycle || 84);
+            // Map each item with its original index and pre-calculated status
+            const items = patients.map((patient, originalIndex) => {
+                const status = getPrescriptionStatus(patient.dispenseDate, patient.cycle || 84);
                 if (status.isDue) dueCount++;
                 else validCount++;
+                return { patient, originalIndex, status };
+            });
 
+            // Sort logic: Overdue first (most negative to least), then 0 (today), then 1, 2, 3, 4 days, then valid ascending
+            items.sort((a, b) => a.status.diffDays - b.status.diffDays);
+
+            let visibleCount = 0;
+
+            items.forEach(({ patient, originalIndex, status }) => {
                 const matchSearch = !searchVal || 
-                    (p.id && p.id.toLowerCase().includes(searchVal)) || 
-                    (p.name && p.name.toLowerCase().includes(searchVal));
+                    (patient.id && patient.id.toLowerCase().includes(searchVal)) || 
+                    (patient.name && patient.name.toLowerCase().includes(searchVal));
 
-                const matchComp = !compVal || p.company === compVal;
+                const matchComp = !compVal || patient.company === compVal;
 
                 let matchStatus = true;
                 if (currentStatusFilter === 'due') matchStatus = status.isDue;
@@ -549,7 +556,7 @@
 
                 if (matchSearch && matchComp && matchStatus) {
                     visibleCount++;
-                    const card = createCustomerCard(p, idx, status);
+                    const card = createCustomerCard(patient, originalIndex, status);
                     container.appendChild(card);
                 }
             });
@@ -913,20 +920,6 @@
             const base64Image = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
             stopLiveCamera();
             processPrescriptionImage(base64Image);
-        }
-
-        function handleFallbackImageUpload(input) {
-            const file = input.files && input.files[0];
-            if (!file) return;
-
-            stopLiveCamera();
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => {
-                const base64Image = reader.result.split(',')[1];
-                processPrescriptionImage(base64Image);
-            };
-            input.value = '';
         }
 
         // Direct File Upload from Prescription Modal
