@@ -59,15 +59,11 @@
             </div>
         </div>
 
-        <!-- Action Buttons Bar -->
-        <div class="max-w-2xl mx-auto grid grid-cols-2 gap-2.5 mt-3">
-            <button type="button" onclick="startLiveCamera('main')" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 active:scale-[0.98] text-white font-bold py-2 px-3 rounded-xl shadow-sm flex items-center justify-center gap-2 text-xs transition-all border border-amber-400/30">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                <span>تصوير مجمّع</span>
-            </button>
-            <button onclick="openAddModal()" class="bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 active:scale-[0.98] text-white font-bold py-2 px-3 rounded-xl shadow-sm flex items-center justify-center gap-2 text-xs transition-all border border-sky-400/30">
+        <!-- Action Button Bar (Only Add Prescription) -->
+        <div class="max-w-2xl mx-auto mt-3">
+            <button onclick="openAddModal()" class="w-full bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 active:scale-[0.99] text-white font-bold py-2.5 px-4 rounded-xl shadow-sm flex items-center justify-center gap-2 text-xs transition-all border border-sky-400/30">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                <span>إضافة وصفة</span>
+                <span>إضافة وصفة جديدة</span>
             </button>
         </div>
     </header>
@@ -178,13 +174,30 @@
                 </button>
             </div>
 
-            <!-- OCR Camera in Add Modal -->
-            <div class="px-4 pt-3 pb-2 bg-amber-50/70 border-b border-amber-100 flex items-center justify-between">
-                <span class="text-[11px] font-bold text-amber-900">تعبئة البيانات تلقائياً بالكاميرا:</span>
-                <button type="button" onclick="startLiveCamera('single')" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold py-1.5 px-3 rounded-xl text-[11px] flex items-center gap-1.5 transition-all shadow-xs">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
-                    <span id="singleScanText">فتح الكاميرا ومسح الوصفة</span>
-                </button>
+            <!-- Smart OCR Actions (Camera + Upload Image) -->
+            <div class="px-4 py-3 bg-amber-50/70 border-b border-amber-100 space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-bold text-amber-900">تعبئة البيانات تلقائياً بالذكاء الاصطناعي:</span>
+                    <span id="scanLoadingIndicator" class="hidden text-[10px] font-bold text-amber-700 animate-pulse flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5 animate-spin text-amber-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                        <span>جاري المعالجة...</span>
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <!-- Button 1: Camera Scan -->
+                    <button type="button" onclick="startLiveCamera()" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold py-2 px-2.5 rounded-xl text-[11px] flex items-center justify-center gap-1.5 transition-all shadow-xs">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+                        <span id="singleScanText">افتح الكاميرا وامسح الوصفة</span>
+                    </button>
+
+                    <!-- Button 2: Upload File/Photo -->
+                    <label class="bg-white hover:bg-amber-100/60 border border-amber-300 text-amber-900 active:scale-95 font-bold py-2 px-2.5 rounded-xl text-[11px] flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer">
+                        <svg class="w-4 h-4 text-amber-700 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        <span>ارفع صورة الوصفة</span>
+                        <input type="file" accept="image/*" class="hidden" onchange="handleDirectFileUpload(this)">
+                    </label>
+                </div>
             </div>
 
             <form id="prescriptionForm" onsubmit="handleFormSubmit(event)" class="p-4 space-y-3 overflow-y-auto custom-scrollbar text-xs">
@@ -275,49 +288,6 @@
                         <button onclick="closeApiModal()" class="px-3 py-1.5 rounded-xl text-slate-600 font-semibold">إغلاق</button>
                         <button onclick="saveApiKey()" class="px-4 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold transition-all shadow-sm">حفظ المفتاح</button>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal: Batch Review & Progress (z-[65]) -->
-    <div id="batchProcessModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[65] flex items-center justify-center p-3 hidden">
-        <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
-                <h3 class="text-xs font-bold flex items-center gap-2">
-                    <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
-                    <span>معالجة الروشتة بالذكاء الاصطناعي</span>
-                </h3>
-                <button onclick="closeBatchModal()" class="text-slate-400 hover:text-white">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-
-            <div class="p-4 space-y-3.5 text-xs overflow-y-auto custom-scrollbar">
-                <div id="ocrProgressBlock" class="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-3">
-                    <div class="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin flex-shrink-0"></div>
-                    <div>
-                        <div class="font-bold text-amber-900" id="ocrStatusText">جاري قراءة وتحليل بيانات الروشتة عبر Gemini...</div>
-                        <div class="text-[11px] text-amber-700" id="ocrProgressSub">يرجى الانتظار ثوانٍ معدودة</div>
-                    </div>
-                </div>
-
-                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
-                    <label class="block font-bold text-slate-800">تاريخ صرف هذه الوصفة:</label>
-                    <div class="flex items-center gap-2">
-                        <input type="date" id="batchDispenseDate" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-amber-500">
-                        <button type="button" onclick="setBatchDateToday()" class="bg-slate-200 hover:bg-slate-300 font-bold px-3 py-1.5 rounded-xl transition-colors">صُرفت اليوم</button>
-                    </div>
-                </div>
-
-                <div>
-                    <h4 class="font-bold text-slate-700 mb-2">البيانات المستخرجة:</h4>
-                    <div id="batchExtractedList" class="space-y-2 max-h-56 overflow-y-auto custom-scrollbar"></div>
-                </div>
-
-                <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
-                    <button type="button" onclick="closeBatchModal()" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold">إلغاء</button>
-                    <button type="button" id="confirmBatchAddBtn" onclick="confirmBatchAdd()" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold transition-all shadow-sm">حفظ وإضافة للمنظومة</button>
                 </div>
             </div>
         </div>
@@ -471,9 +441,7 @@
         let patients = [];
         let currentStatusFilter = 'all';
         let deleteTargetIndex = null;
-        let batchExtractedItems = [];
         let activeMediaStream = null;
-        let currentCameraTarget = 'main';
 
         window.addEventListener('DOMContentLoaded', () => {
             const saved = localStorage.getItem('insurance_patients_db');
@@ -770,7 +738,8 @@
             document.getElementById('prescriptionForm').reset();
             document.getElementById('cycleDuration').value = "84";
             document.getElementById('dispenseDate').value = new Date().toISOString().split('T')[0];
-            document.getElementById('singleScanText').textContent = "فتح الكاميرا ومسح الوصفة";
+            document.getElementById('singleScanText').textContent = "افتح الكاميرا وامسح الوصفة";
+            document.getElementById('scanLoadingIndicator').classList.add('hidden');
             document.getElementById('prescriptionModal').classList.remove('hidden');
         }
 
@@ -876,7 +845,7 @@
         // Live Camera Stream
         // ==========================================
 
-        async function startLiveCamera(target = 'main') {
+        async function startLiveCamera() {
             const apiKey = getGeminiApiKey();
             if (!apiKey) {
                 alert('يرجى إدخال مفتاح Gemini API أولاً لتفعيل القراءة الذكية للروشتات.');
@@ -884,12 +853,7 @@
                 return;
             }
 
-            currentCameraTarget = target;
-            
-            if (target === 'single') {
-                document.getElementById('prescriptionModal').classList.add('hidden');
-            }
-
+            document.getElementById('prescriptionModal').classList.add('hidden');
             const modal = document.getElementById('cameraModal');
             const video = document.getElementById('cameraVideo');
 
@@ -916,7 +880,8 @@
                     await video.play();
                 } catch (fallbackErr) {
                     console.error('All camera attempts failed:', fallbackErr);
-                    alert('تعذر فتح الكاميرا مباشرة. يرجى التأكد من السماح بالوصول للكاميرا في المتصفح أو اختيار صورة من الألبوم.');
+                    alert('تعذر فتح الكاميرا مباشرة. يرجى التأكد من السماح بالوصول للكاميرا في المتصفح أو اختيار صورة عبر زر (ارفع صورة الوصفة).');
+                    stopLiveCamera();
                 }
             }
         }
@@ -929,10 +894,7 @@
             const video = document.getElementById('cameraVideo');
             if (video) video.srcObject = null;
             document.getElementById('cameraModal').classList.add('hidden');
-
-            if (currentCameraTarget === 'single') {
-                document.getElementById('prescriptionModal').classList.remove('hidden');
-            }
+            document.getElementById('prescriptionModal').classList.remove('hidden');
         }
 
         function captureLivePhoto() {
@@ -950,12 +912,7 @@
 
             const base64Image = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
             stopLiveCamera();
-
-            if (currentCameraTarget === 'main') {
-                processCapturedImageMain(base64Image);
-            } else {
-                processCapturedImageSingle(base64Image);
-            }
+            processPrescriptionImage(base64Image);
         }
 
         function handleFallbackImageUpload(input) {
@@ -967,47 +924,41 @@
             reader.readAsDataURL(file);
             reader.onload = () => {
                 const base64Image = reader.result.split(',')[1];
-                if (currentCameraTarget === 'main') {
-                    processCapturedImageMain(base64Image);
-                } else {
-                    processCapturedImageSingle(base64Image);
-                }
+                processPrescriptionImage(base64Image);
             };
             input.value = '';
         }
 
-        async function processCapturedImageMain(base64Image) {
+        // Direct File Upload from Prescription Modal
+        function handleDirectFileUpload(input) {
             const apiKey = getGeminiApiKey();
-            document.getElementById('batchDispenseDate').value = new Date().toISOString().split('T')[0];
-            document.getElementById('batchExtractedList').innerHTML = '';
-            document.getElementById('ocrProgressBlock').classList.remove('hidden');
-            document.getElementById('confirmBatchAddBtn').disabled = true;
-            document.getElementById('confirmBatchAddBtn').classList.add('opacity-50');
-            document.getElementById('batchProcessModal').classList.remove('hidden');
-
-            batchExtractedItems = [];
-
-            try {
-                document.getElementById('ocrStatusText').textContent = 'جاري تحليل صورة الوصفة وقراءة بياناتها...';
-                const extracted = await extractPrescriptionWithGemini(apiKey, base64Image);
-                if (extracted) {
-                    batchExtractedItems.push(extracted);
-                    renderBatchExtractedItem(extracted, 0);
-                }
-            } catch (err) {
-                console.error('OCR Error Details:', err);
-                alert(`تعذر قراءة بيانات الوصفة تلقائياً.\nالسبب: ${err.message || 'خطأ غير معروف في الاتصال بـ Gemini'}`);
+            if (!apiKey) {
+                alert('يرجى إدخال مفتاح Gemini API أولاً لتفعيل القراءة الذكية للروشتات.');
+                openApiModal();
+                input.value = '';
+                return;
             }
 
-            document.getElementById('ocrProgressBlock').classList.add('hidden');
-            document.getElementById('confirmBatchAddBtn').disabled = false;
-            document.getElementById('confirmBatchAddBtn').classList.remove('opacity-50');
+            const file = input.files && input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                const base64Image = reader.result.split(',')[1];
+                processPrescriptionImage(base64Image);
+            };
+            input.value = '';
         }
 
-        async function processCapturedImageSingle(base64Image) {
+        // Process Base64 image and populate the form
+        async function processPrescriptionImage(base64Image) {
             document.getElementById('prescriptionModal').classList.remove('hidden');
             const scanText = document.getElementById('singleScanText');
+            const loader = document.getElementById('scanLoadingIndicator');
+            
             scanText.textContent = 'جاري المسح والاستخراج...';
+            loader.classList.remove('hidden');
 
             const apiKey = getGeminiApiKey();
 
@@ -1034,11 +985,12 @@
                 console.error(err);
                 alert(`حدث خطأ أثناء قراءة الروشتة.\nالسبب: ${err.message || 'تأكد من وضوح الصورة وصلاحية المفتاح'}`);
             } finally {
-                scanText.textContent = 'فتح الكاميرا ومسح الوصفة';
+                scanText.textContent = 'افتح الكاميرا وامسح الوصفة';
+                loader.classList.add('hidden');
             }
         }
 
-        // Direct Gemini Vision Call (Strictly configured for gemini-3.8-flash)
+        // Direct Gemini Vision Call (gemini-3.8-flash)
         async function extractPrescriptionWithGemini(apiKey, base64Image) {
             const prompt = `أنت صيدلي خبير ومحترف. استخرج بيانات الوصفة الطبية المرفقة بدقة تامة. أعد النتيجة فقط في صيغة JSON بالبنية التالية دون أي نصوص تمهيدية ودون علامات markdown:
 {
@@ -1092,59 +1044,6 @@
             }
 
             return JSON.parse(rawText);
-        }
-
-        function renderBatchExtractedItem(item, idx) {
-            const container = document.getElementById('batchExtractedList');
-            const row = document.createElement('div');
-            row.className = "bg-white p-2.5 rounded-xl border border-slate-200 flex items-center justify-between text-xs";
-            row.innerHTML = `
-                <div class="text-right">
-                    <span class="font-bold text-slate-800">${item.name || 'مريض غير معروف'}</span>
-                    <span class="text-slate-400 font-mono text-[11px] block mt-0.5">الهوية: ${item.id || '---'}</span>
-                </div>
-                <div class="text-left">
-                    <span class="text-teal-700 bg-teal-50 px-2 py-0.5 rounded-lg border border-teal-200 text-[10px] font-bold block mb-1">${item.company || 'تكافل الراجحي'}</span>
-                    <span class="text-slate-500 text-[10px]">${(item.meds || []).length} أصناف</span>
-                </div>
-            `;
-            container.appendChild(row);
-        }
-
-        function setBatchDateToday() {
-            document.getElementById('batchDispenseDate').value = new Date().toISOString().split('T')[0];
-        }
-
-        function closeBatchModal() {
-            document.getElementById('batchProcessModal').classList.add('hidden');
-        }
-
-        function confirmBatchAdd() {
-            if (!batchExtractedItems.length) {
-                closeBatchModal();
-                return;
-            }
-
-            const selectedDispenseDate = document.getElementById('batchDispenseDate').value || new Date().toISOString().split('T')[0];
-
-            batchExtractedItems.forEach(item => {
-                patients.unshift({
-                    name: item.name || 'عميل جديد',
-                    id: item.id || '',
-                    company: item.company || 'تكافل الراجحي',
-                    phone: '',
-                    cycle: 84,
-                    dispenseDate: selectedDispenseDate,
-                    remarks: '',
-                    meds: item.meds || []
-                });
-            });
-
-            saveToStorage();
-            closeBatchModal();
-            renderList();
-            showToast(`تمت إضافة الوصفة بنجاح إلى المنظومة`);
-            batchExtractedItems = [];
         }
 
         function exportToExcel() {
