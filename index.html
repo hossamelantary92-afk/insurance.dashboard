@@ -1038,7 +1038,7 @@
             }
         }
 
-        // Direct, Validated Gemini Vision Call (Updated for Latest Models & Payload Specs)
+        // Direct Gemini Vision Call (Strictly configured for gemini-3.8-flash)
         async function extractPrescriptionWithGemini(apiKey, base64Image) {
             const prompt = `أنت صيدلي خبير ومحترف. استخرج بيانات الوصفة الطبية المرفقة بدقة تامة. أعد النتيجة فقط في صيغة JSON بالبنية التالية دون أي نصوص تمهيدية ودون علامات markdown:
 {
@@ -1048,67 +1048,50 @@
   "meds": ["دواء 1 مع الجرعة والشكل الصيدلاني", "دواء 2 مع الجرعة والشكل الصيدلاني"]
 }`;
 
-            // Official stable endpoints for Gemini Vision
-            const endpoints = [
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-                `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`
-            ];
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
 
-            let lastError = null;
-
-            for (const url of endpoints) {
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{
-                                parts: [
-                                    { text: prompt },
-                                    { inlineData: { mimeType: "image/jpeg", data: base64Image } }
-                                ]
-                            }],
-                            generationConfig: {
-                                temperature: 0.1,
-                                responseMimeType: "application/json"
-                            }
-                        })
-                    });
-
-                    if (!response.ok) {
-                        const errData = await response.json().catch(() => ({}));
-                        lastError = new Error(errData.error?.message || `HTTP ${response.status}`);
-                        continue;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [
+                            { text: prompt },
+                            { inlineData: { mimeType: "image/jpeg", data: base64Image } }
+                        ]
+                    }],
+                    generationConfig: {
+                        temperature: 0.1,
+                        responseMimeType: "application/json"
                     }
+                })
+            });
 
-                    const data = await response.json();
-                    if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
-                        lastError = new Error('لم يقم النموذج بإعادة أي نصوص');
-                        continue;
-                    }
-
-                    let rawText = data.candidates[0].content.parts[0].text.trim();
-
-                    if (rawText.startsWith('```json')) {
-                        rawText = rawText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-                    } else if (rawText.startsWith('```')) {
-                        rawText = rawText.replace(/^```\s*/, '').replace(/\s*```$/, '');
-                    }
-
-                    const firstBrace = rawText.indexOf('{');
-                    const lastBrace = rawText.lastIndexOf('}');
-                    if (firstBrace !== -1 && lastBrace !== -1) {
-                        rawText = rawText.substring(firstBrace, lastBrace + 1);
-                    }
-
-                    return JSON.parse(rawText);
-                } catch (fetchErr) {
-                    lastError = fetchErr;
-                }
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.error?.message || `HTTP ${response.status}`);
             }
 
-            throw lastError || new Error('فشلت جميع محاولات الاتصال بالذكاء الاصطناعي');
+            const data = await response.json();
+            if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
+                throw new Error('لم يقم النموذج بإعادة أي نصوص');
+            }
+
+            let rawText = data.candidates[0].content.parts[0].text.trim();
+
+            if (rawText.startsWith('```json')) {
+                rawText = rawText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+            } else if (rawText.startsWith('```')) {
+                rawText = rawText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+            }
+
+            const firstBrace = rawText.indexOf('{');
+            const lastBrace = rawText.lastIndexOf('}');
+            if (firstBrace !== -1 && lastBrace !== -1) {
+                rawText = rawText.substring(firstBrace, lastBrace + 1);
+            }
+
+            return JSON.parse(rawText);
         }
 
         function renderBatchExtractedItem(item, idx) {
