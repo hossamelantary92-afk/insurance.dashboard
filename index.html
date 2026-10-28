@@ -38,7 +38,7 @@
     <!-- Fixed Sticky Header -->
     <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md text-white pt-3.5 pb-3 px-4 shadow-md border-b border-slate-800/80">
         <div class="max-w-2xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-2.5 cursor-pointer" ondblclick="openApiModal()" title="انقر مرتين لفتح إعدادات الـ API">
+            <div class="flex items-center gap-2.5">
                 <div class="w-9 h-9 rounded-xl bg-teal-500/20 border border-teal-400/30 flex items-center justify-center text-teal-300">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                 </div>
@@ -50,16 +50,13 @@
 
             <!-- Actions -->
             <div class="flex items-center gap-2">
-                <button onclick="openApiModal()" id="apiKeyBtn" title="إعداد مفتاح Gemini" class="w-9 h-9 rounded-xl bg-slate-700/60 hover:bg-slate-700 border border-slate-600 flex items-center justify-center text-amber-400 transition-all">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
-                </button>
                 <button onclick="exportToExcel()" title="تصدير إلى Excel" class="w-9 h-9 rounded-xl bg-slate-700/60 hover:bg-slate-700 border border-slate-600 flex items-center justify-center text-slate-200 transition-all">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 </button>
             </div>
         </div>
 
-        <!-- Action Button Bar (Add Prescription Only) -->
+        <!-- Action Button Bar -->
         <div class="max-w-2xl mx-auto mt-3">
             <button onclick="openAddModal()" class="w-full bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 active:scale-[0.99] text-white font-bold py-2.5 px-4 rounded-xl shadow-sm flex items-center justify-center gap-2 text-xs transition-all border border-sky-400/30">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
@@ -130,35 +127,7 @@
         </div>
     </main>
 
-    <!-- LIVE CAMERA MODAL: z-[70] -->
-    <div id="cameraModal" class="fixed inset-0 bg-black/95 z-[70] flex flex-col items-center justify-between p-4 hidden">
-        <div class="w-full max-w-lg flex items-center justify-between text-white pt-2">
-            <span class="text-xs font-bold flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
-                <span>كاميرا قراءة الوصفة الطبية</span>
-            </span>
-            <button type="button" onclick="stopLiveCamera()" class="p-1.5 rounded-xl bg-white/20 text-white hover:bg-white/30 transition-colors">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-        </div>
-
-        <div class="relative w-full max-w-lg flex-1 my-3 bg-black rounded-2xl overflow-hidden flex items-center justify-center border border-white/10 shadow-2xl">
-            <video id="cameraVideo" autoplay playsinline class="w-full h-full object-cover"></video>
-            <div class="absolute inset-5 border-2 border-dashed border-amber-400/80 rounded-2xl pointer-events-none flex items-center justify-center shadow-inner">
-                <span class="bg-black/70 text-amber-300 text-[11px] font-bold px-3 py-1 rounded-full border border-amber-400/30">ضع الوصفة داخل الإطار</span>
-            </div>
-            <canvas id="cameraCanvas" class="hidden"></canvas>
-        </div>
-
-        <!-- Camera Controls: Shutter Button Only -->
-        <div class="w-full max-w-lg flex flex-col items-center justify-center pb-5">
-            <button type="button" onclick="captureLivePhoto()" class="w-18 h-18 rounded-full border-4 border-white bg-amber-500 flex items-center justify-center shadow-lg active:scale-95 transition-all">
-                <div class="w-13 h-13 rounded-full bg-white shadow-xs"></div>
-            </button>
-        </div>
-    </div>
-
-    <!-- Modal: Add / Edit Prescription (z-50) -->
+    <!-- Modal: Add / Edit Prescription -->
     <div id="prescriptionModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 hidden">
         <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[92vh]">
             <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
@@ -171,42 +140,18 @@
                 </button>
             </div>
 
-            <!-- Smart OCR Actions (Camera + Upload Image) -->
-            <div class="px-4 py-3 bg-amber-50/70 border-b border-amber-100 space-y-2">
-                <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-bold text-amber-900">تعبئة البيانات تلقائياً بالذكاء الاصطناعي:</span>
-                    <span id="scanLoadingIndicator" class="hidden text-[10px] font-bold text-amber-700 animate-pulse flex items-center gap-1">
-                        <svg class="w-3.5 h-3.5 animate-spin text-amber-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
-                        <span>جاري المعالجة...</span>
-                    </span>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2">
-                    <button type="button" onclick="startLiveCamera()" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold py-2 px-2.5 rounded-xl text-[11px] flex items-center justify-center gap-1.5 transition-all shadow-xs">
-                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
-                        <span id="singleScanText">افتح الكاميرا وامسح الوصفة</span>
-                    </button>
-
-                    <label class="bg-white hover:bg-amber-100/60 border border-amber-300 text-amber-900 active:scale-95 font-bold py-2 px-2.5 rounded-xl text-[11px] flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer">
-                        <svg class="w-4 h-4 text-amber-700 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                        <span>ارفع صورة الوصفة</span>
-                        <input type="file" accept="image/*" class="hidden" onchange="handleDirectFileUpload(this)">
-                    </label>
-                </div>
-            </div>
-
             <form id="prescriptionForm" onsubmit="handleFormSubmit(event)" class="p-4 space-y-3 overflow-y-auto custom-scrollbar text-xs">
                 <input type="hidden" id="editIndex" value="-1">
 
                 <div>
                     <label class="block text-slate-700 font-bold mb-1">اسم العميل *</label>
-                    <input type="text" id="patientName" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-sky-500">
+                    <input type="text" id="patientName" required placeholder="مثال: محمد عبدالله الشمري" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-sky-500">
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block text-slate-700 font-bold mb-1">رقم الهوية / الإقامة *</label>
-                        <input type="text" id="nationalId" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-sky-500">
+                        <input type="text" id="nationalId" required placeholder="10 أرقام" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-sky-500">
                     </div>
                     <div>
                         <label class="block text-slate-700 font-bold mb-1">شركة التأمين *</label>
@@ -222,13 +167,13 @@
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block text-slate-700 font-bold mb-1">رقم الجوال</label>
-                        <input type="tel" id="phoneNumber" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-sky-500">
+                        <input type="tel" id="phoneNumber" placeholder="05XXXXXXXX" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-sky-500">
                     </div>
                     <div>
                         <label class="block text-slate-700 font-bold mb-1">الدورة التأمينية *</label>
                         <select id="cycleDuration" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs focus:outline-none focus:border-sky-500">
-                            <option value="84" selected>84</option>
-                            <option value="28">28</option>
+                            <option value="84" selected>84 يوم</option>
+                            <option value="28">28 يوم</option>
                         </select>
                     </div>
                 </div>
@@ -240,12 +185,12 @@
 
                 <div>
                     <label class="block text-slate-700 font-bold mb-1">الملاحظات</label>
-                    <input type="text" id="patientRemarks" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-sky-500">
+                    <input type="text" id="patientRemarks" placeholder="أي ملاحظات للمتابعة الصيدلانية" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-sky-500">
                 </div>
 
                 <div>
-                    <label class="block text-slate-700 font-bold mb-1">قائمة الأدوية والمستلزمات *</label>
-                    <textarea id="medicationsList" rows="3" required class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:outline-none focus:border-sky-500 leading-relaxed"></textarea>
+                    <label class="block text-slate-700 font-bold mb-1">قائمة الأدوية والمستلزمات * (كل صنف في سطر)</label>
+                    <textarea id="medicationsList" rows="3" required placeholder="مثال:&#10;Glucophage 500mg&#10;Januvia 100mg" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:outline-none focus:border-sky-500 leading-relaxed"></textarea>
                 </div>
 
                 <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
@@ -256,40 +201,8 @@
         </div>
     </div>
 
-    <!-- Modal: Gemini API Key Setting (z-[65]) -->
-    <div id="apiKeyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[65] flex items-center justify-center p-3 hidden">
-        <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden">
-            <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
-                <h3 class="text-xs font-bold flex items-center gap-2">
-                    <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
-                    <span>إعداد مفتاح Google Gemini API</span>
-                </h3>
-                <button onclick="closeApiModal()" class="text-slate-400 hover:text-white">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-            <div class="p-4 space-y-3 text-xs">
-                <p class="text-slate-600 leading-relaxed">
-                    أدخل مفتاحك المجاني من 
-                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-sky-600 underline font-bold">Google AI Studio</a>:
-                </p>
-                <div>
-                    <label class="block text-slate-700 font-bold mb-1">Gemini API Key</label>
-                    <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:border-amber-500">
-                </div>
-                <div class="flex items-center justify-between pt-2 border-t border-slate-100">
-                    <span id="apiStatusBadge" class="text-[11px] font-bold text-slate-400">غير مضبوط</span>
-                    <div class="flex gap-2">
-                        <button onclick="closeApiModal()" class="px-3 py-1.5 rounded-xl text-slate-600 font-semibold">إغلاق</button>
-                        <button onclick="saveApiKey()" class="px-4 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold transition-all shadow-sm">حفظ المفتاح</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal: Delete Confirmation (z-[65]) -->
-    <div id="deleteConfirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[65] flex items-center justify-center p-3 hidden">
+    <!-- Modal: Delete Confirmation -->
+    <div id="deleteConfirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 hidden">
         <div class="bg-white w-full max-w-sm rounded-2xl shadow-xl p-4 text-center space-y-3">
             <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
@@ -303,8 +216,8 @@
         </div>
     </div>
 
-    <!-- Toast Notification (z-[80]) -->
-    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-[80] bg-slate-900 text-white text-xs font-bold px-4 py-2.5 rounded-2xl shadow-lg flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-3">
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs font-bold px-4 py-2.5 rounded-2xl shadow-lg flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-3">
         <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
         <span id="toastMsg">تمت العملية بنجاح</span>
     </div>
@@ -436,7 +349,6 @@
         let patients = [];
         let currentStatusFilter = 'all';
         let deleteTargetIndex = null;
-        let activeMediaStream = null;
 
         window.addEventListener('DOMContentLoaded', () => {
             const saved = localStorage.getItem('insurance_patients_db');
@@ -450,7 +362,6 @@
                 patients = initialPatients;
                 saveToStorage();
             }
-            updateApiKeyBadge();
             renderList();
         });
 
@@ -530,7 +441,6 @@
             let dueCount = 0;
             let validCount = 0;
 
-            // Map each item with its original index and pre-calculated status
             const items = patients.map((patient, originalIndex) => {
                 const status = getPrescriptionStatus(patient.dispenseDate, patient.cycle || 84);
                 if (status.isDue) dueCount++;
@@ -538,7 +448,7 @@
                 return { patient, originalIndex, status };
             });
 
-            // Sort logic: Overdue first (most negative to least), then 0 (today), then 1, 2, 3, 4 days, then valid ascending
+            // Sorting: Overdue first -> Today -> Remaining 1, 2, 3, 4 days -> Valid ascending
             items.sort((a, b) => a.status.diffDays - b.status.diffDays);
 
             let visibleCount = 0;
@@ -745,8 +655,6 @@
             document.getElementById('prescriptionForm').reset();
             document.getElementById('cycleDuration').value = "84";
             document.getElementById('dispenseDate').value = new Date().toISOString().split('T')[0];
-            document.getElementById('singleScanText').textContent = "افتح الكاميرا وامسح الوصفة";
-            document.getElementById('scanLoadingIndicator').classList.add('hidden');
             document.getElementById('prescriptionModal').classList.remove('hidden');
         }
 
@@ -799,244 +707,6 @@
             saveToStorage();
             closeModal();
             renderList();
-        }
-
-        // ==========================================
-        // Gemini API Configuration
-        // ==========================================
-
-        function getGeminiApiKey() {
-            return localStorage.getItem('gemini_api_key') || '';
-        }
-
-        function openApiModal() {
-            document.getElementById('geminiApiKeyInput').value = getGeminiApiKey();
-            updateApiKeyBadge();
-            document.getElementById('apiKeyModal').classList.remove('hidden');
-        }
-
-        function closeApiModal() {
-            document.getElementById('apiKeyModal').classList.add('hidden');
-        }
-
-        function saveApiKey() {
-            const key = document.getElementById('geminiApiKeyInput').value.trim();
-            if (key) {
-                localStorage.setItem('gemini_api_key', key);
-                showToast('تم حفظ مفتاح Gemini API بنجاح');
-            } else {
-                localStorage.removeItem('gemini_api_key');
-                showToast('تمت إزالة المفتاح');
-            }
-            updateApiKeyBadge();
-            closeApiModal();
-        }
-
-        function updateApiKeyBadge() {
-            const key = getGeminiApiKey();
-            const btn = document.getElementById('apiKeyBtn');
-            const badge = document.getElementById('apiStatusBadge');
-            
-            if (key) {
-                btn.classList.add('hidden');
-                badge.textContent = "مضبوط ومفعل ✅";
-                badge.className = "text-[11px] font-bold text-emerald-600";
-            } else {
-                btn.classList.remove('hidden');
-                badge.textContent = "غير مضبوط ⚠️";
-                badge.className = "text-[11px] font-bold text-amber-500";
-            }
-        }
-
-        // ==========================================
-        // Live Camera Stream
-        // ==========================================
-
-        async function startLiveCamera() {
-            const apiKey = getGeminiApiKey();
-            if (!apiKey) {
-                alert('يرجى إدخال مفتاح Gemini API أولاً لتفعيل القراءة الذكية للروشتات.');
-                openApiModal();
-                return;
-            }
-
-            document.getElementById('prescriptionModal').classList.add('hidden');
-            const modal = document.getElementById('cameraModal');
-            const video = document.getElementById('cameraVideo');
-
-            modal.classList.remove('hidden');
-
-            try {
-                const constraints = {
-                    video: {
-                        facingMode: { ideal: "environment" },
-                        width: { ideal: 1920 },
-                        height: { ideal: 1080 }
-                    },
-                    audio: false
-                };
-
-                activeMediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-                video.srcObject = activeMediaStream;
-                await video.play();
-            } catch (err) {
-                console.warn('getUserMedia back camera direct access failed, trying general camera:', err);
-                try {
-                    activeMediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-                    video.srcObject = activeMediaStream;
-                    await video.play();
-                } catch (fallbackErr) {
-                    console.error('All camera attempts failed:', fallbackErr);
-                    alert('تعذر فتح الكاميرا مباشرة. يرجى التأكد من السماح بالوصول للكاميرا في المتصفح أو اختيار صورة عبر زر (ارفع صورة الوصفة).');
-                    stopLiveCamera();
-                }
-            }
-        }
-
-        function stopLiveCamera() {
-            if (activeMediaStream) {
-                activeMediaStream.getTracks().forEach(track => track.stop());
-                activeMediaStream = null;
-            }
-            const video = document.getElementById('cameraVideo');
-            if (video) video.srcObject = null;
-            document.getElementById('cameraModal').classList.add('hidden');
-            document.getElementById('prescriptionModal').classList.remove('hidden');
-        }
-
-        function captureLivePhoto() {
-            const video = document.getElementById('cameraVideo');
-            const canvas = document.getElementById('cameraCanvas');
-            if (!video || !video.videoWidth) {
-                alert('الكاميرا لم تبدأ بعد، انتظر ثانية واحدة ثم حاول مجدداً.');
-                return;
-            }
-
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            const base64Image = canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
-            stopLiveCamera();
-            processPrescriptionImage(base64Image);
-        }
-
-        // Direct File Upload from Prescription Modal
-        function handleDirectFileUpload(input) {
-            const apiKey = getGeminiApiKey();
-            if (!apiKey) {
-                alert('يرجى إدخال مفتاح Gemini API أولاً لتفعيل القراءة الذكية للروشتات.');
-                openApiModal();
-                input.value = '';
-                return;
-            }
-
-            const file = input.files && input.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => {
-                const base64Image = reader.result.split(',')[1];
-                processPrescriptionImage(base64Image);
-            };
-            input.value = '';
-        }
-
-        // Process Base64 image and populate the form
-        async function processPrescriptionImage(base64Image) {
-            document.getElementById('prescriptionModal').classList.remove('hidden');
-            const scanText = document.getElementById('singleScanText');
-            const loader = document.getElementById('scanLoadingIndicator');
-            
-            scanText.textContent = 'جاري المسح والاستخراج...';
-            loader.classList.remove('hidden');
-
-            const apiKey = getGeminiApiKey();
-
-            try {
-                const extracted = await extractPrescriptionWithGemini(apiKey, base64Image);
-                if (extracted) {
-                    if (extracted.name) document.getElementById('patientName').value = extracted.name;
-                    if (extracted.id) document.getElementById('nationalId').value = extracted.id;
-                    if (extracted.company) {
-                        const compSelect = document.getElementById('insuranceCompany');
-                        for (let opt of compSelect.options) {
-                            if (extracted.company.includes(opt.value)) {
-                                compSelect.value = opt.value;
-                                break;
-                            }
-                        }
-                    }
-                    if (extracted.meds && extracted.meds.length) {
-                        document.getElementById('medicationsList').value = extracted.meds.join('\n');
-                    }
-                    showToast('تم استخراج وتعبئة بيانات الوصفة بنجاح ✅');
-                }
-            } catch (err) {
-                console.error(err);
-                alert(`حدث خطأ أثناء قراءة الروشتة.\nالسبب: ${err.message || 'تأكد من وضوح الصورة وصلاحية المفتاح'}`);
-            } finally {
-                scanText.textContent = 'افتح الكاميرا وامسح الوصفة';
-                loader.classList.add('hidden');
-            }
-        }
-
-        // Direct Gemini Vision Call (gemini-3.8-flash)
-        async function extractPrescriptionWithGemini(apiKey, base64Image) {
-            const prompt = `أنت صيدلي خبير ومحترف. استخرج بيانات الوصفة الطبية المرفقة بدقة تامة. أعد النتيجة فقط في صيغة JSON بالبنية التالية دون أي نصوص تمهيدية ودون علامات markdown:
-{
-  "name": "اسم المريض (ثنائي أو ثلاثي إن وجد)",
-  "id": "رقم الهوية أو الإقامة (10 أرقام)",
-  "company": "تكافل الراجحي",
-  "meds": ["دواء 1 مع الجرعة والشكل الصيدلاني", "دواء 2 مع الجرعة والشكل الصيدلاني"]
-}`;
-
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: [
-                            { text: prompt },
-                            { inlineData: { mimeType: "image/jpeg", data: base64Image } }
-                        ]
-                    }],
-                    generationConfig: {
-                        temperature: 0.1,
-                        responseMimeType: "application/json"
-                    }
-                })
-            });
-
-            if (!response.ok) {
-                const errData = await response.json().catch(() => ({}));
-                throw new Error(errData.error?.message || `HTTP ${response.status}`);
-            }
-
-            const data = await response.json();
-            if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
-                throw new Error('لم يقم النموذج بإعادة أي نصوص');
-            }
-
-            let rawText = data.candidates[0].content.parts[0].text.trim();
-
-            if (rawText.startsWith('```json')) {
-                rawText = rawText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-            } else if (rawText.startsWith('```')) {
-                rawText = rawText.replace(/^```\s*/, '').replace(/\s*```$/, '');
-            }
-
-            const firstBrace = rawText.indexOf('{');
-            const lastBrace = rawText.lastIndexOf('}');
-            if (firstBrace !== -1 && lastBrace !== -1) {
-                rawText = rawText.substring(firstBrace, lastBrace + 1);
-            }
-
-            return JSON.parse(rawText);
         }
 
         function exportToExcel() {
