@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function admin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'approved'
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    function approved() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'approved';
+    }
+    match /users/{uid} {
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['email','name','status','role','requestedAt'])
+        && request.resource.data.status == 'pending'
+        && request.resource.data.role == 'pharmacist'
+        && request.resource.data.email == request.auth.token.email;
+      allow get: if admin() || (signedIn() && request.auth.uid == uid);
+      allow list: if admin();
+      allow update: if admin()
+        && uid != request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['status','role','approvedBy','approvedAt'])
+        && request.resource.data.role == 'pharmacist'
+        && request.resource.data.status in ['approved','pending','rejected','blocked'];
+      allow delete: if false;
+    }
+    match /prescriptions/{id} {
+      allow read: if approved();
+      allow create: if approved()
+        && request.resource.data.updatedBy == request.auth.uid;
+      allow update: if approved()
+        && request.resource.data.updatedBy == request.auth.uid;
+      allow delete: if admin();
+    }
+  }
+}
