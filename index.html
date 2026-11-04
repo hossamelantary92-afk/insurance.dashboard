@@ -34,6 +34,7 @@
     </style>
 </head>
 <body class="text-slate-800 pb-12 antialiased select-none">
+<div id="accessGate" style="position:fixed;inset:0;z-index:9999;background:#f8fafc;display:flex;align-items:center;justify-content:center;padding:20px;font-family:Cairo,sans-serif" dir="rtl"><div style="max-width:420px;width:100%;background:white;padding:30px;border-radius:20px;box-shadow:0 10px 35px #0f172a18;text-align:center"><h2 style="font-size:22px;font-weight:800;color:#0f172a">Insurance Dashboard</h2><p id="accessMessage" style="margin:15px 0;color:#475569">جاري التحقق من حسابك...</p><button id="googleLogin" style="display:none;background:#0f766e;color:white;padding:12px 20px;border-radius:10px;width:100%;font-weight:bold">تسجيل الدخول باستخدام Google</button><button id="googleLogout" style="display:none;margin-top:12px;color:#64748b">تسجيل الخروج</button><div id="adminRequests" style="display:none;text-align:right;margin-top:20px"><h3 style="font-weight:bold">طلبات الانضمام</h3><div id="requestItems"></div></div></div></div>
 
     <!-- Fixed Sticky Header -->
     <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md text-white pt-3.5 pb-3 px-4 shadow-md border-b border-slate-800/80">
@@ -350,23 +351,12 @@
         let currentStatusFilter = 'all';
         let deleteTargetIndex = null;
 
-        window.addEventListener('DOMContentLoaded', () => {
-            const saved = localStorage.getItem('insurance_patients_db');
-            if (saved) {
-                try {
-                    patients = JSON.parse(saved);
-                } catch(e) {
-                    patients = initialPatients;
-                }
-            } else {
-                patients = initialPatients;
-                saveToStorage();
-            }
-            renderList();
-        });
-
+        window.getInsurancePatients = () => patients;
+        window.setInsurancePatients = (rows) => { patients = rows; renderList(); };
+        window.addEventListener('DOMContentLoaded', () => { patients = []; renderList(); });
         function saveToStorage() {
-            localStorage.setItem('insurance_patients_db', JSON.stringify(patients));
+            if (!window.insuranceAccess?.ready) return;
+            window.insuranceAccess.save().catch(e => { alert('تعذر حفظ التغييرات: ' + e.message); });
         }
 
         function formatDateToDisplay(isoDateStr) {
@@ -628,6 +618,7 @@
         }
 
         function promptDelete(index, event) {
+            if (!window.insuranceAccess?.isAdmin()) return;
             event.stopPropagation();
             deleteTargetIndex = index;
             const p = patients[index];
@@ -640,15 +631,12 @@
             document.getElementById('deleteConfirmModal').classList.add('hidden');
         }
 
-        function executeDelete() {
-            if (deleteTargetIndex !== null && patients[deleteTargetIndex]) {
-                const deletedName = getTwoPartName(patients[deleteTargetIndex].name);
-                patients.splice(deleteTargetIndex, 1);
-                saveToStorage();
-                closeDeleteModal();
-                renderList();
-                showToast(`تم حذف وصفة (${deletedName}) بنجاح`);
-            }
+        async function executeDelete() {
+            if (!window.insuranceAccess?.isAdmin()) { alert('الحذف متاح للأدمن فقط'); return; }
+            const p = patients[deleteTargetIndex];
+            if (!p) return;
+            try { await window.insuranceAccess.remove(p); closeDeleteModal(); showToast('تم حذف الوصفة'); }
+            catch(e) { alert('تعذر الحذف: ' + e.message); }
         }
 
         function filterStatus(status) {
@@ -795,5 +783,20 @@
             }, 3000);
         }
     </script>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import {getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import {getFirestore,doc,getDoc,setDoc,collection,query,where,onSnapshot,updateDoc,deleteDoc,serverTimestamp,writeBatch} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+const config={apiKey:"AIzaSyAmb5h7CMWubQkUSULiL4xekXWtuDg4YYU",authDomain:"insurance-dashboard-8ac4a.firebaseapp.com",projectId:"insurance-dashboard-8ac4a",storageBucket:"insurance-dashboard-8ac4a.firebasestorage.app",messagingSenderId:"944599057012",appId:"1:944599057012:web:ec93711b50e1d6a6708721"};
+const app=initializeApp(config),auth=getAuth(app),db=getFirestore(app);
+const gate=document.getElementById("accessGate"),msg=document.getElementById("accessMessage"),login=document.getElementById("googleLogin"),logout=document.getElementById("googleLogout"),reqPanel=document.getElementById("adminRequests"),reqItems=document.getElementById("requestItems");
+let user=null,role=null,unsubPatients=null,unsubRequests=null;
+window.insuranceAccess={ready:false,isAdmin:()=>role==="admin",save:async()=>{if(!user||!role)throw Error("غير مصرح");const batch=writeBatch(db);for(const p of window.getInsurancePatients()){const id=p.__docId||crypto.randomUUID();p.__docId=id;const {__docId,...data}=p;batch.set(doc(db,"prescriptions",id),{...data,updatedBy:user.uid,updatedAt:serverTimestamp()},{merge:true});}await batch.commit();},remove:async(p)=>{if(role!=="admin")throw Error("الحذف للأدمن فقط");if(!p.__docId)throw Error("وصفة غير محفوظة");await deleteDoc(doc(db,"prescriptions",p.__docId));}};
+login.onclick=()=>signInWithPopup(auth,new GoogleAuthProvider()).catch(e=>msg.textContent="تعذر تسجيل الدخول: "+e.message);
+logout.onclick=()=>signOut(auth);
+function stop(){unsubPatients?.();unsubRequests?.();unsubPatients=unsubRequests=null;window.insuranceAccess.ready=false;gate.style.display="flex";reqPanel.style.display="none";}
+function requests(){reqPanel.style.display="block";unsubRequests=onSnapshot(query(collection(db,"users"),where("status","==","pending")),snap=>{reqItems.replaceChildren();snap.forEach(d=>{const item=document.createElement("div");item.style="padding:10px;border-bottom:1px solid #ddd";const label=document.createElement("span");label.textContent=(d.data().name||"") + " — " +(d.data().email||"");const btn=document.createElement("button");btn.textContent="موافقة";btn.style="margin:8px;color:#0f766e;font-weight:bold";btn.onclick=async()=>{try{await updateDoc(d.ref,{status:"approved",role:"pharmacist",approvedBy:user.uid,approvedAt:serverTimestamp()});}catch(e){alert(e.message)}};item.append(label,btn);reqItems.append(item);});},e=>console.error(e));}
+onAuthStateChanged(auth,async u=>{stop();user=u;role=null;login.style.display=u?"none":"block";logout.style.display=u?"block":"none";if(!u){msg.textContent="سجّل دخولك بحساب Google";return;}msg.textContent="جاري التحقق من صلاحيات الدخول...";try{const ref=doc(db,"users",u.uid);let snap=await getDoc(ref);if(!snap.exists()){await setDoc(ref,{email:u.email||"",name:u.displayName||"",status:"pending",role:"pharmacist",requestedAt:serverTimestamp()});msg.textContent="تم إرسال طلب الانضمام. انتظر موافقة الأدمن.";return;}const data=snap.data();if(data.status!=="approved"){msg.textContent=data.status==="rejected"?"تم رفض طلب الدخول":"طلبك قيد موافقة الأدمن";return;}role=data.role==="admin"?"admin":"pharmacist";window.insuranceAccess.ready=true;unsubPatients=onSnapshot(collection(db,"prescriptions"),snapshot=>{const data=snapshot.docs.map(d=>({...d.data(),__docId:d.id}));window.setInsurancePatients(data);gate.style.display="none";},e=>{gate.style.display="flex";msg.textContent="تعذر تحميل الوصفات: "+e.message;});if(role==="admin")requests();}catch(e){msg.textContent="تعذر التحقق من الحساب: "+e.message;}});
+</script>
 </body>
 </html>
