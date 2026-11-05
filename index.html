@@ -1560,34 +1560,72 @@ html[data-theme="light"] .dispense-date-picker-shell{color:#087e84;border-left-c
 
         function exportToExcel() {
             if (typeof XLSX === 'undefined') {
-                alert('تعذر تحميل مكتبة Excel. تحقق من اتصال الإنترنت وحاول مرة أخرى.');
+                alert(langText('تعذر تحميل مكتبة Excel. تحقق من اتصال الإنترنت وحاول مرة أخرى.','Unable to load Excel library. Check your connection and try again.'));
                 return;
             }
+            // Export exactly the currently filtered prescriptions, grouped by prescription.
             const filteredPatients = getFilteredAndSortedItems();
-            const rows = [];
-            filteredPatients.forEach(({patient,status:ps}) => {
-                const dueISO = ps.dueDateISO || '';
+            if (!filteredPatients.length) {
+                alert(langText('لا توجد وصفات مطابقة للتصدير.','No matching prescriptions to export.'));
+                return;
+            }
+            const headers = ['رقم الهوية','رقم الجوال','الأصناف','الكمية','تاريخ الاستحقاق','الملاحظات'];
+            const data = [headers];
+            const groupFirstRows = [];
+            const separatorRows = [];
+            let exportedItems = 0;
+
+            filteredPatients.forEach(({patient,status:ps},groupIndex) => {
                 const meds = Array.isArray(patient.meds) ? patient.meds : [];
                 const quantities = Array.isArray(patient.medQuantities) ? patient.medQuantities : [];
-                (meds.length ? meds : ['']).forEach((med, i) => rows.push({
-                    'رقم الهوية': String(patient.id || ''),
-                    'رقم الجوال': String(patient.phone || ''),
-                    'الأصناف': String(med || ''),
-                    'الكمية': quantities[i] === undefined ? '' : String(quantities[i]),
-                    'تاريخ الاستحقاق': dueISO,
-                    'الملاحظات': String(patient.remarks || '')
-                }));
+                // The six customer/prescription fields are only populated on the first item row.
+                const firstExcelRow = data.length + 1;
+                groupFirstRows.push(firstExcelRow);
+                (meds.length ? meds : ['']).forEach((med,i) => {
+                    data.push([
+                        i===0 ? String(patient.id||'') : '',
+                        i===0 ? String(patient.phone||'') : '',
+                        String(med||''),
+                        quantities[i] == null ? '' : String(quantities[i]),
+                        i===0 ? String(ps.dueDateISO||'') : '',
+                        i===0 ? String(patient.remarks||'') : ''
+                    ]);
+                    if(med)exportedItems++;
+                });
+                if(groupIndex<filteredPatients.length-1){
+                    // A short merged horizontal rule is visible even in SheetJS Community Edition
+                    // (which may omit Excel cell fill/border styling on export).
+                    separatorRows.push(data.length+1);
+                    data.push(['━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━','','','','','']);
+                    data.push(['','','','','','']);
+                }
             });
-            if (!rows.length) { alert(document.documentElement.lang==='en'?'No matching prescriptions to export.':'لا توجد وصفات مطابقة للتصدير.'); return; }
-            const worksheet = XLSX.utils.json_to_sheet(rows, {header: ['رقم الهوية','رقم الجوال','الأصناف','الكمية','تاريخ الاستحقاق','الملاحظات']});
+
+            const worksheet = XLSX.utils.aoa_to_sheet(data);
             worksheet['!cols'] = [{wch:19},{wch:18},{wch:48},{wch:12},{wch:20},{wch:48}];
-            worksheet['!autofilter'] = {ref: worksheet['!ref']};
-            // Keep IDs and phone numbers as text so Excel never strips leading zeroes.
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, 'الوصفات');
-            const filename = `وصفات_التأمين_${todayInRiyadh()}.xlsx`;
-            XLSX.writeFile(workbook, filename);
-            showToast(`تم تجهيز ملف Excel (${rows.length} صنف)`);
+            worksheet['!rows'] = data.map((_,i) => ({hpt: separatorRows.includes(i+1) ? 12 : (i===0?28:23)}));
+            worksheet['!merges'] = separatorRows.map(r => ({s:{r:r-1,c:0},e:{r:r-1,c:5}}));
+            // Add modest cell styles for versions of the exporter that support them.
+            const headerStyle={font:{bold:true,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'17324D'}},alignment:{vertical:'center'}};
+            headers.forEach((_,c) => {
+                const cell=worksheet[XLSX.utils.encode_cell({r:0,c})];
+                if(cell)cell.s=headerStyle;
+            });
+            groupFirstRows.forEach(rowNum => {
+                for(let c=0;c<headers.length;c++){
+                    const cell=worksheet[XLSX.utils.encode_cell({r:rowNum-1,c})];
+                    if(cell)cell.s={fill:{fgColor:{rgb:'E8F3F7'}},font:{bold:c===0||c===1},alignment:{vertical:'center'}};
+                }
+            });
+            separatorRows.forEach(rowNum => {
+                const cell=worksheet[XLSX.utils.encode_cell({r:rowNum-1,c:0})];
+                if(cell)cell.s={font:{color:{rgb:'1D7E82'},sz:10},alignment:{horizontal:'center',vertical:'center'}};
+            });
+            // National ID, phone and quantities remain text (including leading zeros).
+            const workbook=XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook,worksheet,'الوصفات');
+            XLSX.writeFile(workbook,`وصفات_التأمين_${todayInRiyadh()}.xlsx`);
+            showToast(langText(`تم تجهيز ملف Excel (${filteredPatients.length} وصفة، ${exportedItems} صنف)`,`Excel ready (${filteredPatients.length} prescriptions, ${exportedItems} items)`));
         }
 
         function showToast(msg) {
