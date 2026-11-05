@@ -80,10 +80,41 @@
         .theme-toggle:active {transform:scale(.94)}
         .insurer-mark {display:inline-flex;align-items:center;justify-content:center;min-width:25px;height:22px;border-radius:7px;padding:0 4px;margin-inline-start:5px;font-size:9px;font-weight:900;letter-spacing:-.4px;vertical-align:middle;direction:ltr;border:1px solid #ffffff30}
         .insurer-mark.bupa {background:#0875bc;color:white}.insurer-mark.tawuniya {background:#ecf7ff;color:#006e91}.insurer-mark.rajhi {background:#164a98;color:white}.insurer-mark.medgulf {background:#076f93;color:white}
+
+        /* Actual insurer brand images; shared between cards and custom dropdowns. */
+        .insurer-badge-inner {display:inline-flex;align-items:center;gap:8px;max-width:100%}
+        .insurer-logo {display:block;width:45px;height:30px;object-fit:contain;flex-shrink:0;background:#f8fafc;border:1px solid #cbd5e1;border-radius:7px;padding:3px}
+        .insurer-select-native {position:absolute!important;opacity:0!important;pointer-events:none!important;width:1px!important;height:1px!important;overflow:hidden!important}
+        .insurer-select-wrap {position:relative;min-width:0;flex:1}
+        .insurer-select-trigger {width:100%;min-height:42px;display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid #344a61;border-radius:12px;padding:5px 10px;background:#0d1c2d;color:#e8f2fa;font:inherit;text-align:start}
+        html[data-theme="light"] .insurer-select-trigger {background:#f8fafc;color:#334155;border-color:#cbd5e1}
+        .insurer-select-menu {position:absolute;z-index:150;top:calc(100% + 5px);left:0;right:0;background:#122236;border:1px solid #34546b;border-radius:13px;padding:5px;box-shadow:0 15px 40px #0006;max-height:290px;overflow:auto}
+        html[data-theme="light"] .insurer-select-menu {background:white;border-color:#cbd5e1}
+        .insurer-select-menu[hidden] {display:none!important}
+        .insurer-select-option {width:100%;display:flex;align-items:center;gap:10px;text-align:start;padding:8px;border-radius:9px;color:inherit;font:inherit}
+        .insurer-select-option:hover,.insurer-select-option:focus {background:#155e5a;color:white;outline:none}
+        .insurer-select-chevron {font-size:12px;color:#5eead4;flex-shrink:0}
+        
         select {transition:border-color .18s,box-shadow .18s} select:focus {border-color:#14b8a6 !important;box-shadow:0 0 0 3px #14b8a622;outline:none}
         #exportModal > div, #prescriptionModal > div, #deleteConfirmModal > div {animation:modalAppear .19s ease-out}
         @keyframes modalAppear {from{opacity:.65;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
         @media(prefers-reduced-motion:reduce){#exportModal > div,#prescriptionModal > div,#deleteConfirmModal > div{animation:none}}
+
+        /* Mobile visual refinement */
+        .field-label{display:block;font-size:11px;font-weight:700;margin-bottom:5px;color:#8fa7bd}
+        .advanced-panel{transition:border-color .2s ease}
+        html[data-theme="dark"] #alertBanner{background:#3a1d2d!important;border-color:#bd536d!important;color:#ffe3eb!important}
+        html[data-theme="dark"] #alertBannerText{color:#ffe3eb!important}
+        html[data-theme="dark"] #dueCount{color:#ff597f!important}
+        #prescriptionsContainer [id^="details-"] ul li{border-bottom:1px solid #ffffff12;padding:5px 0}
+        #prescriptionsContainer [id^="details-"] ul li strong{min-width:26px;text-align:center;color:#5eead4}
+        #teamAdminTools{max-width:210px!important}
+        #teamAdminTools>div{width:auto!important;padding:5px!important;border-radius:12px!important}
+        #teamToggle{font-size:11px!important;padding:8px 11px!important;text-align:center!important}
+        @media(max-width:600px){main{margin-top:12px!important}#prescriptionsContainer>div{border-radius:18px!important}#alertBanner{gap:10px}#alertBannerText{line-height:1.65}#advancedFields input,#advancedFields select{min-height:39px}}
+        html[dir="ltr"] .text-right{text-align:left!important}
+        html[dir="ltr"] .pr-9{padding-right:.75rem!important;padding-left:2.25rem!important}
+        html[dir="ltr"] #searchInput+svg{right:auto!important;left:.75rem!important}
     </style>
 </head>
 <body class="text-slate-800 pb-12 antialiased select-none">
@@ -110,6 +141,7 @@
 
             <!-- Actions -->
             <div class="flex items-center gap-2">
+                <button id="langToggle" type="button" class="theme-toggle !text-xs !font-bold" onclick="toggleLanguage()" title="Language">EN</button>
                 <button id="themeToggle" type="button" class="theme-toggle" onclick="toggleTheme()" aria-label="تغيير المظهر" title="تغيير المظهر">☀</button>
                 <button onclick="openExportModal()" title="تصدير الوصفات إلى Excel" class="w-9 h-9 rounded-xl bg-slate-700/60 hover:bg-slate-700 border border-slate-600 flex items-center justify-center text-slate-200 transition-all">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
@@ -177,6 +209,20 @@
                 </div>
             </div>
         </div>
+
+        <!-- Advanced independent search filters -->
+        <section class="advanced-panel bg-white border border-slate-200 rounded-2xl p-3 shadow-sm">
+          <button type="button" id="advancedToggle" onclick="toggleAdvancedFilters()" class="w-full flex items-center justify-between text-xs font-bold text-teal-500" aria-expanded="false"><span data-i18n="advanced">⚙ فلاتر متقدمة</span><span id="advancedChevron">⌄</span></button>
+          <div id="advancedFields" class="hidden mt-3 space-y-3">
+            <div class="grid grid-cols-2 gap-2">
+              <div><label class="field-label" data-i18n="period">الفترة حسب الاستحقاق</label><select id="advPeriod" onchange="updateAdvancedFields();applyFilters()" class="w-full border rounded-xl p-2 text-xs"><option value="all" data-i18n="allDates">كل التواريخ</option><option value="month" data-i18n="specificMonth">شهر معين</option><option value="range" data-i18n="dateRange">من تاريخ إلى تاريخ</option></select></div>
+              <div><label class="field-label" data-i18n="status">الحالة</label><select id="advStatus" onchange="applyFilters()" class="w-full border rounded-xl p-2 text-xs"><option value="all" data-i18n="all">الكل</option><option value="due" data-i18n="due">المستحقة</option><option value="valid" data-i18n="notDue">لم يحن موعدها</option></select></div>
+            </div>
+            <div id="advMonthWrap" class="hidden"><label class="field-label" data-i18n="month">الشهر</label><input id="advMonth" type="month" onchange="applyFilters()" class="w-full border rounded-xl p-2 text-xs"></div>
+            <div id="advDatesWrap" class="hidden grid-cols-2 gap-2"><div><label class="field-label" data-i18n="from">من تاريخ</label><input id="advFrom" type="date" onchange="applyFilters()" class="w-full border rounded-xl p-2 text-xs"></div><div><label class="field-label" data-i18n="to">إلى تاريخ</label><input id="advTo" type="date" onchange="applyFilters()" class="w-full border rounded-xl p-2 text-xs"></div></div>
+            <button type="button" onclick="resetAdvancedFilters()" class="text-xs text-teal-500 underline" data-i18n="resetFilters">إعادة ضبط الفلاتر</button>
+          </div>
+        </section>
 
         <!-- Prescriptions Container -->
         <div id="prescriptionsContainer" class="space-y-2"></div>
@@ -249,11 +295,7 @@
                     <input type="text" id="patientRemarks" placeholder="أي ملاحظات للمتابعة الصيدلانية" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-sky-500">
                 </div>
 
-                <div>
-                    <label class="block text-slate-700 font-bold mb-1">قائمة الأدوية والمستلزمات *</label>
-                    <textarea id="medicationsList" rows="3" required placeholder="مثال:&#10;Glucophage 500mg | 2&#10;Januvia 100mg | 1" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:outline-none focus:border-sky-500 leading-relaxed"></textarea>
-                    <p class="text-[10px] text-slate-500 mt-1">كل صنف في سطر، واكتب الكمية بعد | (مثال: Glucophage 500mg | 2). الكمية اختيارية.</p>
-                </div>
+                <div><label class="block text-slate-700 font-bold mb-1" data-i18n="meds">قائمة الأدوية والمستلزمات *</label><div id="medicationRows" class="space-y-2"></div><button type="button" onclick="addMedicationRow()" class="mt-2 px-3 py-2 rounded-xl border border-teal-500 text-teal-500 text-xs font-bold" data-i18n="addItem">+ إضافة صنف</button><p class="text-[10px] text-slate-500 mt-1" data-i18n="quantityOptional">الكمية اختيارية؛ وعند إدخالها يجب أن تكون رقمًا صحيحًا أكبر من صفر.</p></div>
 
                 <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
                     <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold transition-colors">إلغاء</button>
@@ -282,8 +324,9 @@
     <div id="exportModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden items-center justify-center p-3" role="dialog" aria-modal="true" aria-label="تصدير الوصفات">
       <div class="bg-white rounded-2xl shadow-xl p-5 w-full max-w-md space-y-4">
         <div class="flex items-center justify-between"><h3 class="font-bold text-slate-900">تصدير الوصفات إلى Excel</h3><button type="button" onclick="closeExportModal()" aria-label="إغلاق" class="text-slate-500 text-xl">×</button></div>
-        <p class="text-xs text-slate-500">التصفية حسب تاريخ الاستحقاق. يتم تطبيق شركة التأمين المحددة حاليًا، مع تجاهل فلتر حالة الصرف.</p>
-        <label class="block text-xs font-bold">الفترة</label>
+        <p class="text-xs text-slate-500">اختر أي فلاتر تريدها بشكل مستقل؛ كل الخيارات افتراضيًا تشمل جميع الوصفات.</p>
+        <div class="grid grid-cols-2 gap-2"><div><label class="field-label" data-i18n="insurance">شركة التأمين</label><select id="exportCompany" class="w-full border rounded-xl p-2 text-sm"><option value="">كل الشركات</option><option value="تكافل الراجحي">تكافل الراجحي</option><option value="بوبا">بوبا</option><option value="التعاونية">التعاونية</option><option value="ميدغلف">ميدغلف</option></select></div><div><label class="field-label" data-i18n="status">الحالة</label><select id="exportStatus" class="w-full border rounded-xl p-2 text-sm"><option value="all" data-i18n="all">الكل</option><option value="due" data-i18n="due">المستحقة</option><option value="valid" data-i18n="notDue">لم يحن موعدها</option></select></div></div>
+        <label class="block text-xs font-bold" data-i18n="period">الفترة</label>
         <select id="exportRangeMode" onchange="updateExportRangeFields()" class="w-full border rounded-xl p-2 text-sm">
           <option value="all">كل التواريخ</option><option value="month">شهر معين</option><option value="range">من تاريخ إلى تاريخ</option>
         </select>
@@ -300,6 +343,39 @@
     </div>
 
     <script>
+        let currentLanguage='ar';
+        const dictionary={
+          'متابعة صرف وصفات التأمين الدورية':'Recurring insurance prescriptions','إضافة وصفة جديدة':'Add prescription','إجمالي الوصفات':'Total prescriptions','متأخرة ومستحقة':'Due / overdue','لم يحن موعدها':'Not yet due','كل الشركات':'All insurers','تكافل الراجحي':'Al Rajhi Takaful','بوبا':'Bupa Arabia','التعاونية':'Tawuniya','ميدغلف':'Medgulf','الكل':'All','المستحقة':'Due','عرض':'View','إدارة الفريق':'Team management','اسم العميل *':'Patient name *','رقم الهوية / الإقامة *':'Patient ID *','شركة التأمين *':'Insurer *','رقم الجوال':'Phone number','الدورة التأمينية *':'Insurance cycle *','تاريخ آخر صرف *':'Last dispense date *','الملاحظات':'Remarks','قائمة الأدوية والمستلزمات *':'Medicines and supplies *','حفظ الوصفة':'Save prescription','إلغاء':'Cancel','تصدير الوصفات إلى Excel':'Export prescriptions to Excel','الفترة':'Period','كل التواريخ':'All dates','شهر معين':'Specific month','من تاريخ إلى تاريخ':'Custom range','الشهر':'Month','من تاريخ':'From','إلى تاريخ':'To','تحميل Excel':'Download Excel','إضافة صنف':'Add item','الكمية':'Quantity','الوصف':'Description','تعديل بيانات الوصفة':'Edit prescription','بيانات الوصفة':'Prescription details','بحث':'Search','فلاتر متقدمة':'Advanced filters','الحالة':'Status','إعادة ضبط الفلاتر':'Reset filters','صورة الوصفة':'Prescription image','اختياري':'Optional','رفع صورة':'Upload image','تصوير':'Camera','استبدال الصورة':'Replace image','عرض صورة الوصفة':'View prescription image','لم تُرفق صورة':'No image attached','الاسم بالكامل':'Full name','تاريخ آخر صرف':'Last dispensed','تاريخ الاستحقاق':'Due date','الأدوية والمستلزمات المقررة للدورة:':'Medicines and supplies:','تم صرف دورة جديدة اليوم':'Dispensed new cycle today','حفظ الملاحظة':'Save note','ملاحظة الصيدلي:':'Pharmacist note:','تأكيد حذف الوصفة':'Confirm deletion','نعم، احذف':'Delete','طلبات الانضمام':'Join requests','84 يوم':'84 days','28 يوم':'28 days'};
+        function langText(ar,en){return currentLanguage==='en'?en:ar}
+        function translateString(value){return currentLanguage==='en'?(dictionary[value]||value):value}
+        function toggleLanguage(){applyLanguage(currentLanguage==='ar'?'en':'ar')}
+        function applyLanguage(lang){
+          currentLanguage=lang;document.documentElement.lang=lang;document.documentElement.dir=lang==='en'?'ltr':'rtl';
+          const b=document.getElementById('langToggle');if(b)b.textContent=lang==='en'?'AR':'EN';
+          try{localStorage.setItem('insurance-language',lang)}catch(e){}
+          document.querySelectorAll('[data-ar-original]').forEach(el=>{el.textContent=lang==='en'?translateString(el.dataset.arOriginal):el.dataset.arOriginal});
+          document.querySelectorAll('button, label, h1, h2, h3, h4, p, option, [data-i18n]').forEach(el=>{
+            if(el.children.length && !el.matches('option,[data-i18n]'))return;
+            if(!el.dataset.arOriginal)el.dataset.arOriginal=el.textContent.trim();
+            if(el.dataset.i18n){const names={advanced:'فلاتر متقدمة',period:'الفترة',allDates:'كل التواريخ',specificMonth:'شهر معين',dateRange:'من تاريخ إلى تاريخ',status:'الحالة',all:'الكل',due:'المستحقة',notDue:'لم يحن موعدها',month:'الشهر',from:'من تاريخ',to:'إلى تاريخ',resetFilters:'إعادة ضبط الفلاتر',insurance:'شركة التأمين *',meds:'قائمة الأدوية والمستلزمات *',addItem:'إضافة صنف',quantityOptional:'الكمية اختيارية؛ وعند إدخالها يجب أن تكون رقمًا صحيحًا أكبر من صفر.',camera:'تصوير'};const key=names[el.dataset.i18n];if(key)el.dataset.arOriginal=key;}
+            el.textContent=lang==='en'?(el.dataset.i18n==='quantityOptional'?'Quantity is optional; if entered it must be a positive whole number.':translateString(el.dataset.arOriginal)):el.dataset.arOriginal;
+          });
+          const search=document.getElementById('searchInput');if(search)search.placeholder=langText('ابحث برقم الهوية / الإقامة','Search by patient ID');
+          document.querySelectorAll('.med-name').forEach(el=>el.placeholder=langText('وصف الصنف','Item description'));
+          document.querySelectorAll('.med-qty').forEach(el=>el.placeholder=langText('الكمية','Qty'));
+          if(typeof renderList==='function')renderList();
+        }
+        function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+        function addMedicationRow(name='',qty=''){
+          const row=document.createElement('div');row.className='med-row flex items-center gap-2';
+          const description=document.createElement('input');description.type='text';description.className='med-name min-w-0 flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs';description.placeholder=langText('وصف الصنف','Item description');description.value=name;
+          const quantity=document.createElement('input');quantity.type='number';quantity.min='1';quantity.step='1';quantity.inputMode='numeric';quantity.className='med-qty w-16 bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 text-xs';quantity.placeholder=langText('الكمية','Qty');quantity.value=qty??'';
+          const remove=document.createElement('button');remove.type='button';remove.className='text-rose-500 text-xl px-1';remove.textContent='×';remove.title=langText('حذف الصنف','Remove item');remove.onclick=()=>{row.remove();if(!document.querySelector('.med-row'))addMedicationRow()};
+          row.append(description,quantity,remove);document.getElementById('medicationRows').append(row);
+        }
+        function toggleAdvancedFilters(){const fields=document.getElementById('advancedFields');const open=fields.classList.toggle('hidden')===false;document.getElementById('advancedToggle').setAttribute('aria-expanded',String(open));document.getElementById('advancedChevron').textContent=open?'⌃':'⌄'}
+        function updateAdvancedFields(){const mode=document.getElementById('advPeriod').value;document.getElementById('advMonthWrap').classList.toggle('hidden',mode!=='month');document.getElementById('advDatesWrap').classList.toggle('hidden',mode!=='range');document.getElementById('advDatesWrap').classList.toggle('grid',mode==='range')}
+        function resetAdvancedFilters(){document.getElementById('advPeriod').value='all';document.getElementById('advStatus').value='all';document.getElementById('advMonth').value='';document.getElementById('advFrom').value='';document.getElementById('advTo').value='';updateAdvancedFields();applyFilters()}
         function applyTheme(theme) {
             document.documentElement.dataset.theme=theme;
             const b=document.getElementById('themeToggle');
@@ -475,7 +551,7 @@
 
         function getPrescriptionStatus(dispenseDateStr, cycleDays) {
             const now = new Date(todayInRiyadh() + 'T00:00:00Z');
-            const dispenseDate = new Date(dispenseDateStr + 'T00:00:00Z');
+            const dispenseDate = new Date((dispenseDateStr || todayInRiyadh()) + 'T00:00:00Z');
             const dueDate = new Date(dispenseDate);
             dueDate.setUTCDate(dueDate.getUTCDate() + parseInt(cycleDays, 10));
             const diffDays = Math.round((dueDate.getTime() - now.getTime()) / 86400000);
@@ -541,12 +617,20 @@
             return items.filter(({ patient, status }) => {
                 const matchSearch = !searchVal || (patient.id && patient.id.toLowerCase().includes(searchVal));
                 const matchComp = !compVal || patient.company === compVal;
+                const period=document.getElementById('advPeriod')?.value||'all';
+                const dueISO=status.dueDateISO||'';
+                const month=document.getElementById('advMonth')?.value||'';
+                const from=document.getElementById('advFrom')?.value||'';
+                const to=document.getElementById('advTo')?.value||'';
+                const matchPeriod=period==='all'||(period==='month'&&(!month||dueISO.startsWith(month)))||(period==='range'&&(!from||dueISO>=from)&&(!to||dueISO<=to));
+                const advancedStatus=document.getElementById('advStatus')?.value||'all';
+                const matchAdvanced=advancedStatus==='all'||(advancedStatus==='due'?status.isDue:!status.isDue);
 
                 let matchStatus = true;
                 if (currentStatusFilter === 'due') matchStatus = status.isDue;
                 if (currentStatusFilter === 'valid') matchStatus = !status.isDue;
 
-                return matchSearch && matchComp && matchStatus;
+                return matchSearch && matchComp && matchStatus && matchPeriod && matchAdvanced;
             });
         }
 
@@ -586,14 +670,16 @@
             document.getElementById('emptyState').classList.toggle('hidden', filteredItems.length > 0);
         }
 
+        const INSURER_LOGOS = {
+            'بوبا': 'https://companieslogo.com/img/orig/8210.SR-b6db68cc.png?t=1720244490',
+            'التعاونية': 'https://companieslogo.com/img/orig/8010.SR_BIG-79d97bfc.png?t=1720244490',
+            'تكافل الراجحي': 'https://companieslogo.com/img/orig/8230.SR_BIG-3027b54e.png?t=1720244490',
+            'ميدغلف': 'https://companieslogo.com/img/orig/8030.SR_BIG-32d46cc2.png?t=1720244490'
+        };
         function insurerBadge(company) {
-            const brands = {
-                'بوبا': ['bupa','bupa'], 'التعاونية':['tawuniya','T'],
-                'تكافل الراجحي':['rajhi','AR'], 'ميدغلف':['medgulf','medgulf']
-            };
-            const brand=brands[company];
-            const safe=String(company||'تأمين').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-            return brand ? `<span class="insurer-mark ${brand[0]}" aria-hidden="true">${brand[1]}</span>${safe}` : safe;
+            const safe = escapeHtml(currentLanguage==='en'?(dictionary[company]||company):(company||'تأمين'));
+            const src = INSURER_LOGOS[company];
+            return `<span class="insurer-badge-inner">${src?`<img class="insurer-logo" src="${src}" alt="" loading="lazy" onerror="this.style.display='none'">`:''}<span>${safe}</span></span>`;
         }
 
         function createCustomerCard(patient, index, status) {
@@ -601,22 +687,22 @@
             card.className = `bg-white rounded-2xl border border-slate-200/90 hover:border-slate-300 shadow-2xs transition-all overflow-hidden`;
 
             const twoName = getTwoPartName(patient.name);
-            const medsListHtml = (patient.meds || []).map(m => `<li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span><span>${m}</span></li>`).join('');
+            const medsListHtml = (patient.meds || []).map((m,i) => `<li class="flex items-center justify-between gap-2"><span>${escapeHtml(m)}</span><strong>${escapeHtml((patient.medQuantities||[])[i]||'')}</strong></li>`).join('');
             const displayDispenseDate = formatDateToDisplay(patient.dispenseDate);
 
             card.innerHTML = `
-                <div onclick="toggleCard(${index})" class="p-3.5 sm:p-4 min-h-[82px] cursor-pointer flex items-center justify-between gap-2.5">
+                <div onclick="toggleCard(${index})" class="p-3.5 sm:p-4 min-h-[82px] cursor-pointer flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
                     <div class="text-right flex-1 min-w-0 pl-2">
-                        <h3 class="text-xs sm:text-sm font-bold text-slate-900 truncate">${twoName}</h3>
-                        <p class="text-[11px] text-slate-700 font-mono font-extrabold mt-1">الهوية: ${patient.id}</p>
+                        <h3 class="text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(twoName)}</h3>
+                        <p class="text-[11px] text-slate-700 font-mono font-extrabold mt-1">${langText('الهوية','ID')}: ${escapeHtml(patient.id)}</p>
                     </div>
 
-                    <div class="flex items-center gap-2 flex-shrink-0">
+                    <div class="flex items-center justify-between sm:justify-start gap-2 flex-shrink-0">
                         <span class="text-[11px] font-bold text-teal-800 bg-teal-50 border border-teal-200 px-2 py-1 rounded-xl">
                             ${insurerBadge(patient.company)}
                         </span>
                         <span class="text-[11px] px-2.5 py-1 rounded-xl border font-bold ${status.cssBadge}">
-                            ${status.text}
+                            ${currentLanguage==='en'?(status.state==='overdue'?`Overdue (${Math.abs(status.diffDays)} days)`:status.state==='today'?'Due today':`${status.diffDays} days left`):status.text}
                         </span>
                         <div id="chevron-${index}" class="w-7 h-7 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 transition-transform duration-200">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -629,39 +715,50 @@
                         <div class="flex items-center justify-between mb-1.5">
                             <span class="text-xs font-bold text-amber-900 flex items-center gap-1.5">
                                 <svg class="w-3.5 h-3.5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                <span>ملاحظة الصيدلي:</span>
+                                <span>${langText('ملاحظة الصيدلي:','Pharmacist note:')}</span>
                             </span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <input type="text" id="remark-input-${index}" value="${patient.remarks || ''}" placeholder="اكتب ملاحظة للمتابعة هنا..." class="flex-1 bg-white/90 border border-amber-200 rounded-xl px-2.5 py-1.5 text-xs text-amber-950 focus:outline-none focus:border-amber-400">
+                            <input type="text" id="remark-input-${index}" value="${escapeHtml(patient.remarks || '')}" placeholder="اكتب ملاحظة للمتابعة هنا..." class="flex-1 bg-white/90 border border-amber-200 rounded-xl px-2.5 py-1.5 text-xs text-amber-950 focus:outline-none focus:border-amber-400">
                             <button type="button" onclick="saveDirectRemark(${index}, event)" class="bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-bold text-xs px-3 py-1.5 rounded-xl shadow-xs transition-all flex items-center gap-1 flex-shrink-0">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
-                                <span>حفظ الملاحظة</span>
+                                <span>${langText('حفظ الملاحظة','Save note')}</span>
                             </button>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2 text-xs">
                         <div class="bg-white p-2.5 rounded-xl border border-slate-200">
-                            <span class="text-[10px] text-slate-400 block font-semibold">الاسم بالكامل</span>
-                            <span class="font-bold text-slate-800">${patient.name}</span>
+                            <span class="text-[10px] text-slate-400 block font-semibold">${langText('الاسم بالكامل','Full name')}</span>
+                            <span class="font-bold text-slate-800">${escapeHtml(patient.name)}</span>
                         </div>
                         <div class="bg-white p-2.5 rounded-xl border border-slate-200">
-                            <span class="text-[10px] text-slate-400 block font-semibold">رقم الجوال</span>
-                            <span class="font-bold text-slate-800 font-mono">${patient.phone || 'غير مسجل'}</span>
+                            <span class="text-[10px] text-slate-400 block font-semibold">${langText('رقم الجوال','Phone number')}</span>
+                            <span class="font-bold text-slate-800 font-mono">${escapeHtml(patient.phone || langText('غير مسجل','Not provided'))}</span>
                         </div>
                         <div class="bg-white p-2.5 rounded-xl border border-slate-200">
-                            <span class="text-[10px] text-slate-400 block font-semibold">تاريخ آخر صرف</span>
+                            <span class="text-[10px] text-slate-400 block font-semibold">${langText('تاريخ آخر صرف','Last dispensed')}</span>
                             <span class="font-bold text-slate-800 font-mono">${displayDispenseDate}</span>
                         </div>
                         <div class="bg-white p-2.5 rounded-xl border border-slate-200">
-                            <span class="text-[10px] text-slate-400 block font-semibold">تاريخ الاستحقاق</span>
+                            <span class="text-[10px] text-slate-400 block font-semibold">${langText('تاريخ الاستحقاق','Due date')}</span>
                             <span class="font-bold text-emerald-700 font-mono">${status.dueDate}</span>
                         </div>
                     </div>
 
+                    <div class="bg-white p-3 rounded-2xl border border-slate-200 space-y-2">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-xs font-bold text-slate-700">صورة الوصفة <span class="font-normal text-slate-400">(اختياري)</span></span>
+                            <label class="cursor-pointer rounded-xl bg-teal-700 hover:bg-teal-600 text-white px-3 py-2 text-xs font-bold">
+                                ${patient.prescriptionImagePath ? langText('استبدال الصورة','Replace image') : langText('رفع صورة','Upload image')}
+                                <input type="file" accept="image/jpeg,image/png,image/webp" class="hidden" onchange="uploadPrescriptionImage(${index},event)">
+                            </label><label class="cursor-pointer rounded-xl border border-teal-500 text-teal-500 px-3 py-2 text-xs font-bold"><span data-i18n="camera">📷 تصوير</span><input type="file" accept="image/*" capture="environment" class="hidden" onchange="uploadPrescriptionImage(${index},event)"></label>
+                        </div>
+                        <div id="image-area-${index}" class="text-xs text-slate-500">${patient.prescriptionImagePath ? '<button type="button" class="text-teal-500 underline" onclick="viewPrescriptionImage('+index+',event)">عرض صورة الوصفة</button>' : 'لم تُرفق صورة'}</div>
+                    </div>
+
                     <div class="bg-white p-3 rounded-2xl border border-slate-200">
-                        <div class="text-xs font-bold text-slate-700 mb-1.5">الأدوية والمستلزمات المقررة للدورة:</div>
+                        <div class="text-xs font-bold text-slate-700 mb-1.5">${langText('الأدوية والمستلزمات المقررة للدورة:','Medicines and supplies:')}</div>
                         <ul class="text-xs text-slate-600 space-y-1 pr-1 font-medium">
                             ${medsListHtml}
                         </ul>
@@ -679,7 +776,7 @@
 
                         <button onclick="renewDispenseToday(${index}, event)" class="flex-1 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-bold text-xs py-2 px-3 rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            <span>تم صرف دورة جديدة اليوم</span>
+                            <span>${langText('تم صرف دورة جديدة اليوم','Dispensed new cycle today')}</span>
                         </button>
                     </div>
                 </div>
@@ -727,6 +824,46 @@
             } finally {
                 if (button?.isConnected) button.disabled = false;
             }
+        }
+
+        async function uploadPrescriptionImage(index, event) {
+            event.stopPropagation();
+            const file = event.target.files?.[0];
+            const patient = patients[index];
+            if (!file || !patient?.__docId) return;
+            if (!['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) {
+                alert('اختر صورة JPG أو PNG أو WebP بحجم لا يتجاوز 5 MB');
+                event.target.value = '';
+                return;
+            }
+            const area = document.getElementById(`image-area-${index}`);
+            if (area) area.textContent = 'جاري رفع الصورة...';
+            try {
+                await window.insuranceAccess.uploadImage(patient.__docId, file);
+                showToast('تم حفظ صورة الوصفة بنجاح');
+            } catch (error) {
+                if (area) area.textContent = 'تعذر رفع الصورة، حاول مرة أخرى';
+                alert('تعذر رفع صورة الوصفة: ' + error.message);
+            } finally { event.target.value = ''; }
+        }
+
+        async function viewPrescriptionImage(index, event) {
+            event?.stopPropagation();
+            const patient = patients[index];
+            if (!patient?.prescriptionImagePath) return;
+            try {
+                const blob = await window.insuranceAccess.readImage(patient.prescriptionImagePath);
+                const url = URL.createObjectURL(blob);
+                const win = window.open('', '_blank');
+                if (!win) { URL.revokeObjectURL(url); alert('اسمح بفتح النوافذ المنبثقة لعرض الصورة'); return; }
+                win.document.title = 'صورة الوصفة';
+                const img = win.document.createElement('img');
+                img.style.cssText = 'max-width:100%;height:auto;display:block;margin:auto';
+                img.src = url;
+                win.document.body.style.background = '#07111f';
+                win.document.body.appendChild(img);
+                win.addEventListener('pagehide', () => URL.revokeObjectURL(url), {once:true});
+            } catch (error) { alert('تعذر عرض الصورة: ' + error.message); }
         }
 
         function saveDirectRemark(index, event) {
@@ -783,6 +920,7 @@
             document.getElementById('editIndex').value = "-1";
             document.getElementById('modalTitle').querySelector('span').textContent = "إضافة وصفة جديدة";
             document.getElementById('prescriptionForm').reset();
+            document.getElementById('medicationRows').replaceChildren();addMedicationRow();
             document.getElementById('cycleDuration').value = "84";
             document.getElementById('dispenseDate').value = new Date().toISOString().split('T')[0];
             document.getElementById('prescriptionModal').classList.remove('hidden');
@@ -801,7 +939,9 @@
             document.getElementById('cycleDuration').value = p.cycle || '84';
             document.getElementById('dispenseDate').value = p.dispenseDate || '';
             document.getElementById('patientRemarks').value = p.remarks || '';
-            document.getElementById('medicationsList').value = (p.meds || []).map((m, i) => { const qty = (p.medQuantities || [])[i]; return qty === undefined || qty === null || qty === '' ? m : `${m} | ${qty}`; }).join('\n');
+            document.getElementById('medicationRows').replaceChildren();
+            (p.meds||[]).forEach((m,i)=>addMedicationRow(m,(p.medQuantities||[])[i]));
+            if(!(p.meds||[]).length)addMedicationRow();
 
             document.getElementById('prescriptionModal').classList.remove('hidden');
         }
@@ -813,13 +953,12 @@
         async function handleFormSubmit(e) {
             e.preventDefault();
             const idx = parseInt(document.getElementById('editIndex').value, 10);
-            const medicationLines = document.getElementById('medicationsList').value.split('\n').map(m => m.trim()).filter(Boolean);
-            const parsedMeds = medicationLines.map(line => {
-                const match = line.match(/^(.*?)\s*\|\s*(\d+(?:[.,]\d+)?)\s*$/);
-                return match ? {name: match[1].trim(), quantity: match[2].replace(',', '.')} : {name: line, quantity: ''};
-            });
-            const meds = parsedMeds.map(m => m.name);
-            const medQuantities = parsedMeds.map(m => m.quantity);
+            const parsedMeds=[...document.querySelectorAll('#medicationRows .med-row')].map(row=>({name:row.querySelector('.med-name').value.trim(),quantity:row.querySelector('.med-qty').value.trim()}));
+            if(parsedMeds.some(m=>m.quantity && (!/^\d+$/.test(m.quantity)||Number(m.quantity)<1))){alert(langText('الكمية يجب أن تكون رقمًا صحيحًا أكبر من صفر','Quantity must be a positive whole number'));return;}
+            const validMeds=parsedMeds.filter(m=>m.name);
+            if(!validMeds.length){alert(langText('أضف صنفًا واحدًا على الأقل','Add at least one item'));return;}
+            if(parsedMeds.some(m=>!m.name&&m.quantity)){alert(langText('اكتب وصف الصنف بجانب الكمية','Enter an item description for each quantity'));return;}
+            const meds=validMeds.map(m=>m.name),medQuantities=validMeds.map(m=>m.quantity);
 
             const newPatientData = {
                 name: document.getElementById('patientName').value.trim(),
@@ -839,7 +978,10 @@
                 alert('تعذر تحديد الوصفة الأصلية. حدّث الصفحة وحاول مرة أخرى.');
                 return;
             }
-            if (!isNew) newPatientData.__docId = oldPatient.__docId;
+            if (!isNew) {
+                newPatientData.__docId = oldPatient.__docId;
+                if (oldPatient.prescriptionImagePath) newPatientData.prescriptionImagePath = oldPatient.prescriptionImagePath;
+            }
             const submitButton = e.target.querySelector('button[type="submit"]');
             submitButton.disabled = true;
             try {
@@ -856,6 +998,7 @@
         function openExportModal() {
             const modal = document.getElementById('exportModal');
             document.getElementById('exportMonth').value = todayInRiyadh().slice(0, 7);
+            document.getElementById('exportCompany').value='';document.getElementById('exportStatus').value='all';
             updateExportRangeFields();
             modal.classList.remove('hidden'); modal.classList.add('flex');
         }
@@ -881,11 +1024,14 @@
             const to = document.getElementById('exportTo').value;
             if (mode === 'month' && !/^\d{4}-\d{2}$/.test(month)) { alert('اختر الشهر المطلوب.'); return; }
             if (mode === 'range' && (!from || !to || from > to)) { alert('حدد تاريخ بداية ونهاية صحيحين.'); return; }
-            const company = document.getElementById('companyFilter').value;
+            const company = document.getElementById('exportCompany').value;
+            const statusChoice = document.getElementById('exportStatus').value;
             const rows = [];
             patients.forEach(patient => {
                 if (company && patient.company !== company) return;
                 if (!patient.dispenseDate) return;
+                const ps = getPrescriptionStatus(patient.dispenseDate,patient.cycle||84);
+                if(statusChoice==='due'&&!ps.isDue || statusChoice==='valid'&&ps.isDue)return;
                 const dueISO = getPrescriptionStatus(patient.dispenseDate, patient.cycle || 84).dueDateISO;
                 if (mode === 'month' && dueISO.slice(0, 7) !== month) return;
                 if (mode === 'range' && (dueISO < from || dueISO > to)) return;
@@ -922,22 +1068,65 @@
                 toast.classList.add('opacity-0', 'translate-y-3', 'pointer-events-none');
             }, 3000);
         }
+        try{applyLanguage(localStorage.getItem('insurance-language')==='en'?'en':'ar')}catch(e){console.warn('Language initialization:',e)}
     </script>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import {getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import {getFirestore,doc,getDoc,setDoc,collection,query,where,onSnapshot,updateDoc,deleteDoc,serverTimestamp,getDocFromServer} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import {getStorage,ref as storageRef,uploadBytes,getBlob} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-storage.js";
 const config={apiKey:"AIzaSyAmb5h7CMWubQkUSULiL4xekXWtuDg4YYU",authDomain:"insurance-dashboard-8ac4a.firebaseapp.com",projectId:"insurance-dashboard-8ac4a",storageBucket:"insurance-dashboard-8ac4a.firebasestorage.app",messagingSenderId:"944599057012",appId:"1:944599057012:web:ec93711b50e1d6a6708721"};
-const app=initializeApp(config),auth=getAuth(app),db=getFirestore(app);
+const app=initializeApp(config),auth=getAuth(app),db=getFirestore(app),storage=getStorage(app);
 const gate=document.getElementById("accessGate"),msg=document.getElementById("accessMessage"),login=document.getElementById("googleLogin"),logout=document.getElementById("googleLogout"),reqPanel=document.getElementById("adminRequests"),reqItems=document.getElementById("requestItems"),teamTools=document.getElementById("teamAdminTools"),teamToggle=document.getElementById("teamToggle"),teamCount=document.getElementById("teamCount");
 teamToggle.onclick=()=>{reqPanel.style.display=reqPanel.style.display==="none"?"block":"none";};
 let user=null,role=null,unsubPatients=null,unsubRequests=null;
-window.insuranceAccess={ready:false,isAdmin:()=>role==="admin",save:async(p,isNew=false)=>{if(!user||!role||!window.insuranceAccess.ready)throw Error("غير مصرح");if(!p)throw Error("لا توجد وصفة للحفظ");if(!isNew&&!p.__docId)throw Error("معرّف الوصفة مفقود؛ لن يتم إنشاء نسخة مكررة");const id=isNew?crypto.randomUUID():p.__docId;const {__docId,...data}=p;const ref=doc(db,"prescriptions",id);if(isNew){await setDoc(ref,{...data,updatedBy:user.uid,updatedAt:serverTimestamp()});p.__docId=id;}else{await updateDoc(ref,{...data,updatedBy:user.uid,updatedAt:serverTimestamp()});}},renew:async(id,newDate)=>{if(!user||!role||!window.insuranceAccess.ready)throw Error("غير مصرح");if(!id)throw Error("معرّف الوصفة مفقود");if(!/^\d{4}-\d{2}-\d{2}$/.test(newDate))throw Error("تاريخ غير صالح");const ref=doc(db,"prescriptions",id);await updateDoc(ref,{dispenseDate:newDate,updatedBy:user.uid,updatedAt:serverTimestamp()});const saved=await getDocFromServer(ref);if(!saved.exists()||saved.data().dispenseDate!==newDate)throw Error("لم يتم تأكيد حفظ التاريخ على الخادم");},remove:async(p)=>{if(role!=="admin")throw Error("الحذف للأدمن فقط");if(!p.__docId)throw Error("وصفة غير محفوظة");await deleteDoc(doc(db,"prescriptions",p.__docId));}};
+window.insuranceAccess={uploadImage:async(id,file)=>{
+ if(!user||!role||!window.insuranceAccess.ready)throw Error('غير مصرح');
+ const path=`prescription-images/${id}/${crypto.randomUUID()}.${file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg'}`;
+ await uploadBytes(storageRef(storage,path),file,{contentType:file.type});
+ await updateDoc(doc(db,'prescriptions',id),{prescriptionImagePath:path,updatedBy:user.uid,updatedAt:serverTimestamp()});
+},readImage:async(path)=>{
+ if(!user||!role||!window.insuranceAccess.ready)throw Error('غير مصرح');
+ return getBlob(storageRef(storage,path));
+},ready:false,isAdmin:()=>role==="admin",save:async(p,isNew=false)=>{if(!user||!role||!window.insuranceAccess.ready)throw Error("غير مصرح");if(!p)throw Error("لا توجد وصفة للحفظ");if(!isNew&&!p.__docId)throw Error("معرّف الوصفة مفقود؛ لن يتم إنشاء نسخة مكررة");const id=isNew?crypto.randomUUID():p.__docId;const {__docId,...data}=p;const ref=doc(db,"prescriptions",id);if(isNew){await setDoc(ref,{...data,updatedBy:user.uid,updatedAt:serverTimestamp()});p.__docId=id;}else{await updateDoc(ref,{...data,updatedBy:user.uid,updatedAt:serverTimestamp()});}},renew:async(id,newDate)=>{if(!user||!role||!window.insuranceAccess.ready)throw Error("غير مصرح");if(!id)throw Error("معرّف الوصفة مفقود");if(!/^\d{4}-\d{2}-\d{2}$/.test(newDate))throw Error("تاريخ غير صالح");const ref=doc(db,"prescriptions",id);await updateDoc(ref,{dispenseDate:newDate,updatedBy:user.uid,updatedAt:serverTimestamp()});const saved=await getDocFromServer(ref);if(!saved.exists()||saved.data().dispenseDate!==newDate)throw Error("لم يتم تأكيد حفظ التاريخ على الخادم");},remove:async(p)=>{if(role!=="admin")throw Error("الحذف للأدمن فقط");if(!p.__docId)throw Error("وصفة غير محفوظة");await deleteDoc(doc(db,"prescriptions",p.__docId));}};
 login.onclick=()=>signInWithPopup(auth,new GoogleAuthProvider()).catch(e=>msg.textContent="تعذر تسجيل الدخول: "+e.message);
 logout.onclick=()=>signOut(auth);
 function stop(){unsubPatients?.();unsubRequests?.();unsubPatients=unsubRequests=null;window.insuranceAccess.ready=false;gate.style.display="flex";gate.classList.add("checking");reqPanel.style.display="none";teamTools.style.display="none";teamCount.textContent="";}
 function requests(){teamTools.style.display="block";unsubRequests=onSnapshot(query(collection(db,"users"),where("status","==","pending")),snap=>{reqItems.replaceChildren();teamCount.textContent=snap.size?"("+snap.size+" طلب)":"";if(snap.empty){const empty=document.createElement("p");empty.textContent="لا توجد طلبات معلقة";empty.style="padding:12px;color:#64748b";reqItems.append(empty);}snap.forEach(d=>{const item=document.createElement("div");item.style="padding:10px;border-bottom:1px solid #ddd";const label=document.createElement("span");label.textContent=(d.data().name||"") + " — " +(d.data().email||"");const btn=document.createElement("button");btn.textContent="موافقة";btn.style="margin:8px;color:#0f766e;font-weight:bold";btn.onclick=async()=>{try{await updateDoc(d.ref,{status:"approved",role:"pharmacist",approvedBy:user.uid,approvedAt:serverTimestamp()});}catch(e){alert(e.message)}};const reject=document.createElement("button");reject.textContent="رفض";reject.style="margin:8px;color:#b91c1c;font-weight:bold";reject.onclick=async()=>{if(!confirm("رفض طلب هذا الحساب؟"))return;try{await updateDoc(d.ref,{status:"rejected",role:"pharmacist"});}catch(e){alert(e.message)}};item.append(label,btn,reject);reqItems.append(item);});},e=>console.error(e));}
 onAuthStateChanged(auth,async u=>{stop();user=u;role=null;login.style.display=u?"none":"block";logout.style.display=u?"block":"none";if(!u){gate.classList.remove("checking");msg.textContent="سجّل دخولك بحساب Google";return;}msg.textContent="جاري التحقق من صلاحيات الدخول...";try{const ref=doc(db,"users",u.uid);let snap=await getDoc(ref);if(!snap.exists()){await setDoc(ref,{email:u.email||"",name:u.displayName||"",status:"pending",role:"pharmacist",requestedAt:serverTimestamp()});gate.classList.remove("checking");msg.textContent="تم إرسال طلب الانضمام. انتظر موافقة الأدمن.";return;}const data=snap.data();if(data.status!=="approved"){gate.classList.remove("checking");msg.textContent=data.status==="rejected"?"تم رفض طلب الدخول":"طلبك قيد موافقة الأدمن";return;}role=data.role==="admin"?"admin":"pharmacist";window.insuranceAccess.ready=true;unsubPatients=onSnapshot(collection(db,"prescriptions"),snapshot=>{const data=snapshot.docs.map(d=>({...d.data(),__docId:d.id}));window.setInsurancePatients(data);gate.style.display="none";},e=>{gate.style.display="flex";gate.classList.remove("checking");msg.textContent="تعذر تحميل الوصفات: "+e.message;});if(role==="admin")requests();}catch(e){gate.classList.remove("checking");msg.textContent="تعذر التحقق من الحساب: "+e.message;}});
+</script>
+
+<script>
+(function(){
+ const logos={
+ 'بوبا':'https://companieslogo.com/img/orig/8210.SR-b6db68cc.png?t=1720244490',
+ 'التعاونية':'https://companieslogo.com/img/orig/8010.SR_BIG-79d97bfc.png?t=1720244490',
+ 'تكافل الراجحي':'https://companieslogo.com/img/orig/8230.SR_BIG-3027b54e.png?t=1720244490',
+ 'ميدغلف':'https://companieslogo.com/img/orig/8030.SR_BIG-32d46cc2.png?t=1720244490'};
+ const en={'بوبا':'Bupa Arabia','التعاونية':'Tawuniya','تكافل الراجحي':'Al Rajhi Takaful','ميدغلف':'Medgulf','':'All insurers'};
+ const isEn=()=>document.documentElement.lang==='en';
+ const name=(v,opt)=>isEn()?(en[v]||opt.textContent):(v||'كل الشركات');
+ function build(select){
+   if(!select || select.dataset.brandedSelect)return;
+   select.dataset.brandedSelect='true';
+   const wrap=document.createElement('div');wrap.className='insurer-select-wrap';
+   select.parentNode.insertBefore(wrap,select);wrap.appendChild(select);select.classList.add('insurer-select-native');
+   const trigger=document.createElement('button');trigger.type='button';trigger.className='insurer-select-trigger';trigger.setAttribute('aria-haspopup','listbox');trigger.setAttribute('aria-expanded','false');
+   const menu=document.createElement('div');menu.className='insurer-select-menu';menu.setAttribute('role','listbox');menu.hidden=true;
+   wrap.append(trigger,menu);
+   const item=(v,label)=>{const row=document.createElement('span');row.className='insurer-badge-inner';if(logos[v]){const img=document.createElement('img');img.className='insurer-logo';img.alt='';img.src=logos[v];img.onerror=()=>img.remove();row.append(img)}const text=document.createElement('span');text.textContent=label;row.append(text);return row};
+   const refresh=()=>{trigger.replaceChildren(item(select.value,name(select.value,select.selectedOptions[0]||{textContent:''})));const chev=document.createElement('span');chev.className='insurer-select-chevron';chev.textContent='⌄';trigger.append(chev);menu.replaceChildren();[...select.options].forEach(opt=>{const b=document.createElement('button');b.type='button';b.className='insurer-select-option';b.setAttribute('role','option');b.setAttribute('aria-selected',String(select.value===opt.value));b.append(item(opt.value,name(opt.value,opt)));b.onclick=()=>{select.value=opt.value;select.dispatchEvent(new Event('change',{bubbles:true}));close();refresh()};menu.append(b)})};
+   const close=()=>{menu.hidden=true;trigger.setAttribute('aria-expanded','false')};
+   trigger.onclick=()=>{const open=menu.hidden;document.querySelectorAll('.insurer-select-menu').forEach(m=>m.hidden=true);menu.hidden=!open;trigger.setAttribute('aria-expanded',String(open));if(open)refresh()};
+   select.addEventListener('change',refresh);
+   document.addEventListener('pointerdown',e=>{if(!wrap.contains(e.target))close()});
+   document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+   const observer=new MutationObserver(()=>refresh());observer.observe(select,{attributes:true,attributeFilter:['value']});
+   refresh();
+ }
+ function init(){['insuranceCompany','companyFilter'].forEach(id=>build(document.getElementById(id)))}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
 </script>
 </body>
 </html>
