@@ -490,6 +490,13 @@ main>.dashboard-footer{margin-top:auto!important;padding:12px 2px 0!important;mi
  #footerTeamSlot #teamToggle{min-height:36px!important;padding:7px 9px!important}
 }
 
+/* Consistent insurer dropdown menus with eleven distinct choices. */
+.insurer-select-menu{max-height:min(440px,55dvh);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.insurer-select-option{min-height:42px;white-space:normal;overflow-wrap:anywhere}
+.insurer-select-option .insurer-badge-inner{min-width:0}
+.insurer-select-option .insurer-badge-inner > span:last-child{min-width:0;overflow-wrap:anywhere}
+@media(max-width:600px){.insurer-select-menu{max-height:min(410px,52dvh)}}
+
 </style>
 </head>
 <body class="text-slate-800 pb-12 antialiased select-none">
@@ -584,19 +591,19 @@ main>.dashboard-footer{margin-top:auto!important;padding:12px 2px 0!important;mi
             
             <div class="flex items-center gap-2">
                 <select id="companyFilter" onchange="applyFilters()" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-sky-500">
-                    <option value="">كل الشركات</option>
-                    <option value="تكافل الراجحي">تكافل الراجحي</option>
-                    <option value="بوبا">بوبا</option>
-                    <option value="التعاونية">التعاونية</option>
-                    <option value="ميدغلف">ميدغلف</option>
-<option value="Arabian Shield">Arabian Shield</option>
-<option value="GIG">GIG</option>
-<option value="GlobeMed">GlobeMed</option>
-<option value="Gulf Union">Gulf Union</option>
-<option value="Malath">Malath</option>
-<option value="SAICO">SAICO</option>
-<option value="TCS">TCS</option>
-                </select>
+                        <option value="">كل الشركات</option>
+                        <option value="تكافل الراجحي">تكافل الراجحي</option>
+                        <option value="بوبا">بوبا</option>
+                        <option value="التعاونية">التعاونية</option>
+                        <option value="ميدغلف">ميدغلف</option>
+                        <option value="Arabian Shield">Arabian Shield</option>
+                        <option value="GIG">GIG</option>
+                        <option value="GlobeMed">GlobeMed</option>
+                        <option value="Gulf Union">Gulf Union</option>
+                        <option value="Malath">Malath</option>
+                        <option value="SAICO">SAICO</option>
+                        <option value="TCS">TCS</option>
+                    </select>
 
                 <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-[11px] font-bold">
                     <button onclick="filterStatus('all')" id="tabAll" class="px-2.5 py-1 rounded-lg bg-white text-slate-800 shadow-xs transition-all">الكل</button>
@@ -672,18 +679,18 @@ main>.dashboard-footer{margin-top:auto!important;padding:12px 2px 0!important;mi
                     <div>
                         <label class="block text-slate-700 font-bold mb-1">شركة التأمين *</label>
                         <select id="insuranceCompany" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs focus:outline-none focus:border-sky-500">
-                            <option value="تكافل الراجحي">تكافل الراجحي</option>
-                            <option value="بوبا">بوبا</option>
-                            <option value="التعاونية">التعاونية</option>
-                            <option value="ميدغلف">ميدغلف</option>
-<option value="Arabian Shield">Arabian Shield</option>
-<option value="GIG">GIG</option>
-<option value="GlobeMed">GlobeMed</option>
-<option value="Gulf Union">Gulf Union</option>
-<option value="Malath">Malath</option>
-<option value="SAICO">SAICO</option>
-<option value="TCS">TCS</option>
-                        </select>
+                        <option value="تكافل الراجحي">تكافل الراجحي</option>
+                        <option value="بوبا">بوبا</option>
+                        <option value="التعاونية">التعاونية</option>
+                        <option value="ميدغلف">ميدغلف</option>
+                        <option value="Arabian Shield">Arabian Shield</option>
+                        <option value="GIG">GIG</option>
+                        <option value="GlobeMed">GlobeMed</option>
+                        <option value="Gulf Union">Gulf Union</option>
+                        <option value="Malath">Malath</option>
+                        <option value="SAICO">SAICO</option>
+                        <option value="TCS">TCS</option>
+                    </select>
                     </div>
                 </div>
 
