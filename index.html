@@ -216,6 +216,12 @@ html[data-theme="light"] #advancedFields .due-date-control input{color:#102b40;b
 #footerTeamSlot #teamToggle{border:1px solid #38536e;border-radius:11px!important;background:#0f2035!important;color:#eef5fc;font-size:12px!important;padding:8px 11px!important;min-height:36px}
 #footerTeamSlot #adminRequests{position:absolute;bottom:calc(100% + 8px);left:0;background:#122439;border:1px solid #38536e;border-radius:12px;padding:10px;width:min(320px,calc(100vw - 28px));box-shadow:0 10px 24px #0009;z-index:20}
 @media(max-width:420px){.insurer-select-trigger{padding:5px 9px;font-size:12px;gap:7px}.insurer-heading-icon svg{width:17px;height:17px}.footer-total{font-size:11px}.footer-total strong{font-size:15px!important}}
+/* Mobile-only insurer filter refinement: retain the dropdown chevron, hide only the decorative building icon. */
+@media (max-width: 767px) {
+  #companyFilter + .insurer-select-trigger .insurer-heading-icon { display: none !important; }
+  #companyFilter + .insurer-select-trigger { gap: 8px; }
+  #companyFilter + .insurer-select-trigger .insurer-badge-inner { flex: 1 1 auto; min-width: 0; }
+}
 html[data-theme="light"] .dashboard-footer{border-top-color:#dae5ee}
 html[data-theme="light"] #footerTeamSlot #teamToggle{background:#f8fafc!important;color:#0f172a}
 
