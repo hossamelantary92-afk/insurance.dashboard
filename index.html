@@ -1638,7 +1638,7 @@ html[data-theme="light"] .export-format-copy small{color:#587187}
             // Pre-paginate at prescription boundaries. Never repeat customer fields per medicine row.
             const pages=[];
             let page=[],used=0;
-            const maxRowsPerPage=13;
+            const maxRowsPerPage=22;
             matches.forEach(item=>{
                 const medicines=Array.isArray(item.patient.meds)&&item.patient.meds.length?item.patient.meds:[''];
                 const weight=medicines.length+1;
@@ -1653,13 +1653,13 @@ html[data-theme="light"] .export-format-copy small{color:#587187}
             container.style.cssText='position:fixed;left:0;top:0;width:1050px;max-height:100vh;overflow:hidden;background:#fff;color:#17324d;z-index:20000;pointer-events:none;font-family:Cairo,Arial,sans-serif;';
             const styles=document.createElement('style');
             styles.textContent=`
-              .pdf-export-sheet{width:1050px;padding:18px 16px;background:#fff;color:#17324d;box-sizing:border-box;font-family:Cairo,Arial,sans-serif}
+              .pdf-export-sheet{width:1050px;padding:20px 18px;background:#fff;color:#17324d;box-sizing:border-box;font-family:Cairo,Arial,sans-serif}
               .pdf-export-head{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:3px solid #17324d;margin-bottom:12px;padding-bottom:9px}
-              .pdf-export-title{font-size:21px;font-weight:900;letter-spacing:.1px}
-              .pdf-export-meta{color:#47657e;font-size:12px;font-weight:700}
-              .pdf-export-table{border-collapse:collapse;table-layout:fixed;width:100%;font-size:12px;line-height:1.5}
-              .pdf-export-table th{background:#17324d;color:#fff;padding:9px 7px;text-align:center;font-weight:900;border:1px solid #17324d}
-              .pdf-export-table td{border-bottom:1px solid #d6e2eb;padding:7px 8px;vertical-align:top;font-weight:600;overflow-wrap:anywhere}
+              .pdf-export-title{font-size:26px;font-weight:900;letter-spacing:.1px}
+              .pdf-export-meta{color:#47657e;font-size:15px;font-weight:700}
+              .pdf-export-table{border-collapse:collapse;table-layout:fixed;width:100%;font-size:16px;line-height:1.45}
+              .pdf-export-table th{background:#17324d;color:#fff;padding:13px 8px;text-align:center;font-weight:900;border:1px solid #17324d}
+              .pdf-export-table td{border-bottom:1px solid #d6e2eb;padding:10px 8px;vertical-align:top;font-weight:600;overflow-wrap:anywhere}
               .pdf-export-table th:nth-child(1),.pdf-export-table td:nth-child(1){width:15%}
               .pdf-export-table th:nth-child(2),.pdf-export-table td:nth-child(2){width:15%}
               .pdf-export-table th:nth-child(3),.pdf-export-table td:nth-child(3){width:30%}
@@ -1670,7 +1670,7 @@ html[data-theme="light"] .export-format-copy small{color:#587187}
               .pdf-export-table tbody tr:first-child td{border-top:1px solid #8aaaba;background:#f3f8fa}
               .pdf-export-table tbody tr:last-child td{border-bottom:2px solid #137e83}
               .pdf-export-table tbody tr td:nth-child(6){direction:rtl;text-align:right}
-              .pdf-export-footer{display:flex;justify-content:space-between;font-size:11px;color:#627b91;padding:12px 2px 0}
+              .pdf-export-footer{display:flex;justify-content:space-between;font-size:13px;color:#627b91;padding:13px 2px 0}
               .pdf-export-page+.pdf-export-page{break-before:page;page-break-before:always}
               .pdf-export-page{break-inside:avoid;page-break-inside:avoid}
             `;
@@ -1751,8 +1751,9 @@ html[data-theme="light"] .export-format-copy small{color:#587187}
                     const pageWidth=pdf.internal.pageSize.getWidth();
                     const pageHeight=pdf.internal.pageSize.getHeight();
                     const availableW=pageWidth-14,availableH=pageHeight-14;
-                    const renderedH=Math.min(availableH,availableW*canvas.height/canvas.width);
-                    const renderedW=Math.min(availableW,availableH*canvas.width/canvas.height);
+                    // Uniform scaling preserves font and table proportions.
+                    const scale=Math.min(availableW/canvas.width,availableH/canvas.height);
+                    const renderedW=canvas.width*scale,renderedH=canvas.height*scale;
                     const image=canvas.toDataURL('image/jpeg',0.92);
                     pdf.addImage(image,'JPEG',(pageWidth-renderedW)/2,7,renderedW,renderedH);
                 }
