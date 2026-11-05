@@ -381,6 +381,48 @@ html[data-theme="light"] #accessGate:not(.checking)>div { background:#fff !impor
 html[data-theme="light"] .prescription-edit-action{background:#e3f5f5!important;color:#075b64!important;border-color:#58b7b8!important}
 html[data-theme="light"] .prescription-edit-action:hover{background:#c9ebec!important}
 @media(max-width:410px){.prescription-actions{gap:7px}.prescription-action-icons{gap:6px}.prescription-action-icon{width:48px;height:48px;min-width:48px;min-height:48px}.prescription-renew-action{height:48px;min-height:48px;padding:0 9px!important;font-size:11px!important}.prescription-action-icon .prescription-action-svg{width:23px;height:23px}}
+
+/* Responsive team approvals panel: keep the popup inside the viewport. */
+#footerTeamSlot #adminRequests{
+  box-sizing:border-box;
+  min-width:0;
+  max-width:calc(100vw - 32px);
+  max-height:min(60vh,520px);
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  direction:rtl;
+}
+#footerTeamSlot #requestItems{min-width:0;max-width:100%;overflow-wrap:anywhere}
+#footerTeamSlot .team-request-row{display:flex;flex-direction:column;gap:10px;padding:12px 2px;border-bottom:1px solid #38536e;min-width:0}
+#footerTeamSlot .team-request-identity{display:flex;flex-direction:column;gap:3px;min-width:0;max-width:100%;text-align:start}
+#footerTeamSlot .team-request-name{font-size:13px;font-weight:800;line-height:1.5;overflow-wrap:anywhere}
+#footerTeamSlot .team-request-email{font-size:12px;line-height:1.6;direction:ltr;unicode-bidi:plaintext;text-align:start;overflow-wrap:anywhere;word-break:break-word;color:#b6c9dc}
+#footerTeamSlot .team-request-actions{display:flex;gap:8px;min-width:0;flex-wrap:wrap}
+#footerTeamSlot .team-request-actions button{flex:1 1 105px;min-width:0;margin:0!important;min-height:40px;padding:8px 10px;border-radius:10px;font-size:13px;font-weight:800}
+#footerTeamSlot .team-request-approve{background:#104c48;color:#72ead6!important;border:1px solid #267f73}
+#footerTeamSlot .team-request-reject{background:#4a202d;color:#ff98ab!important;border:1px solid #854154}
+html[data-theme="light"] #footerTeamSlot .team-request-row{border-bottom-color:#d8e3ec}
+html[data-theme="light"] #footerTeamSlot .team-request-email{color:#50667c}
+html[data-theme="light"] #footerTeamSlot .team-request-approve{background:#e0f6f0;color:#087568!important;border-color:#9ed9c9}
+html[data-theme="light"] #footerTeamSlot .team-request-reject{background:#ffebef;color:#a22b45!important;border-color:#edb0bf}
+@media(max-width:767px){
+  #footerTeamSlot #adminRequests{
+    position:fixed!important;
+    left:12px!important;right:12px!important;
+    top:auto!important;bottom:calc(82px + env(safe-area-inset-bottom,0px))!important;
+    width:calc(100vw - 24px)!important;
+    max-width:calc(100vw - 24px)!important;
+    max-height:min(66dvh,560px)!important;
+    margin:0!important;
+    padding:16px!important;
+    border-radius:18px!important;
+    z-index:1000!important;
+    box-shadow:0 16px 48px #0009!important;
+  }
+  #footerTeamSlot #adminRequests h3{font-size:15px;margin:0 0 12px}
+}
+
 </style>
 </head>
 <body class="text-slate-800 pb-12 antialiased select-none">
@@ -1343,7 +1385,7 @@ window.insuranceAccess={ready:false,isAdmin:()=>role==="admin",save:async(p,isNe
 login.onclick=()=>signInWithPopup(auth,new GoogleAuthProvider()).catch(e=>msg.textContent="تعذر تسجيل الدخول: "+e.message);
 logout.onclick=()=>signOut(auth);
 function stop(){unsubPatients?.();unsubRequests?.();unsubPatients=unsubRequests=null;window.insuranceAccess.ready=false;gate.style.display="flex";gate.classList.add("checking");reqPanel.style.display="none";teamTools.style.display="none";teamCount.textContent="";}
-function requests(){teamTools.style.display="block";unsubRequests=onSnapshot(query(collection(db,"users"),where("status","==","pending")),snap=>{reqItems.replaceChildren();teamCount.textContent=snap.size?"("+snap.size+" طلب)":"";if(snap.empty){const empty=document.createElement("p");empty.textContent="لا توجد طلبات معلقة";empty.style="padding:12px;color:#64748b";reqItems.append(empty);}snap.forEach(d=>{const item=document.createElement("div");item.style="padding:10px;border-bottom:1px solid #ddd";const label=document.createElement("span");label.textContent=(d.data().name||"") + " — " +(d.data().email||"");const btn=document.createElement("button");btn.textContent="موافقة";btn.style="margin:8px;color:#0f766e;font-weight:bold";btn.onclick=async()=>{try{await updateDoc(d.ref,{status:"approved",role:"pharmacist",approvedBy:user.uid,approvedAt:serverTimestamp()});}catch(e){alert(e.message)}};const reject=document.createElement("button");reject.textContent="رفض";reject.style="margin:8px;color:#b91c1c;font-weight:bold";reject.onclick=async()=>{if(!confirm("رفض طلب هذا الحساب؟"))return;try{await updateDoc(d.ref,{status:"rejected",role:"pharmacist"});}catch(e){alert(e.message)}};item.append(label,btn,reject);reqItems.append(item);});},e=>console.error(e));}
+function requests(){teamTools.style.display="block";unsubRequests=onSnapshot(query(collection(db,"users"),where("status","==","pending")),snap=>{reqItems.replaceChildren();teamCount.textContent=snap.size?"("+snap.size+" طلب)":"";if(snap.empty){const empty=document.createElement("p");empty.textContent="لا توجد طلبات معلقة";empty.style="padding:12px;color:#64748b";reqItems.append(empty);}snap.forEach(d=>{const item=document.createElement("div");item.className="team-request-row";const identity=document.createElement("div");identity.className="team-request-identity";const nameLabel=document.createElement("span");nameLabel.className="team-request-name";nameLabel.textContent=d.data().name||"مستخدم جديد";const emailLabel=document.createElement("span");emailLabel.className="team-request-email";emailLabel.textContent=d.data().email||"";identity.append(nameLabel,emailLabel);const actions=document.createElement("div");actions.className="team-request-actions";const btn=document.createElement("button");btn.type="button";btn.className="team-request-approve";btn.textContent="موافقة";btn.onclick=async()=>{try{await updateDoc(d.ref,{status:"approved",role:"pharmacist",approvedBy:user.uid,approvedAt:serverTimestamp()});}catch(e){alert(e.message)}};const reject=document.createElement("button");reject.type="button";reject.className="team-request-reject";reject.textContent="رفض";reject.onclick=async()=>{if(!confirm("رفض طلب هذا الحساب؟"))return;try{await updateDoc(d.ref,{status:"rejected",role:"pharmacist"});}catch(e){alert(e.message)}};actions.append(btn,reject);item.append(identity,actions);reqItems.append(item);});},e=>console.error(e));}
 onAuthStateChanged(auth,async u=>{stop();user=u;role=null;login.style.display=u?"none":"block";logout.style.display=u?"block":"none";if(!u){gate.classList.remove("checking");msg.textContent="سجّل دخولك بحساب Google";return;}msg.textContent="جاري التحقق من صلاحيات الدخول...";try{const ref=doc(db,"users",u.uid);let snap=await getDoc(ref);if(!snap.exists()){await setDoc(ref,{email:u.email||"",name:u.displayName||"",status:"pending",role:"pharmacist",requestedAt:serverTimestamp()});gate.classList.remove("checking");msg.textContent="تم إرسال طلب الانضمام. انتظر موافقة الأدمن.";return;}const data=snap.data();if(data.status!=="approved"){gate.classList.remove("checking");msg.textContent=data.status==="rejected"?"تم رفض طلب الدخول":"طلبك قيد موافقة الأدمن";return;}role=data.role==="admin"?"admin":"pharmacist";window.insuranceAccess.ready=true;unsubPatients=onSnapshot(collection(db,"prescriptions"),snapshot=>{const data=snapshot.docs.map(d=>({...d.data(),__docId:d.id}));window.setInsurancePatients(data);gate.style.display="none";},e=>{gate.style.display="flex";gate.classList.remove("checking");msg.textContent="تعذر تحميل الوصفات: "+e.message;});if(role==="admin")requests();}catch(e){gate.classList.remove("checking");msg.textContent="تعذر التحقق من الحساب: "+e.message;}});
 </script>
 
