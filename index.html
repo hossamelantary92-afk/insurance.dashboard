@@ -431,7 +431,8 @@ html[data-theme="light"] #footerTeamSlot .team-request-reject{background:#ffebef
   display:flex;align-items:center;justify-content:center;
   padding:16px;box-sizing:border-box;
 }
-#teamManagementOverlay.team-management-overlay[style*="display:none"]{display:none!important}
+#teamManagementOverlay[aria-hidden="true"]{display:none!important}
+#teamManagementOverlay[aria-hidden="false"]{display:flex!important}
 #teamManagementOverlay .team-management-dialog{
   width:min(100%,460px);max-width:460px;
   max-height:min(75dvh,640px);overflow:hidden;
