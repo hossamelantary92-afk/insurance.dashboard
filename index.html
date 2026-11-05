@@ -7,6 +7,7 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
     <!-- Google Font Cairo -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -1558,74 +1559,101 @@ html[data-theme="light"] .dispense-date-picker-shell{color:#087e84;border-left-c
             }
         }
 
-        function exportToExcel() {
-            if (typeof XLSX === 'undefined') {
-                alert(langText('تعذر تحميل مكتبة Excel. تحقق من اتصال الإنترنت وحاول مرة أخرى.','Unable to load Excel library. Check your connection and try again.'));
-                return;
-            }
-            // Export exactly the currently filtered prescriptions, grouped by prescription.
+        async function exportToExcel() {
             const filteredPatients = getFilteredAndSortedItems();
             if (!filteredPatients.length) {
                 alert(langText('لا توجد وصفات مطابقة للتصدير.','No matching prescriptions to export.'));
                 return;
             }
-            const headers = ['رقم الهوية','رقم الجوال','الأصناف','الكمية','تاريخ الاستحقاق','الملاحظات'];
-            const data = [headers];
-            const groupFirstRows = [];
-            const separatorRows = [];
-            let exportedItems = 0;
-
-            filteredPatients.forEach(({patient,status:ps},groupIndex) => {
-                const meds = Array.isArray(patient.meds) ? patient.meds : [];
-                const quantities = Array.isArray(patient.medQuantities) ? patient.medQuantities : [];
-                // The six customer/prescription fields are only populated on the first item row.
-                const firstExcelRow = data.length + 1;
-                groupFirstRows.push(firstExcelRow);
-                (meds.length ? meds : ['']).forEach((med,i) => {
-                    data.push([
-                        i===0 ? String(patient.id||'') : '',
-                        i===0 ? String(patient.phone||'') : '',
-                        String(med||''),
-                        quantities[i] == null ? '' : String(quantities[i]),
-                        i===0 ? String(ps.dueDateISO||'') : '',
-                        i===0 ? String(patient.remarks||'') : ''
-                    ]);
-                    if(med)exportedItems++;
+            if (typeof ExcelJS === 'undefined') {
+                alert(langText('تعذر تحميل مكتبة Excel. تحقق من اتصال الإنترنت وحاول مرة أخرى.','Unable to load Excel library. Check your connection and try again.'));
+                return;
+            }
+            const workbook = new ExcelJS.Workbook();
+            workbook.creator='Insurance Dashboard';
+            workbook.created=new Date();
+            const sheet = workbook.addWorksheet('الوصفات',{
+                views:[{state:'normal',rightToLeft:false,showGridLines:false}],
+                pageSetup:{
+                    paperSize:9,orientation:'landscape',
+                    fitToPage:true,fitToWidth:1,fitToHeight:0,
+                    horizontalCentered:true,verticalCentered:false,
+                    showGridLines:false,
+                    margins:{left:0.25,right:0.25,top:0.35,bottom:0.35,header:0.15,footer:0.15}
+                },
+                properties:{defaultRowHeight:21}
+            });
+            sheet.columns=[
+                {header:'رقم الهوية',key:'id',width:16},
+                {header:'رقم الجوال',key:'phone',width:16},
+                {header:'الأصناف',key:'medicine',width:32},
+                {header:'الكمية',key:'quantity',width:10},
+                {header:'تاريخ الاستحقاق',key:'due',width:19},
+                {header:'الملاحظات',key:'remarks',width:32}
+            ];
+            sheet.pageSetup.printTitlesRow='1:1';
+            const thinBorder={style:'hair',color:{argb:'FFD8E2EA'}};
+            const header=sheet.getRow(1);
+            header.height=30;
+            header.eachCell(cell=>{
+                cell.font={name:'Arial',size:11,bold:true,color:{argb:'FFFFFFFF'}};
+                cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF17324D'}};
+                cell.alignment={vertical:'middle',horizontal:'center',wrapText:true};
+                cell.border={bottom:{style:'medium',color:{argb:'FF087E84'}}};
+            });
+            let itemCount=0;
+            filteredPatients.forEach(({patient,status:ps},groupIndex)=>{
+                const medicines=Array.isArray(patient.meds)&&patient.meds.length?patient.meds:[''];
+                const quantities=Array.isArray(patient.medQuantities)?patient.medQuantities:[];
+                const firstRowNumber=sheet.rowCount+1;
+                medicines.forEach((medicine,i)=>{
+                    const row=sheet.addRow({
+                        id:i===0?String(patient.id||''):'',
+                        phone:i===0?String(patient.phone||''):'',
+                        medicine:String(medicine||''),
+                        quantity:quantities[i]==null?'':String(quantities[i]),
+                        due:i===0?formatDateToDisplay(ps.dueDateISO||''):'',
+                        remarks:i===0?String(patient.remarks||''):''
+                    });
+                    if(medicine)itemCount++;
+                    row.height=24;
+                    row.eachCell({includeEmpty:true},(cell,col)=>{
+                        cell.font={name:'Arial',size:11,bold:i===0&&(col===1||col===2),color:{argb:'FF1C3043'}};
+                        cell.alignment={vertical:'middle',horizontal:col===4?'center':(col===6?'right':'left'),wrapText:col===3||col===6};
+                        cell.border={bottom:{...thinBorder}};
+                        if(col===1||col===2||col===4)cell.numFmt='@';
+                        if(groupIndex%2===1)cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF3F7FA'}};
+                        else if(i===0)cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFEBF5F6'}};
+                    });
+                    if(i===0 && String(patient.remarks||'').length>42)row.height=34;
                 });
                 if(groupIndex<filteredPatients.length-1){
-                    // A short merged horizontal rule is visible even in SheetJS Community Edition
-                    // (which may omit Excel cell fill/border styling on export).
-                    separatorRows.push(data.length+1);
-                    data.push(['━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━','','','','','']);
-                    data.push(['','','','','','']);
+                    const finalRow=sheet.getRow(sheet.rowCount);
+                    for(let col=1;col<=6;col++){
+                        const c=finalRow.getCell(col);
+                        c.border={bottom:{style:'medium',color:{argb:'FF087E84'}}};
+                    }
+                    const separator=sheet.addRow(['','','','','','']);
+                    separator.height=9;
                 }
             });
-
-            const worksheet = XLSX.utils.aoa_to_sheet(data);
-            worksheet['!cols'] = [{wch:19},{wch:18},{wch:48},{wch:12},{wch:20},{wch:48}];
-            worksheet['!rows'] = data.map((_,i) => ({hpt: separatorRows.includes(i+1) ? 12 : (i===0?28:23)}));
-            worksheet['!merges'] = separatorRows.map(r => ({s:{r:r-1,c:0},e:{r:r-1,c:5}}));
-            // Add modest cell styles for versions of the exporter that support them.
-            const headerStyle={font:{bold:true,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'17324D'}},alignment:{vertical:'center'}};
-            headers.forEach((_,c) => {
-                const cell=worksheet[XLSX.utils.encode_cell({r:0,c})];
-                if(cell)cell.s=headerStyle;
-            });
-            groupFirstRows.forEach(rowNum => {
-                for(let c=0;c<headers.length;c++){
-                    const cell=worksheet[XLSX.utils.encode_cell({r:rowNum-1,c})];
-                    if(cell)cell.s={fill:{fgColor:{rgb:'E8F3F7'}},font:{bold:c===0||c===1},alignment:{vertical:'center'}};
-                }
-            });
-            separatorRows.forEach(rowNum => {
-                const cell=worksheet[XLSX.utils.encode_cell({r:rowNum-1,c:0})];
-                if(cell)cell.s={font:{color:{rgb:'1D7E82'},sz:10},alignment:{horizontal:'center',vertical:'center'}};
-            });
-            // National ID, phone and quantities remain text (including leading zeros).
-            const workbook=XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook,worksheet,'الوصفات');
-            XLSX.writeFile(workbook,`وصفات_التأمين_${todayInRiyadh()}.xlsx`);
-            showToast(langText(`تم تجهيز ملف Excel (${filteredPatients.length} وصفة، ${exportedItems} صنف)`,`Excel ready (${filteredPatients.length} prescriptions, ${exportedItems} items)`));
+            sheet.pageSetup.printArea=`A1:F${sheet.rowCount}`;
+            const filename=`وصفات_التأمين_${todayInRiyadh()}.xlsx`;
+            try {
+                const buffer=await workbook.xlsx.writeBuffer();
+                const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+                const url=URL.createObjectURL(blob);
+                const a=document.createElement('a');
+                a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();
+                setTimeout(()=>URL.revokeObjectURL(url),60000);
+                showToast(langText(
+                    `تم تجهيز ملف Excel (${filteredPatients.length} وصفة، ${itemCount} صنف)`,
+                    `Excel ready (${filteredPatients.length} prescriptions, ${itemCount} items)`
+                ));
+            } catch(e) {
+                console.error('Excel export failed',e);
+                alert(langText('تعذر تصدير Excel. حاول مرة أخرى.','Excel export failed. Please try again.'));
+            }
         }
 
         function showToast(msg) {
