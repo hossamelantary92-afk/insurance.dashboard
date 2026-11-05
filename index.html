@@ -402,18 +402,11 @@
         }
 
         function getPrescriptionStatus(dispenseDateStr, cycleDays) {
-            const now = new Date();
-            now.setHours(0, 0, 0, 0);
-
-            const dispenseDate = new Date(dispenseDateStr);
-            dispenseDate.setHours(0, 0, 0, 0);
-
+            const now = new Date(todayInRiyadh() + 'T00:00:00Z');
+            const dispenseDate = new Date(dispenseDateStr + 'T00:00:00Z');
             const dueDate = new Date(dispenseDate);
-            dueDate.setDate(dueDate.getDate() + parseInt(cycleDays, 10));
-
-            const diffTime = dueDate.getTime() - now.getTime();
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
+            dueDate.setUTCDate(dueDate.getUTCDate() + parseInt(cycleDays, 10));
+            const diffDays = Math.round((dueDate.getTime() - now.getTime()) / 86400000);
             const dueDateISO = dueDate.toISOString().split('T')[0];
             const dueDateFormatted = formatDateToDisplay(dueDateISO);
 
@@ -635,22 +628,20 @@
         async function renewDispenseToday(index, event) {
             if (event) event.stopPropagation();
             const patient = patients[index];
-            if (!patient || !patient.__docId) {
+            if (!patient?.__docId) {
                 alert('تعذر تحديد الوصفة. حدّث الصفحة وحاول مرة أخرى.');
                 return;
             }
             const button = event?.currentTarget;
             if (button) button.disabled = true;
-            const previousDate = patient.dispenseDate;
-            patient.dispenseDate = todayInRiyadh();
+            const newDate = todayInRiyadh();
             try {
-                await saveToStorage(patient);
-                renderList();
-                showToast(`تم تحديث تاريخ آخر صرف إلى ${formatDateToDisplay(patient.dispenseDate)} بنجاح`);
+                // Update the original Firestore document directly, without mutating a stale UI object.
+                await window.insuranceAccess.renew(patient.__docId, newDate);
+                // Realtime Firestore snapshot is the source of truth for the displayed dates.
+                showToast('تم تحديث تاريخ الصرف بنجاح');
             } catch (e) {
-                patient.dispenseDate = previousDate;
-                renderList();
-                alert('تعذر حفظ دورة الصرف: ' + e.message);
+                alert('تعذر تحديث تاريخ الصرف: ' + e.message);
             } finally {
                 if (button?.isConnected) button.disabled = false;
             }
@@ -765,7 +756,7 @@
             try {
                 await saveToStorage(newPatientData, isNew);
                 closeModal();
-                showToast(isNew ? 'تمت إضافة الوصفة بنجاح' : 'تم تحديث الوصفة دون إنشاء نسخة جديدة');
+                showToast(isNew ? 'تمت إضافة الوصفة بنجاح' : 'تم حفظ التعديلات بنجاح');
             } catch (error) {
                 alert('تعذر حفظ الوصفة: ' + error.message);
             } finally {
@@ -842,13 +833,13 @@
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import {getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import {getFirestore,doc,getDoc,setDoc,collection,query,where,onSnapshot,updateDoc,deleteDoc,serverTimestamp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import {getFirestore,doc,getDoc,setDoc,collection,query,where,onSnapshot,updateDoc,deleteDoc,serverTimestamp,getDocFromServer} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 const config={apiKey:"AIzaSyAmb5h7CMWubQkUSULiL4xekXWtuDg4YYU",authDomain:"insurance-dashboard-8ac4a.firebaseapp.com",projectId:"insurance-dashboard-8ac4a",storageBucket:"insurance-dashboard-8ac4a.firebasestorage.app",messagingSenderId:"944599057012",appId:"1:944599057012:web:ec93711b50e1d6a6708721"};
 const app=initializeApp(config),auth=getAuth(app),db=getFirestore(app);
 const gate=document.getElementById("accessGate"),msg=document.getElementById("accessMessage"),login=document.getElementById("googleLogin"),logout=document.getElementById("googleLogout"),reqPanel=document.getElementById("adminRequests"),reqItems=document.getElementById("requestItems"),teamTools=document.getElementById("teamAdminTools"),teamToggle=document.getElementById("teamToggle"),teamCount=document.getElementById("teamCount");
 teamToggle.onclick=()=>{reqPanel.style.display=reqPanel.style.display==="none"?"block":"none";};
 let user=null,role=null,unsubPatients=null,unsubRequests=null;
-window.insuranceAccess={ready:false,isAdmin:()=>role==="admin",save:async(p,isNew=false)=>{if(!user||!role||!window.insuranceAccess.ready)throw Error("غير مصرح");if(!p)throw Error("لا توجد وصفة للحفظ");if(!isNew&&!p.__docId)throw Error("معرّف الوصفة مفقود؛ لن يتم إنشاء نسخة مكررة");const id=isNew?crypto.randomUUID():p.__docId;const {__docId,...data}=p;const ref=doc(db,"prescriptions",id);if(isNew){await setDoc(ref,{...data,updatedBy:user.uid,updatedAt:serverTimestamp()});p.__docId=id;}else{await updateDoc(ref,{...data,updatedBy:user.uid,updatedAt:serverTimestamp()});}},remove:async(p)=>{if(role!=="admin")throw Error("الحذف للأدمن فقط");if(!p.__docId)throw Error("وصفة غير محفوظة");await deleteDoc(doc(db,"prescriptions",p.__docId));}};
+window.insuranceAccess={ready:false,isAdmin:()=>role==="admin",save:async(p,isNew=false)=>{if(!user||!role||!window.insuranceAccess.ready)throw Error("غير مصرح");if(!p)throw Error("لا توجد وصفة للحفظ");if(!isNew&&!p.__docId)throw Error("معرّف الوصفة مفقود؛ لن يتم إنشاء نسخة مكررة");const id=isNew?crypto.randomUUID():p.__docId;const {__docId,...data}=p;const ref=doc(db,"prescriptions",id);if(isNew){await setDoc(ref,{...data,updatedBy:user.uid,updatedAt:serverTimestamp()});p.__docId=id;}else{await updateDoc(ref,{...data,updatedBy:user.uid,updatedAt:serverTimestamp()});}},renew:async(id,newDate)=>{if(!user||!role||!window.insuranceAccess.ready)throw Error("غير مصرح");if(!id)throw Error("معرّف الوصفة مفقود");if(!/^\d{4}-\d{2}-\d{2}$/.test(newDate))throw Error("تاريخ غير صالح");const ref=doc(db,"prescriptions",id);await updateDoc(ref,{dispenseDate:newDate,updatedBy:user.uid,updatedAt:serverTimestamp()});const saved=await getDocFromServer(ref);if(!saved.exists()||saved.data().dispenseDate!==newDate)throw Error("لم يتم تأكيد حفظ التاريخ على الخادم");},remove:async(p)=>{if(role!=="admin")throw Error("الحذف للأدمن فقط");if(!p.__docId)throw Error("وصفة غير محفوظة");await deleteDoc(doc(db,"prescriptions",p.__docId));}};
 login.onclick=()=>signInWithPopup(auth,new GoogleAuthProvider()).catch(e=>msg.textContent="تعذر تسجيل الدخول: "+e.message);
 logout.onclick=()=>signOut(auth);
 function stop(){unsubPatients?.();unsubRequests?.();unsubPatients=unsubRequests=null;window.insuranceAccess.ready=false;gate.style.display="flex";gate.classList.add("checking");reqPanel.style.display="none";teamTools.style.display="none";teamCount.textContent="";}
