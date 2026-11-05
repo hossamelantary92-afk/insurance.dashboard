@@ -128,6 +128,51 @@
         html[dir="ltr"] .text-right{text-align:left!important}
         html[dir="ltr"] .pr-9{padding-right:.75rem!important;padding-left:2.25rem!important}
         html[dir="ltr"] #searchInput+svg{right:auto!important;left:.75rem!important}
+
+/* Approved compact mobile design — 2026-11-05 */
+main{max-width:740px!important}
+#alertBanner,main>.grid.grid-cols-3{display:none!important}
+#prescriptionsContainer{display:flex;flex-direction:column;gap:10px!important}
+#prescriptionsContainer>div{background:#102235!important;border:1px solid #29455e!important;border-radius:22px!important;box-shadow:none!important}
+.client-card-top{direction:ltr;display:grid;grid-template-columns:52px 68px minmax(0,1fr) auto;align-items:center;gap:13px;padding:14px 16px;min-height:95px;cursor:pointer}
+.client-expand{height:42px;width:42px;display:grid;place-items:center;border-radius:12px;background:#1c344c;color:#dcebf9;transition:transform .2s}
+.client-expand svg{height:22px;width:22px}
+.client-logo{height:62px;width:62px;display:grid;place-items:center;border-radius:12px;background:#f8fbff;border:2px solid #dbe7f4;overflow:hidden}
+.client-logo img{width:100%;height:100%;object-fit:contain;padding:3px}
+.client-logo-fallback{font-size:10px;font-weight:800;text-align:center;color:#0c5374;line-height:1.3;padding:3px}
+.client-identity{min-width:0;text-align:start;direction:ltr}
+.client-identity h3{color:#f5f8ff;font-size:19px;font-weight:800;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.client-identity p{display:flex;align-items:center;gap:7px;margin-top:7px;color:#d3e1f0;font-size:15px;font-weight:600}
+.client-identity p svg{width:19px;height:19px;flex:none}
+.client-status{justify-self:end;white-space:nowrap;border:1.5px solid #5eead4;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:800;color:#6ee7d1;background:#113b38;direction:rtl}
+.client-status.is-soon{color:#f7b948;background:#3b301c;border-color:#f4c85c}
+.client-status.is-due{color:#ff8095;background:#3b202e;border-color:#fa6b89}
+.advanced-panel{padding:12px 15px!important;border-radius:19px!important}
+#advancedToggle{font-size:14px!important;color:#f4f8ff!important;gap:12px;min-height:42px}
+.due-heading{display:flex;align-items:center;gap:10px;text-align:start}
+.due-heading svg{width:26px;height:26px;color:#55e5d4;flex-shrink:0}
+.due-heading strong{display:block;font-size:14px}
+.due-heading small{display:block;font-size:12px;color:#c2d2e2;font-weight:500;margin-top:4px}
+#advancedChevron.filter-chevron{height:11px;width:11px;border-color:#eaf7ff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg);margin:0 5px 5px}
+#advancedToggle[aria-expanded="true"] #advancedChevron.filter-chevron{transform:rotate(225deg);margin:5px 5px 0}
+#activeDuePeriod{margin-top:6px!important;justify-content:flex-end}
+#activeDuePeriodText{display:none}
+.dashboard-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:24px;padding:12px 8px;color:#d6e4f2}
+.footer-total{display:flex;align-items:center;gap:10px;font-size:14px;white-space:nowrap}
+.footer-total strong{font-size:19px;color:#fff}
+.footer-total svg{height:24px;width:24px}
+#footerTeamSlot #teamAdminTools{max-width:none!important}
+#footerTeamSlot #teamToggle{font-size:13px!important}
+@media(max-width:420px){.client-card-top{grid-template-columns:38px 48px minmax(0,1fr) auto;gap:9px;padding:11px 10px;min-height:80px}.client-expand{width:34px;height:36px}.client-logo{width:46px;height:46px;border-radius:10px}.client-identity h3{font-size:16px}.client-identity p{font-size:12px;gap:4px}.client-identity p svg{width:15px;height:15px}.client-status{font-size:11px;padding:5px 7px}.footer-total{font-size:11px;gap:5px}.footer-total strong{font-size:15px}}
+html[data-theme="light"] #prescriptionsContainer>div{background:#f8fafc!important;border-color:#d2dfec!important}
+html[data-theme="light"] .client-identity h3{color:#142438}
+html[data-theme="light"] .client-identity p{color:#475569}
+html[data-theme="light"] #advancedToggle{color:#123148!important}
+html[data-theme="light"] .due-heading small{color:#475569}
+html[data-theme="light"] #advancedChevron.filter-chevron{border-color:#0f766e}
+html[data-theme="light"] .dashboard-footer{color:#334155}
+html[data-theme="light"] .footer-total strong{color:#0f172a}
+
     </style>
 </head>
 <body class="text-slate-800 pb-12 antialiased select-none">
@@ -225,10 +270,10 @@
 
         <!-- Due-date filter: applied only after confirmation -->
         <section class="advanced-panel bg-white border border-slate-200 rounded-2xl p-3 shadow-sm">
-          <button type="button" id="advancedToggle" onclick="toggleAdvancedFilters()" class="w-full flex items-center justify-between text-xs font-bold text-teal-500" aria-expanded="false"><span data-i18n="duePeriod">فترة الاستحقاق</span><span id="advancedChevron" class="filter-chevron" aria-hidden="true"></span></button>
+          <button type="button" id="advancedToggle" onclick="toggleAdvancedFilters()" class="w-full flex items-center justify-between text-xs font-bold text-teal-500" aria-expanded="false"><span class="due-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18M8 14h2M13 14h2M8 18h2"/></svg><span><strong data-i18n="duePeriod">فترة الاستحقاق</strong><small id="duePeriodHint">كل التواريخ</small></span></span><span id="advancedChevron" class="filter-chevron" aria-hidden="true"></span></button>
           <div id="activeDuePeriod" class="hidden mt-2 flex items-center gap-2 text-xs"><span id="activeDuePeriodText" class="flex-1"></span><button type="button" id="clearDuePeriod" onclick="resetAdvancedFilters()" aria-label="إلغاء فترة الاستحقاق" title="إلغاء فترة الاستحقاق" class="filter-clear">×</button></div>
           <div id="advancedFields" class="hidden mt-3 space-y-3">
-            <div><label class="field-label" data-i18n="duePeriod">فترة الاستحقاق</label><select id="advPeriod" onchange="updateAdvancedFields()" class="w-full border rounded-xl p-2 text-xs"><option value="all" data-i18n="allDates">كل التواريخ</option><option value="month" data-i18n="specificMonth">شهر معين</option><option value="range" data-i18n="dateRange">من تاريخ إلى تاريخ</option></select></div>
+            <div><label class="sr-only" for="advPeriod" data-i18n="duePeriod">فترة الاستحقاق</label><select id="advPeriod" onchange="updateAdvancedFields()" class="w-full border rounded-xl p-2 text-xs"><option value="all" data-i18n="allDates">كل التواريخ</option><option value="month" data-i18n="specificMonth">شهر معين</option><option value="range" data-i18n="dateRange">من تاريخ إلى تاريخ</option></select></div>
             <div id="advMonthWrap" class="hidden"><label class="field-label" data-i18n="month">الشهر</label><input id="advMonth" type="month" class="w-full border rounded-xl p-2 text-xs"></div>
             <div id="advDatesWrap" class="hidden grid-cols-2 gap-2"><div><label class="field-label" data-i18n="from">من تاريخ</label><input id="advFrom" type="date" class="w-full border rounded-xl p-2 text-xs"></div><div><label class="field-label" data-i18n="to">إلى تاريخ</label><input id="advTo" type="date" class="w-full border rounded-xl p-2 text-xs"></div></div>
             <div class="flex justify-end"><button type="button" onclick="confirmDuePeriod()" class="filter-confirm" data-i18n="done">تم</button></div>
@@ -237,6 +282,8 @@
 
         <!-- Prescriptions Container -->
         <div id="prescriptionsContainer" class="space-y-2"></div>
+
+        <div class="dashboard-footer"><div id="footerTeamSlot"></div><div class="footer-total"><span data-i18n="totalPrescriptions">إجمالي الوصفات</span><strong id="footerTotal">0</strong><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h9l5 5v15H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM14 2v6h6M8 13h8M8 17h8"/></svg></div></div>
 
         <!-- Empty State -->
         <div id="emptyState" class="hidden text-center py-10 bg-white border border-slate-200/80 rounded-2xl p-6">
@@ -375,7 +422,7 @@
         let appliedDuePeriod={mode:'all',month:'',from:'',to:''};
         function toggleAdvancedFilters(){const fields=document.getElementById('advancedFields');const open=fields.classList.toggle('hidden')===false;document.getElementById('advancedToggle').setAttribute('aria-expanded',String(open))}
         function updateAdvancedFields(){const mode=document.getElementById('advPeriod').value;document.getElementById('advMonthWrap').classList.toggle('hidden',mode!=='month');document.getElementById('advDatesWrap').classList.toggle('hidden',mode!=='range');document.getElementById('advDatesWrap').classList.toggle('grid',mode==='range')}
-        function renderDuePeriod(){const el=document.getElementById('activeDuePeriod');const {mode,month,from,to}=appliedDuePeriod;el.classList.toggle('hidden',mode==='all');const en=document.documentElement.lang==='en';document.getElementById('activeDuePeriodText').textContent=mode==='month'?month:mode==='range'?`${from} — ${to}`:'';document.getElementById('clearDuePeriod').title=en?'Clear due-date filter':'إلغاء فترة الاستحقاق'}
+        function renderDuePeriod(){const el=document.getElementById('activeDuePeriod');const {mode,month,from,to}=appliedDuePeriod;el.classList.toggle('hidden',mode==='all');const en=document.documentElement.lang==='en';document.getElementById('activeDuePeriodText').textContent=mode==='month'?month:mode==='range'?`${from} — ${to}`:'';document.getElementById('clearDuePeriod').title=en?'Clear due-date filter':'إلغاء فترة الاستحقاق';const hint=document.getElementById('duePeriodHint');if(hint)hint.textContent=mode==='all'?(en?'All dates':'كل التواريخ'):mode==='month'?month:`${from} — ${to}`}
         function confirmDuePeriod(){const mode=document.getElementById('advPeriod').value,month=document.getElementById('advMonth').value,from=document.getElementById('advFrom').value,to=document.getElementById('advTo').value;const en=document.documentElement.lang==='en';if(mode==='month'&&!/^\d{4}-\d{2}$/.test(month)){alert(en?'Choose a month.':'اختر الشهر المطلوب.');return}if(mode==='range'&&(!from||!to||from>to)){alert(en?'Choose a valid date range.':'حدد فترة استحقاق صحيحة.');return}appliedDuePeriod={mode,month,from,to};renderDuePeriod();applyFilters();const fields=document.getElementById('advancedFields');fields.classList.add('hidden');document.getElementById('advancedToggle').setAttribute('aria-expanded','false');showToast('تم ✔️')}
         function resetAdvancedFilters(){appliedDuePeriod={mode:'all',month:'',from:'',to:''};document.getElementById('advPeriod').value='all';document.getElementById('advMonth').value='';document.getElementById('advFrom').value='';document.getElementById('advTo').value='';updateAdvancedFields();renderDuePeriod();applyFilters()}
         function applyTheme(theme) {
@@ -529,7 +576,7 @@
 
         window.getInsurancePatients = () => patients;
         window.setInsurancePatients = (rows) => { patients = rows; renderList(); };
-        window.addEventListener('DOMContentLoaded', () => { patients = []; renderList(); });
+        window.addEventListener('DOMContentLoaded', () => { patients = []; renderList();const team=document.getElementById('teamAdminTools');const slot=document.getElementById('footerTeamSlot');if(team&&slot)slot.appendChild(team); });
         async function saveToStorage(patient, isNew = false) {
             if (!window.insuranceAccess?.ready) throw Error('انتظر تحميل الوصفات أولاً');
             return window.insuranceAccess.save(patient, isNew);
@@ -652,7 +699,7 @@
                 container.appendChild(card);
             });
 
-            document.getElementById('totalCount').textContent = total;
+            document.getElementById('totalCount').textContent = total;const footerTotal=document.getElementById('footerTotal');if(footerTotal)footerTotal.textContent=total;
             document.getElementById('dueCount').textContent = dueCount;
             document.getElementById('validCount').textContent = validCount;
 
@@ -679,6 +726,12 @@
             return `<span class="insurer-badge-inner">${src?`<span class="insurer-logo-shell"><img class="insurer-logo" src="${src}" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></span>`:''}<span>${safe}</span></span>`;
         }
 
+        function insurerIcon(company) {
+            const src=INSURER_LOGOS[company];
+            const safe=escapeHtml(currentLanguage==='en'?(dictionary[company]||company):(company||''));
+            return src ? `<img src="${src}" alt="${safe}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span class="client-logo-fallback" style="display:none">${safe}</span>` : `<span class="client-logo-fallback">${safe}</span>`;
+        }
+
         function createCustomerCard(patient, index, status) {
             const card = document.createElement('div');
             card.className = `bg-white rounded-2xl border border-slate-200/90 hover:border-slate-300 shadow-2xs transition-all overflow-hidden`;
@@ -688,23 +741,16 @@
             const displayDispenseDate = formatDateToDisplay(patient.dispenseDate);
 
             card.innerHTML = `
-                <div onclick="toggleCard(${index})" class="p-3.5 sm:p-4 min-h-[82px] cursor-pointer flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
-                    <div class="text-right flex-1 min-w-0 pl-2">
-                        <h3 class="text-xs sm:text-sm font-bold text-slate-900 truncate">${escapeHtml(twoName)}</h3>
-                        <p class="text-[11px] text-slate-700 font-mono font-extrabold mt-1">${langText('الهوية','ID')}: ${escapeHtml(patient.id)}</p>
+                <div onclick="toggleCard(${index})" class="client-card-top" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCard(${index})}">
+                    <div id="chevron-${index}" class="client-expand" aria-label="${langText('تفاصيل الوصفة','Prescription details')}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                     </div>
-
-                    <div class="flex items-center justify-between sm:justify-start gap-2 flex-shrink-0">
-                        <span class="text-[11px] font-bold text-teal-800 bg-teal-50 border border-teal-200 px-2 py-1 rounded-xl">
-                            ${insurerBadge(patient.company)}
-                        </span>
-                        <span class="text-[11px] px-2.5 py-1 rounded-xl border font-bold ${status.cssBadge}">
-                            ${currentLanguage==='en'?(status.state==='overdue'?`Overdue (${Math.abs(status.diffDays)} days)`:status.state==='today'?'Due today':`${status.diffDays} days left`):status.text}
-                        </span>
-                        <div id="chevron-${index}" class="w-7 h-7 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 transition-transform duration-200">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </div>
+                    <div class="client-logo">${insurerIcon(patient.company)}</div>
+                    <div class="client-identity">
+                        <h3>${escapeHtml(twoName)}</h3>
+                        <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="2.5" y="4" width="19" height="16" rx="2"/><circle cx="8" cy="10" r="2"/><path d="M5 16c.5-2 5.5-2 6 0M14 9h5M14 13h5"/></svg><b dir="ltr">${escapeHtml(patient.id)}</b></p>
                     </div>
+                    <span class="client-status ${status.isDue?'is-due':status.diffDays<=7?'is-soon':'is-valid'}">${currentLanguage==='en'?(status.state==='overdue'?`Overdue ${Math.abs(status.diffDays)}d`:status.state==='today'?'Due today':`${status.diffDays} days left`):status.text}</span>
                 </div>
 
                 <div id="details-${index}" class="hidden border-t border-slate-100 bg-slate-50/50 p-4 space-y-3.5">
@@ -741,17 +787,6 @@
                             <span class="text-[10px] text-slate-400 block font-semibold">${langText('تاريخ الاستحقاق','Due date')}</span>
                             <span class="font-bold text-emerald-700 font-mono">${status.dueDate}</span>
                         </div>
-                    </div>
-
-                    <div class="bg-white p-3 rounded-2xl border border-slate-200 space-y-2">
-                        <div class="flex items-center justify-between gap-2">
-                            <span class="text-xs font-bold text-slate-700">صورة الوصفة <span class="font-normal text-slate-400">(اختياري)</span></span>
-                            <label class="cursor-pointer rounded-xl bg-teal-700 hover:bg-teal-600 text-white px-3 py-2 text-xs font-bold">
-                                ${patient.prescriptionImagePath ? langText('استبدال الصورة','Replace image') : langText('رفع صورة','Upload image')}
-                                <input type="file" accept="image/jpeg,image/png,image/webp" class="hidden" onchange="uploadPrescriptionImage(${index},event)">
-                            </label><label class="cursor-pointer rounded-xl border border-teal-500 text-teal-500 px-3 py-2 text-xs font-bold"><span data-i18n="camera">📷 تصوير</span><input type="file" accept="image/*" capture="environment" class="hidden" onchange="uploadPrescriptionImage(${index},event)"></label>
-                        </div>
-                        <div id="image-area-${index}" class="text-xs text-slate-500">${patient.prescriptionImagePath ? '<button type="button" class="text-teal-500 underline" onclick="viewPrescriptionImage('+index+',event)">عرض صورة الوصفة</button>' : 'لم تُرفق صورة'}</div>
                     </div>
 
                     <div class="bg-white p-3 rounded-2xl border border-slate-200">
@@ -821,48 +856,6 @@
             } finally {
                 if (button?.isConnected) button.disabled = false;
             }
-        }
-
-        async function uploadPrescriptionImage(index, event) {
-            event.stopPropagation();
-            const file = event.target.files?.[0];
-            const patient = patients[index];
-            if (!file || !patient?.__docId) return;
-            if (!['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) {
-                alert(langText('اختر صورة JPG أو PNG أو WebP بحجم لا يتجاوز 5 MB. صور HEIC تحتاج تحويلًا إلى JPG.','Choose JPG, PNG or WebP up to 5 MB. Convert HEIC to JPG first.'));
-                event.target.value = '';
-                return;
-            }
-            const area = document.getElementById(`image-area-${index}`);
-            if (area) area.textContent = langText('جاري رفع الصورة...','Uploading image...');
-            const progress=e=>{if(area)area.textContent=langText('جاري رفع الصورة ','Uploading image ')+e.detail.percent+'%'};
-            window.addEventListener('prescription-upload-progress',progress);
-            try {
-                await window.insuranceAccess.uploadImage(patient.__docId, file);
-                showToast(langText('تم حفظ الصورة ✔️','Image saved ✔️'));
-            } catch (error) {
-                if (area) area.textContent = 'تعذر رفع الصورة، حاول مرة أخرى';
-                alert('تعذر رفع صورة الوصفة: ' + error.message);
-            } finally { window.removeEventListener('prescription-upload-progress',progress); event.target.value = ''; }
-        }
-
-        async function viewPrescriptionImage(index, event) {
-            event?.stopPropagation();
-            const patient = patients[index];
-            if (!patient?.prescriptionImagePath) return;
-            try {
-                const blob = await window.insuranceAccess.readImage(patient.prescriptionImagePath);
-                const url = URL.createObjectURL(blob);
-                const win = window.open('', '_blank');
-                if (!win) { URL.revokeObjectURL(url); alert('اسمح بفتح النوافذ المنبثقة لعرض الصورة'); return; }
-                win.document.title = 'صورة الوصفة';
-                const img = win.document.createElement('img');
-                img.style.cssText = 'max-width:100%;height:auto;display:block;margin:auto';
-                img.src = url;
-                win.document.body.style.background = '#07111f';
-                win.document.body.appendChild(img);
-                win.addEventListener('pagehide', () => URL.revokeObjectURL(url), {once:true});
-            } catch (error) { alert('تعذر عرض الصورة: ' + error.message); }
         }
 
         function saveDirectRemark(index, event) {
@@ -979,7 +972,6 @@
             }
             if (!isNew) {
                 newPatientData.__docId = oldPatient.__docId;
-                if (oldPatient.prescriptionImagePath) newPatientData.prescriptionImagePath = oldPatient.prescriptionImagePath;
             }
             const submitButton = e.target.querySelector('button[type="submit"]');
             submitButton.disabled = true;
@@ -1040,21 +1032,12 @@
 import {initializeApp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import {getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import {getFirestore,doc,getDoc,setDoc,collection,query,where,onSnapshot,updateDoc,deleteDoc,serverTimestamp,getDocFromServer} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
-import {getStorage,ref as storageRef,uploadBytesResumable,getBlob} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-storage.js";
 const config={apiKey:"AIzaSyAmb5h7CMWubQkUSULiL4xekXWtuDg4YYU",authDomain:"insurance-dashboard-8ac4a.firebaseapp.com",projectId:"insurance-dashboard-8ac4a",storageBucket:"insurance-dashboard-8ac4a.firebasestorage.app",messagingSenderId:"944599057012",appId:"1:944599057012:web:ec93711b50e1d6a6708721"};
-const app=initializeApp(config),auth=getAuth(app),db=getFirestore(app),storage=getStorage(app);
+const app=initializeApp(config),auth=getAuth(app),db=getFirestore(app);
 const gate=document.getElementById("accessGate"),msg=document.getElementById("accessMessage"),login=document.getElementById("googleLogin"),logout=document.getElementById("googleLogout"),reqPanel=document.getElementById("adminRequests"),reqItems=document.getElementById("requestItems"),teamTools=document.getElementById("teamAdminTools"),teamToggle=document.getElementById("teamToggle"),teamCount=document.getElementById("teamCount");
 teamToggle.onclick=()=>{reqPanel.style.display=reqPanel.style.display==="none"?"block":"none";};
 let user=null,role=null,unsubPatients=null,unsubRequests=null;
-window.insuranceAccess={uploadImage:async(id,file)=>{
- if(!user||!role||!window.insuranceAccess.ready)throw Error('غير مصرح');
- const path=`prescription-images/${id}/${crypto.randomUUID()}.${file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg'}`;
- await new Promise((resolve,reject)=>{const task=uploadBytesResumable(storageRef(storage,path),file,{contentType:file.type||'image/jpeg'});const timer=setTimeout(()=>{task.cancel();reject(Error('انتهت مهلة رفع الصورة. تحقق من Firebase Storage والاتصال بالإنترنت.'))},60000);task.on('state_changed',snap=>{window.dispatchEvent(new CustomEvent('prescription-upload-progress',{detail:{percent:Math.round(100*snap.bytesTransferred/Math.max(1,snap.totalBytes))}}))},err=>{clearTimeout(timer);reject(err)},()=>{clearTimeout(timer);resolve()})});
- await updateDoc(doc(db,'prescriptions',id),{prescriptionImagePath:path,updatedBy:user.uid,updatedAt:serverTimestamp()});
-},readImage:async(path)=>{
- if(!user||!role||!window.insuranceAccess.ready)throw Error('غير مصرح');
- return getBlob(storageRef(storage,path));
-},ready:false,isAdmin:()=>role==="admin",save:async(p,isNew=false)=>{if(!user||!role||!window.insuranceAccess.ready)throw Error("غير مصرح");if(!p)throw Error("لا توجد وصفة للحفظ");if(!isNew&&!p.__docId)throw Error("معرّف الوصفة مفقود؛ لن يتم إنشاء نسخة مكررة");const id=isNew?crypto.randomUUID():p.__docId;const {__docId,...data}=p;const ref=doc(db,"prescriptions",id);if(isNew){await setDoc(ref,{...data,updatedBy:user.uid,updatedAt:serverTimestamp()});p.__docId=id;}else{await updateDoc(ref,{...data,updatedBy:user.uid,updatedAt:serverTimestamp()});}},renew:async(id,newDate)=>{if(!user||!role||!window.insuranceAccess.ready)throw Error("غير مصرح");if(!id)throw Error("معرّف الوصفة مفقود");if(!/^\d{4}-\d{2}-\d{2}$/.test(newDate))throw Error("تاريخ غير صالح");const ref=doc(db,"prescriptions",id);await updateDoc(ref,{dispenseDate:newDate,updatedBy:user.uid,updatedAt:serverTimestamp()});const saved=await getDocFromServer(ref);if(!saved.exists()||saved.data().dispenseDate!==newDate)throw Error("لم يتم تأكيد حفظ التاريخ على الخادم");},remove:async(p)=>{if(role!=="admin")throw Error("الحذف للأدمن فقط");if(!p.__docId)throw Error("وصفة غير محفوظة");await deleteDoc(doc(db,"prescriptions",p.__docId));}};
+window.insuranceAccess={ready:false,isAdmin:()=>role==="admin",save:async(p,isNew=false)=>{if(!user||!role||!window.insuranceAccess.ready)throw Error("غير مصرح");if(!p)throw Error("لا توجد وصفة للحفظ");if(!isNew&&!p.__docId)throw Error("معرّف الوصفة مفقود؛ لن يتم إنشاء نسخة مكررة");const id=isNew?crypto.randomUUID():p.__docId;const {__docId,...data}=p;const ref=doc(db,"prescriptions",id);if(isNew){await setDoc(ref,{...data,updatedBy:user.uid,updatedAt:serverTimestamp()});p.__docId=id;}else{await updateDoc(ref,{...data,updatedBy:user.uid,updatedAt:serverTimestamp()});}},renew:async(id,newDate)=>{if(!user||!role||!window.insuranceAccess.ready)throw Error("غير مصرح");if(!id)throw Error("معرّف الوصفة مفقود");if(!/^\d{4}-\d{2}-\d{2}$/.test(newDate))throw Error("تاريخ غير صالح");const ref=doc(db,"prescriptions",id);await updateDoc(ref,{dispenseDate:newDate,updatedBy:user.uid,updatedAt:serverTimestamp()});const saved=await getDocFromServer(ref);if(!saved.exists()||saved.data().dispenseDate!==newDate)throw Error("لم يتم تأكيد حفظ التاريخ على الخادم");},remove:async(p)=>{if(role!=="admin")throw Error("الحذف للأدمن فقط");if(!p.__docId)throw Error("وصفة غير محفوظة");await deleteDoc(doc(db,"prescriptions",p.__docId));}};
 login.onclick=()=>signInWithPopup(auth,new GoogleAuthProvider()).catch(e=>msg.textContent="تعذر تسجيل الدخول: "+e.message);
 logout.onclick=()=>signOut(auth);
 function stop(){unsubPatients?.();unsubRequests?.();unsubPatients=unsubRequests=null;window.insuranceAccess.ready=false;gate.style.display="flex";gate.classList.add("checking");reqPanel.style.display="none";teamTools.style.display="none";teamCount.textContent="";}
