@@ -173,7 +173,53 @@ html[data-theme="light"] #advancedChevron.filter-chevron{border-color:#0f766e}
 html[data-theme="light"] .dashboard-footer{color:#334155}
 html[data-theme="light"] .footer-total strong{color:#0f172a}
 
-    </style>
+    
+/* Due date range + minimal footer refinement */
+#duePeriodHint.hidden{display:none!important}
+#advancedFields .due-date-control{position:relative;min-width:0}
+#advancedFields .due-date-control input{display:block;width:100%;min-width:0;height:42px;padding-inline:12px 40px;font-size:13px;font-weight:600;color:inherit;background:#0a1929;border:1px solid #36526b;border-radius:12px;outline:none;direction:ltr;text-align:start;color-scheme:dark;transition:border-color .2s,box-shadow .2s}
+#advancedFields .due-date-control input:focus{border-color:#5eead4;box-shadow:0 0 0 3px #2dd4bf1b}
+#advancedFields .due-date-control input::-webkit-calendar-picker-indicator{position:absolute;inset-inline-end:0;right:0;width:36px;height:100%;opacity:0;cursor:pointer;z-index:2}
+#advancedFields .due-date-icon{position:absolute;right:11px;top:50%;transform:translateY(-50%);width:19px;height:19px;display:grid;place-items:center;color:#5eead4;pointer-events:none}
+#advancedFields .due-date-icon svg{width:19px;height:19px}
+html[data-theme="light"] #advancedFields .due-date-control input{color:#102b40;background:#f8fafc;border-color:#cad7e5;color-scheme:light}
+.dashboard-footer{margin-top:16px;padding:9px 3px 15px;border-top:1px solid #29435a;gap:10px}
+.footer-total{font-size:13px;gap:8px;color:#b8cadb}
+.footer-total strong{font-size:17px;font-variant-numeric:tabular-nums;color:#fff}
+.footer-total svg{width:19px;height:19px;color:#74dfd3}
+@media(max-width:420px){.dashboard-footer{padding:9px 2px 12px}.footer-total{font-size:11px;gap:5px}.footer-total strong{font-size:15px}.footer-total svg{width:17px;height:17px}}
+
+
+/* Final search / insurer selector and quiet footer — 2026-11-05 */
+#searchInput{height:45px;border-radius:14px!important;padding-block:10px!important;font-size:13px!important;box-shadow:inset 0 1px 2px #00000012;transition:border-color .18s,box-shadow .18s}
+#searchInput:focus{border-color:#36d7ca!important;box-shadow:0 0 0 2px #22d3ee22}
+#searchInput + svg{width:19px;height:19px;top:13px!important;color:#8eacc3;stroke-width:1.9}
+.insurer-select-trigger{min-height:43px;display:flex;justify-content:initial;gap:10px;border-radius:13px;font-size:13px;font-weight:700;white-space:nowrap;transition:border-color .18s,box-shadow .18s}
+.insurer-select-trigger:focus-visible{outline:2px solid #5eead4;outline-offset:2px}
+#companyFilter + .insurer-select-trigger .insurer-badge-inner{flex:1;min-width:0}
+.insurer-select-trigger>.insurer-badge-inner{flex:1;min-width:0}
+.insurer-select-trigger .insurer-badge-inner>span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.insurer-heading-icon{display:grid;place-items:center;color:#5eead4;flex:none;order:3}
+.insurer-heading-icon svg{width:19px;height:19px}
+.insurer-select-chevron{order:2;border-width:0 2px 2px 0!important;width:9px!important;height:9px!important;margin:0 6px 5px!important;border-color:#5eead4}
+.insurer-select-trigger[aria-expanded="true"] .insurer-select-chevron{transform:rotate(225deg);margin:5px 6px 0!important}
+.insurer-select-menu{box-shadow:0 18px 40px #0008}
+.insurer-select-option{min-height:39px;font-size:13px;border-radius:10px}
+.insurer-select-option[aria-selected="true"]{background:#0d94883a}
+.dashboard-footer{margin-top:16px!important;padding:11px 5px!important;border-top:1px solid #264057;display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:10px;background:transparent!important;box-shadow:none!important}
+.footer-total{display:flex;align-items:center;gap:7px;color:#b6cada;font-size:12px;font-weight:500;white-space:nowrap}
+.footer-total strong{font-size:17px!important;line-height:1;font-weight:800;color:#f4faff}
+.footer-total svg{color:#5eead4;height:19px;width:19px;flex:none}
+#footerTeamSlot{min-width:0}
+#footerTeamSlot #teamAdminTools{position:relative!important;left:auto!important;bottom:auto!important;right:auto!important;z-index:auto!important;max-width:none!important}
+#footerTeamSlot #teamAdminTools>div{background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;width:auto!important}
+#footerTeamSlot #teamToggle{border:1px solid #38536e;border-radius:11px!important;background:#0f2035!important;color:#eef5fc;font-size:12px!important;padding:8px 11px!important;min-height:36px}
+#footerTeamSlot #adminRequests{position:absolute;bottom:calc(100% + 8px);left:0;background:#122439;border:1px solid #38536e;border-radius:12px;padding:10px;width:min(320px,calc(100vw - 28px));box-shadow:0 10px 24px #0009;z-index:20}
+@media(max-width:420px){.insurer-select-trigger{padding:5px 9px;font-size:12px;gap:7px}.insurer-heading-icon svg{width:17px;height:17px}.footer-total{font-size:11px}.footer-total strong{font-size:15px!important}}
+html[data-theme="light"] .dashboard-footer{border-top-color:#dae5ee}
+html[data-theme="light"] #footerTeamSlot #teamToggle{background:#f8fafc!important;color:#0f172a}
+
+</style>
 </head>
 <body class="text-slate-800 pb-12 antialiased select-none">
 <div id="accessGate" class="checking" style="position:fixed;inset:0;z-index:9999;background:#f8fafc;display:flex;align-items:center;justify-content:center;padding:20px;font-family:Cairo,sans-serif" dir="rtl"><div style="max-width:420px;width:100%;background:white;padding:30px;border-radius:20px;box-shadow:0 10px 35px #0f172a18;text-align:center"><div id="brandSplash" aria-label="تحميل لوحة التأمين"><div class="brandMark"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5 20 6v5.6c0 5-3.2 8.4-8 10-4.8-1.6-8-5-8-10V6l8-3.5Z"/><path d="m8.5 12 2.3 2.3 4.8-4.8"/></svg></div><div class="brandProgress"></div></div><h2 style="font-size:22px;font-weight:800;color:#0f172a">Insurance Dashboard</h2><p id="accessMessage" style="margin:15px 0;color:#475569">جاري التحقق من حسابك...</p><button id="googleLogin" style="display:none;background:#0f766e;color:white;padding:12px 20px;border-radius:10px;width:100%;font-weight:bold">تسجيل الدخول باستخدام Google</button><button id="googleLogout" style="display:none;margin-top:12px;color:#64748b">تسجيل الخروج</button></div></div>
@@ -270,12 +316,12 @@ html[data-theme="light"] .footer-total strong{color:#0f172a}
 
         <!-- Due-date filter: applied only after confirmation -->
         <section class="advanced-panel bg-white border border-slate-200 rounded-2xl p-3 shadow-sm">
-          <button type="button" id="advancedToggle" onclick="toggleAdvancedFilters()" class="w-full flex items-center justify-between text-xs font-bold text-teal-500" aria-expanded="false"><span class="due-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18M8 14h2M13 14h2M8 18h2"/></svg><span><strong data-i18n="duePeriod">فترة الاستحقاق</strong><small id="duePeriodHint">كل التواريخ</small></span></span><span id="advancedChevron" class="filter-chevron" aria-hidden="true"></span></button>
+          <button type="button" id="advancedToggle" onclick="toggleAdvancedFilters()" class="w-full flex items-center justify-between text-xs font-bold text-teal-500" aria-expanded="false"><span class="due-heading"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18M8 14h2M13 14h2M8 18h2"/></svg><span><strong data-i18n="duePeriod">فترة الاستحقاق</strong><small id="duePeriodHint" class="hidden" aria-live="polite"></small></span></span><span id="advancedChevron" class="filter-chevron" aria-hidden="true"></span></button>
           <div id="activeDuePeriod" class="hidden mt-2 flex items-center gap-2 text-xs"><span id="activeDuePeriodText" class="flex-1"></span><button type="button" id="clearDuePeriod" onclick="resetAdvancedFilters()" aria-label="إلغاء فترة الاستحقاق" title="إلغاء فترة الاستحقاق" class="filter-clear">×</button></div>
           <div id="advancedFields" class="hidden mt-3 space-y-3">
             <div><label class="sr-only" for="advPeriod" data-i18n="duePeriod">فترة الاستحقاق</label><select id="advPeriod" onchange="updateAdvancedFields()" class="w-full border rounded-xl p-2 text-xs"><option value="all" data-i18n="allDates">كل التواريخ</option><option value="month" data-i18n="specificMonth">شهر معين</option><option value="range" data-i18n="dateRange">من تاريخ إلى تاريخ</option></select></div>
-            <div id="advMonthWrap" class="hidden"><label class="field-label" data-i18n="month">الشهر</label><input id="advMonth" type="month" class="w-full border rounded-xl p-2 text-xs"></div>
-            <div id="advDatesWrap" class="hidden grid-cols-2 gap-2"><div><label class="field-label" data-i18n="from">من تاريخ</label><input id="advFrom" type="date" class="w-full border rounded-xl p-2 text-xs"></div><div><label class="field-label" data-i18n="to">إلى تاريخ</label><input id="advTo" type="date" class="w-full border rounded-xl p-2 text-xs"></div></div>
+            <div id="advMonthWrap" class="hidden"><label class="field-label" data-i18n="month">الشهر</label><div class="due-date-control"><input id="advMonth" type="month" class="w-full border rounded-xl p-2 text-xs" aria-label="الشهر"><span class="due-date-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg></span></div></div>
+            <div id="advDatesWrap" class="hidden grid-cols-2 gap-2"><div><label class="field-label" data-i18n="from">من تاريخ</label><div class="due-date-control"><input id="advFrom" type="date" class="w-full border rounded-xl p-2 text-xs" aria-label="من تاريخ"><span class="due-date-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg></span></div></div><div><label class="field-label" data-i18n="to">إلى تاريخ</label><div class="due-date-control"><input id="advTo" type="date" class="w-full border rounded-xl p-2 text-xs" aria-label="إلى تاريخ"><span class="due-date-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg></span></div></div></div>
             <div class="flex justify-end"><button type="button" onclick="confirmDuePeriod()" class="filter-confirm" data-i18n="done">تم</button></div>
           </div>
         </section>
@@ -406,7 +452,7 @@ html[data-theme="light"] .footer-total strong{color:#0f172a}
           document.querySelectorAll('input,textarea').forEach(el=>{if(!el.dataset.arPlaceholder)el.dataset.arPlaceholder=el.getAttribute('placeholder')||'';el.placeholder=lang==='en'?({'أي ملاحظات للمتابعة الصيدلانية':'Pharmacy follow-up notes','10 أرقام':'10 digits','أي ملاحظات للمراجعة الصيدلانية':'Pharmacy follow-up notes','وصف الصنف':'Item description','الكمية':'Qty'}[el.dataset.arPlaceholder]||el.dataset.arPlaceholder):el.dataset.arPlaceholder;});
           document.querySelectorAll('input:not([type="date"]):not([type="month"]):not([type="number"]),textarea').forEach(el=>el.style.textAlign=lang==='en'?'left':'right');
           document.querySelectorAll('.insurer-select-native').forEach(el=>el.dispatchEvent(new Event('change')));
-          const search=document.getElementById('searchInput');if(search)search.placeholder=langText('ابحث برقم الهوية / الإقامة','Search by patient ID');
+          const search=document.getElementById('searchInput');if(search)search.placeholder=langText('ابحث برقم الهوية / الإقامة','Search by patient ID');document.dispatchEvent(new Event('insurance-language-change'));
           document.querySelectorAll('.med-name').forEach(el=>el.placeholder=langText('وصف الصنف','Item description'));
           document.querySelectorAll('.med-qty').forEach(el=>el.placeholder=langText('الكمية','Qty'));
           if(typeof renderList==='function')renderList();
@@ -422,7 +468,7 @@ html[data-theme="light"] .footer-total strong{color:#0f172a}
         let appliedDuePeriod={mode:'all',month:'',from:'',to:''};
         function toggleAdvancedFilters(){const fields=document.getElementById('advancedFields');const open=fields.classList.toggle('hidden')===false;document.getElementById('advancedToggle').setAttribute('aria-expanded',String(open))}
         function updateAdvancedFields(){const mode=document.getElementById('advPeriod').value;document.getElementById('advMonthWrap').classList.toggle('hidden',mode!=='month');document.getElementById('advDatesWrap').classList.toggle('hidden',mode!=='range');document.getElementById('advDatesWrap').classList.toggle('grid',mode==='range')}
-        function renderDuePeriod(){const el=document.getElementById('activeDuePeriod');const {mode,month,from,to}=appliedDuePeriod;el.classList.toggle('hidden',mode==='all');const en=document.documentElement.lang==='en';document.getElementById('activeDuePeriodText').textContent=mode==='month'?month:mode==='range'?`${from} — ${to}`:'';document.getElementById('clearDuePeriod').title=en?'Clear due-date filter':'إلغاء فترة الاستحقاق';const hint=document.getElementById('duePeriodHint');if(hint)hint.textContent=mode==='all'?(en?'All dates':'كل التواريخ'):mode==='month'?month:`${from} — ${to}`}
+        function renderDuePeriod(){const el=document.getElementById('activeDuePeriod');const {mode,month,from,to}=appliedDuePeriod;el.classList.toggle('hidden',mode==='all');const en=document.documentElement.lang==='en';document.getElementById('activeDuePeriodText').textContent=mode==='month'?month:mode==='range'?`${from} — ${to}`:'';document.getElementById('clearDuePeriod').title=en?'Clear due-date filter':'إلغاء فترة الاستحقاق';const hint=document.getElementById('duePeriodHint');if(hint){hint.textContent=mode==='all'?'':mode==='month'?month:`${from} — ${to}`;hint.classList.toggle('hidden',mode==='all')}}
         function confirmDuePeriod(){const mode=document.getElementById('advPeriod').value,month=document.getElementById('advMonth').value,from=document.getElementById('advFrom').value,to=document.getElementById('advTo').value;const en=document.documentElement.lang==='en';if(mode==='month'&&!/^\d{4}-\d{2}$/.test(month)){alert(en?'Choose a month.':'اختر الشهر المطلوب.');return}if(mode==='range'&&(!from||!to||from>to)){alert(en?'Choose a valid date range.':'حدد فترة استحقاق صحيحة.');return}appliedDuePeriod={mode,month,from,to};renderDuePeriod();applyFilters();const fields=document.getElementById('advancedFields');fields.classList.add('hidden');document.getElementById('advancedToggle').setAttribute('aria-expanded','false');showToast('تم ✔️')}
         function resetAdvancedFilters(){appliedDuePeriod={mode:'all',month:'',from:'',to:''};document.getElementById('advPeriod').value='all';document.getElementById('advMonth').value='';document.getElementById('advFrom').value='';document.getElementById('advTo').value='';updateAdvancedFields();renderDuePeriod();applyFilters()}
         function applyTheme(theme) {
@@ -1054,7 +1100,7 @@ onAuthStateChanged(auth,async u=>{stop();user=u;role=null;login.style.display=u?
  'ميدغلف':'https://companieslogo.com/img/orig/8030.SR_BIG-32d46cc2.png?t=1720244490'};
  const en={'بوبا':'Bupa Arabia','التعاونية':'Tawuniya','تكافل الراجحي':'Al Rajhi Takaful','ميدغلف':'Medgulf','':'All insurers'};
  const isEn=()=>document.documentElement.lang==='en';
- const name=(v,opt)=>isEn()?(en[v]||opt.textContent):(v||'كل الشركات');
+ const name=(v,opt,filter=false)=>{if(!v&&filter)return isEn()?'Insurance company':'شركة التأمين';return isEn()?(en[v]||opt.textContent):(v||'كل الشركات')};
  function build(select){
    if(!select || select.dataset.brandedSelect)return;
    select.dataset.brandedSelect='true';
@@ -1064,10 +1110,10 @@ onAuthStateChanged(auth,async u=>{stop();user=u;role=null;login.style.display=u?
    const menu=document.createElement('div');menu.className='insurer-select-menu';menu.setAttribute('role','listbox');menu.hidden=true;
    wrap.append(trigger,menu);
    const item=(v,label)=>{const row=document.createElement('span');row.className='insurer-badge-inner';if(logos[v]){const shell=document.createElement('span');shell.className='insurer-logo-shell';const img=document.createElement('img');img.className='insurer-logo';img.alt='';img.src=logos[v];img.onerror=()=>shell.remove();shell.append(img);row.append(shell)}const text=document.createElement('span');text.textContent=label;row.append(text);return row};
-   const refresh=()=>{trigger.replaceChildren(item(select.value,name(select.value,select.selectedOptions[0]||{textContent:''})));const chev=document.createElement('span');chev.className='insurer-select-chevron';chev.setAttribute('aria-hidden','true');trigger.append(chev);menu.replaceChildren();[...select.options].forEach(opt=>{const b=document.createElement('button');b.type='button';b.className='insurer-select-option';b.setAttribute('role','option');b.setAttribute('aria-selected',String(select.value===opt.value));b.append(item(opt.value,name(opt.value,opt)));b.onclick=()=>{select.value=opt.value;select.dispatchEvent(new Event('change',{bubbles:true}));close();refresh()};menu.append(b)})};
+   const refresh=()=>{trigger.replaceChildren(item(select.value,name(select.value,select.selectedOptions[0]||{textContent:''},select.id==='companyFilter')));const chev=document.createElement('span');chev.className='insurer-select-chevron';chev.setAttribute('aria-hidden','true');trigger.append(chev);if(select.id==='companyFilter'&&!select.value){const headingIcon=document.createElement('span');headingIcon.className='insurer-heading-icon';headingIcon.setAttribute('aria-hidden','true');headingIcon.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V7l9-4 9 4v14M3 21h18M8 10h1m6 0h1M8 14h1m6 0h1M10 21v-4h4v4"/></svg>';trigger.insertBefore(headingIcon,trigger.firstChild)}menu.replaceChildren();[...select.options].forEach(opt=>{const b=document.createElement('button');b.type='button';b.className='insurer-select-option';b.setAttribute('role','option');b.setAttribute('aria-selected',String(select.value===opt.value));b.append(item(opt.value,name(opt.value,opt)));b.onclick=()=>{select.value=opt.value;select.dispatchEvent(new Event('change',{bubbles:true}));close();refresh()};menu.append(b)})};
    const close=()=>{menu.hidden=true;trigger.setAttribute('aria-expanded','false')};
    trigger.onclick=()=>{const open=menu.hidden;document.querySelectorAll('.insurer-select-menu').forEach(m=>m.hidden=true);menu.hidden=!open;trigger.setAttribute('aria-expanded',String(open));if(open)refresh()};
-   select.addEventListener('change',refresh);
+   select.addEventListener('change',refresh);document.addEventListener('insurance-language-change',refresh);
    document.addEventListener('pointerdown',e=>{if(!wrap.contains(e.target))close()});
    document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
    const observer=new MutationObserver(()=>refresh());observer.observe(select,{attributes:true,attributeFilter:['value']});
