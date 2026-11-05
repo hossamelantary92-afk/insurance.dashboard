@@ -696,8 +696,8 @@ main>.dashboard-footer{margin-top:auto!important;padding:12px 2px 0!important;mi
 
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-slate-700 font-bold mb-1">رقم الجوال</label>
-                        <input type="tel" id="phoneNumber" placeholder="05XXXXXXXX" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-sky-500">
+                        <label class="block text-slate-700 font-bold mb-1">رقم الجوال *</label>
+                        <input type="tel" id="phoneNumber" required autocomplete="tel" placeholder="05XXXXXXXX" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-sky-500">
                     </div>
                     <div>
                         <label class="block text-slate-700 font-bold mb-1">الدورة التأمينية *</label>
@@ -1369,7 +1369,7 @@ main>.dashboard-footer{margin-top:auto!important;padding:12px 2px 0!important;mi
             document.getElementById('prescriptionForm').reset();
             document.getElementById('medicationRows').replaceChildren();addMedicationRow();
             document.getElementById('cycleDuration').value = "84";
-            document.getElementById('dispenseDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('dispenseDate').value = ''; // Deliberately blank: user must choose the actual dispense date.
             document.getElementById('prescriptionModal').classList.remove('hidden');
         }
 
@@ -1399,6 +1399,21 @@ main>.dashboard-footer{margin-top:auto!important;padding:12px 2px 0!important;mi
 
         async function handleFormSubmit(e) {
             e.preventDefault();
+            // Validate required marked fields before any Firestore write.
+            const requiredFields = ['patientName','nationalId','insuranceCompany','phoneNumber','cycleDuration','dispenseDate'];
+            for (const fieldId of requiredFields) {
+                const input = document.getElementById(fieldId);
+                if (!input || !String(input.value || '').trim() || !input.checkValidity()) {
+                    if (input) {
+                        input.focus();
+                        input.reportValidity();
+                    }
+                    if (!input || String(input.value || '').trim() === '') {
+                        alert(langText('يرجى استكمال جميع الحقول المطلوبة (*) قبل حفظ الوصفة.','Please complete all required (*) fields before saving.'));
+                    }
+                    return;
+                }
+            }
             const idx = parseInt(document.getElementById('editIndex').value, 10);
             const parsedMeds=[...document.querySelectorAll('#medicationRows .med-row')].map(row=>({name:row.querySelector('.med-name').value.trim(),quantity:row.querySelector('.med-qty').value.trim()}));
             if(parsedMeds.some(m=>m.quantity && (!/^\d+$/.test(m.quantity)||Number(m.quantity)<1))){alert(langText('الكمية يجب أن تكون رقمًا صحيحًا أكبر من صفر','Quantity must be a positive whole number'));return;}
