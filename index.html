@@ -524,7 +524,7 @@ html[data-theme="light"] .dispense-date-picker-shell{color:#087e84;border-left-c
 
 /* Compact export dropdown consistent with Insurance Dashboard's navy/teal identity. */
 .export-menu-container{position:relative;flex:none}
-.export-format-menu{position:absolute;left:0;right:auto;top:calc(100% + 9px);width:215px;max-width:calc(100vw - 24px);padding:7px;border-radius:15px;border:1px solid #38536d;background:#13263b;box-shadow:0 14px 40px #0008;z-index:1700;display:flex;flex-direction:column;gap:5px}
+.export-format-menu{position:fixed;left:12px;right:auto;top:110px;width:235px;max-width:calc(100vw - 24px);padding:7px;border-radius:15px;border:1px solid #38536d;background:#13263b;box-shadow:0 14px 40px #0008;z-index:1700;display:flex;flex-direction:column;gap:5px}
 .export-format-menu.hidden{display:none!important}
 .export-format-choice{display:flex;align-items:center;gap:10px;direction:ltr;text-align:left;width:100%;padding:9px;border-radius:11px;color:#e9f2fa;min-height:58px}
 .export-format-choice:hover,.export-format-choice:focus-visible{background:#24425a;outline:1px solid #3dc8bd}
@@ -1600,7 +1600,15 @@ html[data-theme="light"] .export-format-copy small{color:#587187}
             const menu=document.getElementById('exportMenu');
             const opening=menu.classList.contains('hidden');
             closeExportMenu();
-            if(opening){menu.classList.remove('hidden');document.getElementById('exportMenuToggle').setAttribute('aria-expanded','true');}
+            if(opening){
+                const button=document.getElementById('exportMenuToggle');
+                const rect=button.getBoundingClientRect();
+                // Keep the menu fully in view on iPhone, even inside the sticky header.
+                menu.style.top=Math.min(window.innerHeight-135,rect.bottom+8)+'px';
+                menu.style.left=Math.max(12,Math.min(rect.left,window.innerWidth-247))+'px';
+                menu.classList.remove('hidden');
+                button.setAttribute('aria-expanded','true');
+            }
         }
         function startExport(format){
             closeExportMenu();
@@ -1640,8 +1648,8 @@ html[data-theme="light"] .export-format-copy small{color:#587187}
             const headers=['رقم الهوية','رقم الجوال','الأصناف','الكمية','تاريخ الاستحقاق','الملاحظات'];
             const container=document.createElement('div');
             container.setAttribute('dir','ltr');
-            // The export is temporarily rendered off-screen so Arabic shaping works in html2canvas.
-            container.style.cssText='position:fixed;left:-20000px;top:0;width:1050px;background:#fff;color:#17324d;z-index:-1;font-family:Cairo,Arial,sans-serif;';
+            // Render a real, measurable HTML layout at the document origin; far-offscreen positioning causes blank PDF canvases on iOS.
+            container.style.cssText='position:absolute;left:0;top:0;width:1050px;background:#fff;color:#17324d;z-index:-1;pointer-events:none;font-family:Cairo,Arial,sans-serif;';
             const styles=document.createElement('style');
             styles.textContent=`
               .pdf-export-sheet{width:1050px;padding:18px 16px;background:#fff;color:#17324d;box-sizing:border-box;font-family:Cairo,Arial,sans-serif}
@@ -1709,6 +1717,10 @@ html[data-theme="light"] .export-format-copy small{color:#587187}
             document.body.appendChild(container);
             try{
                 if(document.fonts&&document.fonts.ready)await document.fonts.ready;
+                // Confirm actual prescription rows are available to the renderer.
+                if (!container.querySelector('.pdf-export-table tbody tr td') || !container.getBoundingClientRect().width) {
+                    throw new Error('PDF table could not be rendered');
+                }
                 await html2pdf().set({
                     margin:[7,7,7,7],
                     filename:'Insurance_Prescriptions_'+todayInRiyadh()+'.pdf',
