@@ -366,6 +366,21 @@ html[data-theme="light"] #alertBannerText { color:#992849 !important; }
 html[data-theme="light"] #accessGate:not(.checking) { background:#f2f6fa !important; }
 html[data-theme="light"] #accessGate:not(.checking)>div { background:#fff !important; }
 
+
+/* Aligned prescription action controls – approved mobile layout */
+.prescription-actions{width:100%;min-width:0;gap:10px;align-items:stretch}
+.prescription-action-icons{flex:0 0 auto;gap:8px;align-items:stretch}
+.prescription-action-icon{width:52px;height:52px;min-width:52px;min-height:52px;display:inline-flex;align-items:center;justify-content:center;border-radius:15px;transition:transform .16s,background-color .16s,border-color .16s}
+.prescription-action-icon:active{transform:scale(.97)}
+.prescription-action-icon .prescription-action-svg{width:24px;height:24px;flex:none}
+.prescription-renew-action{height:52px;min-height:52px;min-width:0;padding:0 12px!important;border-radius:15px;line-height:1.35}
+.prescription-renew-action .prescription-action-svg{width:21px;height:21px;flex:none}
+.prescription-renew-action span{min-width:0;text-align:center;font-weight:800}
+.prescription-edit-action{background:#0d4656!important;color:#e7fffd!important;border:1px solid #39d7d0!important}
+.prescription-edit-action:hover{background:#105b69!important}
+html[data-theme="light"] .prescription-edit-action{background:#e3f5f5!important;color:#075b64!important;border-color:#58b7b8!important}
+html[data-theme="light"] .prescription-edit-action:hover{background:#c9ebec!important}
+@media(max-width:410px){.prescription-actions{gap:7px}.prescription-action-icons{gap:6px}.prescription-action-icon{width:48px;height:48px;min-width:48px;min-height:48px}.prescription-renew-action{height:48px;min-height:48px;padding:0 9px!important;font-size:11px!important}.prescription-action-icon .prescription-action-svg{width:23px;height:23px}}
 </style>
 </head>
 <body class="text-slate-800 pb-12 antialiased select-none">
@@ -1051,18 +1066,18 @@ html[data-theme="light"] #accessGate:not(.checking)>div { background:#fff !impor
                         </ul>
                     </div>
 
-                    <div class="flex items-center justify-between gap-2 pt-1">
-                        <div class="flex items-center gap-1.5">
-                            <button style="${window.insuranceAccess?.isAdmin() ? "" : "display:none"}" onclick="promptDelete(${index}, event)" title="حذف الوصفة" class="w-8 h-8 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 flex items-center justify-center transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    <div class="prescription-actions flex items-center justify-between gap-2 pt-1">
+                        <div class="prescription-action-icons flex items-center gap-1.5">
+                            <button style="${window.insuranceAccess?.isAdmin() ? "" : "display:none"}" onclick="promptDelete(${index}, event)" title="حذف الوصفة" aria-label="حذف الوصفة" class="prescription-action-icon prescription-delete-action rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 flex items-center justify-center transition-colors">
+                                <svg class="prescription-action-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                             </button>
-                            <button onclick="openEditModal(${index}, event)" title="تعديل الوصفة" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 flex items-center justify-center transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                            <button onclick="openEditModal(${index}, event)" title="تعديل الوصفة" aria-label="تعديل الوصفة" class="prescription-action-icon prescription-edit-action rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 flex items-center justify-center transition-colors">
+                                <svg class="prescription-action-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                             </button>
                         </div>
 
-                        <button onclick="renewDispenseToday(${index}, event)" class="flex-1 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-bold text-xs py-2 px-3 rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <button onclick="renewDispenseToday(${index}, event)" class="prescription-renew-action flex-1 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-bold text-xs py-2 px-3 rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]">
+                            <svg class="prescription-action-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                             <span>${langText('تم صرف دورة جديدة اليوم','Dispensed new cycle today')}</span>
                         </button>
                     </div>
