@@ -500,10 +500,23 @@ main>.dashboard-footer{margin-top:auto!important;padding:12px 2px 0!important;mi
 /* Explicit DD-MM-YYYY date display and optional native calendar selector. */
 .dispense-date-wrap{position:relative;min-width:0}
 #dispenseDate{width:100%;min-width:0;box-sizing:border-box;padding-right:52px!important;text-align:left;direction:ltr;font-variant-numeric:tabular-nums;font-size:14px}
-.dispense-date-picker-shell{position:absolute;top:0;right:0;width:46px;height:100%;display:grid;place-items:center;color:#5eead4;border-left:1px solid #36526b;overflow:hidden;border-radius:0 12px 12px 0}
+.dispense-date-picker-shell{position:absolute;top:0;right:0;width:46px;height:100%;display:grid;place-items:center;color:#5eead4;border-left:1px solid #36526b;border-radius:0 12px 12px 0;cursor:pointer;background:transparent}
 .dispense-date-picker-shell svg{width:20px;height:20px;pointer-events:none}
-.dispense-date-picker-shell input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;box-sizing:border-box}
-.dispense-date-picker-shell input::-webkit-calendar-picker-indicator{position:absolute;inset:0;width:100%;height:100%;cursor:pointer;opacity:0}
+.dispense-calendar{position:absolute;top:calc(100% + 8px);right:0;z-index:500;width:min(320px,calc(100vw - 66px));background:#122439;border:1px solid #36536b;border-radius:16px;padding:12px;box-shadow:0 16px 42px #0008;color:#f2f8ff;direction:rtl}
+.dispense-calendar.hidden{display:none!important}
+.dispense-calendar-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;font-size:14px;font-weight:800}
+.dispense-calendar-nav{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;background:#1c3952;color:#66e8d7;font-size:27px;line-height:1}
+.dispense-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;text-align:center;align-items:center}
+.dispense-calendar-weekdays{color:#a8bfd1;font-size:11px;font-weight:700;margin-bottom:5px}
+.dispense-calendar-weekdays>span{padding:5px 0}
+.dispense-calendar-day{height:37px;min-width:0;border-radius:9px;display:grid;place-items:center;font-size:13px;font-weight:700;color:inherit;background:transparent}
+.dispense-calendar-day:hover,.dispense-calendar-day:focus-visible{background:#1d4b59;color:#85fff0;outline:1px solid #42cbbb}
+.dispense-calendar-day.is-selected{background:#0d9488;color:white}
+.dispense-calendar-day.is-today:not(.is-selected){box-shadow:inset 0 0 0 1px #30bcb0}
+html[data-theme="light"] .dispense-calendar{background:#fff;color:#17324d;border-color:#c7d9e6;box-shadow:0 14px 35px #17324d30}
+html[data-theme="light"] .dispense-calendar-nav{background:#e8f4f6;color:#087e84}
+html[data-theme="light"] .dispense-calendar-weekdays{color:#667f94}
+html[data-theme="light"] .dispense-calendar-day:hover,html[data-theme="light"] .dispense-calendar-day:focus-visible{background:#e0f6f0;color:#087e84}
 html[data-theme="light"] .dispense-date-picker-shell{color:#087e84;border-left-color:#cbdbe8}
 
 </style>
@@ -721,10 +734,18 @@ html[data-theme="light"] .dispense-date-picker-shell{color:#087e84;border-left-c
                     <label class="block text-slate-700 font-bold mb-1">تاريخ آخر صرف *</label>
                     <div class="dispense-date-wrap">
                         <input type="text" id="dispenseDate" required inputmode="numeric" maxlength="10" autocomplete="off" placeholder="DD-MM-YYYY" pattern="[0-9]{2}-[0-9]{2}-[0-9]{4}" aria-label="تاريخ آخر صرف DD-MM-YYYY" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-sky-500" dir="ltr">
-                        <span class="dispense-date-picker-shell" title="اختيار التاريخ">
+                        <button type="button" id="dispenseCalendarToggle" class="dispense-date-picker-shell" aria-label="اختيار تاريخ آخر صرف" aria-controls="dispenseCalendar" aria-expanded="false" onclick="toggleDispenseCalendar(event)">
                             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg>
-                            <input id="dispenseDatePicker" type="date" tabindex="-1" aria-label="اختيار تاريخ آخر صرف" onchange="syncDispenseDateFromPicker(this)" />
-                        </span>
+                        </button>
+                        <div id="dispenseCalendar" class="dispense-calendar hidden" role="group" aria-label="اختر تاريخ آخر صرف" dir="rtl">
+                            <div class="dispense-calendar-top">
+                                <button type="button" class="dispense-calendar-nav" onclick="changeDispenseCalendarMonth(-1)" aria-label="الشهر السابق">‹</button>
+                                <span id="dispenseCalendarMonth"></span>
+                                <button type="button" class="dispense-calendar-nav" onclick="changeDispenseCalendarMonth(1)" aria-label="الشهر التالي">›</button>
+                            </div>
+                            <div id="dispenseCalendarWeekdays" class="dispense-calendar-grid dispense-calendar-weekdays"></div>
+                            <div id="dispenseCalendarDays" class="dispense-calendar-grid"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -1018,9 +1039,53 @@ html[data-theme="light"] .dispense-date-picker-shell{color:#087e84;border-left-c
             if(d.getUTCFullYear()!==year||d.getUTCMonth()!==month-1||d.getUTCDate()!==day)return null;
             return `${match[3]}-${match[2]}-${match[1]}`;
         }
-        function syncDispenseDateFromPicker(picker) {
-            document.getElementById('dispenseDate').value=formatDateToDisplay(picker.value);
+        let dispenseCalendarView = null;
+        function closeDispenseCalendar() {
+            document.getElementById('dispenseCalendar').classList.add('hidden');
+            document.getElementById('dispenseCalendarToggle').setAttribute('aria-expanded','false');
         }
+        function toggleDispenseCalendar(event) {
+            if(event)event.stopPropagation();
+            const el=document.getElementById('dispenseCalendar');
+            if(!el.classList.contains('hidden')){closeDispenseCalendar();return;}
+            const iso=parseDispenseDateDMY(document.getElementById('dispenseDate').value);
+            const seed=iso?new Date(iso+'T12:00:00Z'):new Date(todayInRiyadh()+'T12:00:00Z');
+            dispenseCalendarView={year:seed.getUTCFullYear(),month:seed.getUTCMonth()};
+            renderDispenseCalendar();
+            el.classList.remove('hidden');
+            document.getElementById('dispenseCalendarToggle').setAttribute('aria-expanded','true');
+        }
+        function changeDispenseCalendarMonth(delta){
+            if(!dispenseCalendarView)return;
+            const next=new Date(Date.UTC(dispenseCalendarView.year,dispenseCalendarView.month+delta,1));
+            dispenseCalendarView={year:next.getUTCFullYear(),month:next.getUTCMonth()};
+            renderDispenseCalendar();
+        }
+        function renderDispenseCalendar() {
+            const {year,month}=dispenseCalendarView;
+            const lang=document.documentElement.lang==='en'?'en':'ar';
+            document.getElementById('dispenseCalendarMonth').textContent=new Intl.DateTimeFormat(lang==='en'?'en-GB':'ar-EG',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(Date.UTC(year,month,1)));
+            const week=document.getElementById('dispenseCalendarWeekdays');
+            week.replaceChildren();
+            (lang==='en'?['Sun','Mon','Tue','Wed','Thu','Fri','Sat']:['أحد','إثن','ثلا','أرب','خمي','جمع','سبت']).forEach(w=>{const e=document.createElement('span');e.textContent=w;week.appendChild(e)});
+            const days=document.getElementById('dispenseCalendarDays');days.replaceChildren();
+            const offset=new Date(Date.UTC(year,month,1)).getUTCDay();
+            for(let i=0;i<offset;i++){const spacer=document.createElement('span');spacer.setAttribute('aria-hidden','true');days.appendChild(spacer)}
+            const count=new Date(Date.UTC(year,month+1,0)).getUTCDate();
+            const selected=parseDispenseDateDMY(document.getElementById('dispenseDate').value);
+            const today=todayInRiyadh();
+            for(let day=1;day<=count;day++){
+                const iso=`${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                const b=document.createElement('button');b.type='button';b.className='dispense-calendar-day';
+                b.textContent=String(day);b.setAttribute('aria-label',iso);
+                if(iso===today)b.classList.add('is-today');
+                if(iso===selected){b.classList.add('is-selected');b.setAttribute('aria-pressed','true')}
+                b.onclick=()=>{document.getElementById('dispenseDate').value=formatDateToDisplay(iso);closeDispenseCalendar();document.getElementById('dispenseDate').dispatchEvent(new Event('change',{bubbles:true}))};
+                days.appendChild(b);
+            }
+        }
+        document.addEventListener('pointerdown',e=>{const wrap=document.querySelector('.dispense-date-wrap');if(wrap&&!wrap.contains(e.target))closeDispenseCalendar()});
+        document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDispenseCalendar()});
         function formatDateToDisplay(isoDateStr) {
             if (!isoDateStr) return '';
             const parts = isoDateStr.split('-');
@@ -1397,7 +1462,7 @@ html[data-theme="light"] .dispense-date-picker-shell{color:#087e84;border-left-c
             document.getElementById('medicationRows').replaceChildren();addMedicationRow();
             document.getElementById('cycleDuration').value = "84";
             document.getElementById('dispenseDate').value = ''; // Deliberately blank: user must choose the actual dispense date.
-            document.getElementById('dispenseDatePicker').value = '';
+            closeDispenseCalendar();
             document.getElementById('prescriptionModal').classList.remove('hidden');
         }
 
@@ -1413,7 +1478,7 @@ html[data-theme="light"] .dispense-date-picker-shell{color:#087e84;border-left-c
             document.getElementById('phoneNumber').value = p.phone || '';
             document.getElementById('cycleDuration').value = p.cycle || '84';
             document.getElementById('dispenseDate').value = formatDateToDisplay(p.dispenseDate || '');
-            document.getElementById('dispenseDatePicker').value = p.dispenseDate || '';
+            closeDispenseCalendar();
             document.getElementById('patientRemarks').value = p.remarks || '';
             document.getElementById('medicationRows').replaceChildren();
             (p.meds||[]).forEach((m,i)=>addMedicationRow(m,(p.medQuantities||[])[i]));
