@@ -6,6 +6,7 @@
     <title>Insurance Dashboard</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- Google Font Cairo -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -77,7 +78,7 @@
 
             <!-- Actions -->
             <div class="flex items-center gap-2">
-                <button onclick="exportToExcel()" title="تصدير النتائج المعروضة إلى Excel" class="w-9 h-9 rounded-xl bg-slate-700/60 hover:bg-slate-700 border border-slate-600 flex items-center justify-center text-slate-200 transition-all">
+                <button onclick="openExportModal()" title="تصدير الوصفات إلى Excel" class="w-9 h-9 rounded-xl bg-slate-700/60 hover:bg-slate-700 border border-slate-600 flex items-center justify-center text-slate-200 transition-all">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 </button>
             </div>
@@ -217,7 +218,8 @@
 
                 <div>
                     <label class="block text-slate-700 font-bold mb-1">قائمة الأدوية والمستلزمات *</label>
-                    <textarea id="medicationsList" rows="3" required placeholder="مثال:&#10;Glucophage 500mg&#10;Januvia 100mg" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:outline-none focus:border-sky-500 leading-relaxed"></textarea>
+                    <textarea id="medicationsList" rows="3" required placeholder="مثال:&#10;Glucophage 500mg | 2&#10;Januvia 100mg | 1" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:outline-none focus:border-sky-500 leading-relaxed"></textarea>
+                    <p class="text-[10px] text-slate-500 mt-1">كل صنف في سطر، واكتب الكمية بعد | (مثال: Glucophage 500mg | 2). الكمية اختيارية.</p>
                 </div>
 
                 <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
@@ -241,6 +243,21 @@
                 <button onclick="executeDelete()" class="flex-1 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition-colors shadow-sm">نعم، احذف</button>
             </div>
         </div>
+    </div>
+
+    <!-- Export Excel filters -->
+    <div id="exportModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden items-center justify-center p-3" role="dialog" aria-modal="true" aria-label="تصدير الوصفات">
+      <div class="bg-white rounded-2xl shadow-xl p-5 w-full max-w-md space-y-4">
+        <div class="flex items-center justify-between"><h3 class="font-bold text-slate-900">تصدير الوصفات إلى Excel</h3><button type="button" onclick="closeExportModal()" aria-label="إغلاق" class="text-slate-500 text-xl">×</button></div>
+        <p class="text-xs text-slate-500">التصفية حسب تاريخ الاستحقاق. يتم تطبيق شركة التأمين المحددة حاليًا، مع تجاهل فلتر حالة الصرف.</p>
+        <label class="block text-xs font-bold">الفترة</label>
+        <select id="exportRangeMode" onchange="updateExportRangeFields()" class="w-full border rounded-xl p-2 text-sm">
+          <option value="all">كل التواريخ</option><option value="month">شهر معين</option><option value="range">من تاريخ إلى تاريخ</option>
+        </select>
+        <div id="exportMonthWrap" class="hidden"><label class="block text-xs font-semibold mb-1">الشهر</label><input id="exportMonth" type="month" class="w-full border rounded-xl p-2" /></div>
+        <div id="exportDatesWrap" class="hidden grid grid-cols-2 gap-2"><div><label class="block text-xs font-semibold mb-1">من تاريخ</label><input id="exportFrom" type="date" class="w-full border rounded-xl p-2" /></div><div><label class="block text-xs font-semibold mb-1">إلى تاريخ</label><input id="exportTo" type="date" class="w-full border rounded-xl p-2" /></div></div>
+        <div class="flex gap-2 justify-end"><button onclick="closeExportModal()" class="px-4 py-2 rounded-xl bg-slate-100 text-sm">إلغاء</button><button id="exportConfirm" onclick="exportToExcel()" class="px-4 py-2 rounded-xl bg-teal-700 text-white font-bold text-sm">تحميل Excel</button></div>
+      </div>
     </div>
 
     <!-- Toast Notification -->
@@ -719,7 +736,7 @@
             document.getElementById('cycleDuration').value = p.cycle || '84';
             document.getElementById('dispenseDate').value = p.dispenseDate || '';
             document.getElementById('patientRemarks').value = p.remarks || '';
-            document.getElementById('medicationsList').value = (p.meds || []).join('\n');
+            document.getElementById('medicationsList').value = (p.meds || []).map((m, i) => { const qty = (p.medQuantities || [])[i]; return qty === undefined || qty === null || qty === '' ? m : `${m} | ${qty}`; }).join('\n');
 
             document.getElementById('prescriptionModal').classList.remove('hidden');
         }
@@ -731,7 +748,13 @@
         async function handleFormSubmit(e) {
             e.preventDefault();
             const idx = parseInt(document.getElementById('editIndex').value, 10);
-            const meds = document.getElementById('medicationsList').value.split('\n').map(m => m.trim()).filter(Boolean);
+            const medicationLines = document.getElementById('medicationsList').value.split('\n').map(m => m.trim()).filter(Boolean);
+            const parsedMeds = medicationLines.map(line => {
+                const match = line.match(/^(.*?)\s*\|\s*(\d+(?:[.,]\d+)?)\s*$/);
+                return match ? {name: match[1].trim(), quantity: match[2].replace(',', '.')} : {name: line, quantity: ''};
+            });
+            const meds = parsedMeds.map(m => m.name);
+            const medQuantities = parsedMeds.map(m => m.quantity);
 
             const newPatientData = {
                 name: document.getElementById('patientName').value.trim(),
@@ -741,7 +764,8 @@
                 cycle: parseInt(document.getElementById('cycleDuration').value, 10) || 84,
                 dispenseDate: document.getElementById('dispenseDate').value,
                 remarks: document.getElementById('patientRemarks').value.trim(),
-                meds: meds
+                meds: meds,
+                medQuantities: medQuantities
             };
 
             const isNew = idx < 0;
@@ -764,61 +788,65 @@
             }
         }
 
-        // Custom Export with exact naming rules
+        function openExportModal() {
+            const modal = document.getElementById('exportModal');
+            document.getElementById('exportMonth').value = todayInRiyadh().slice(0, 7);
+            updateExportRangeFields();
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+        }
+        function closeExportModal() {
+            const modal = document.getElementById('exportModal');
+            modal.classList.add('hidden'); modal.classList.remove('flex');
+        }
+        function updateExportRangeFields() {
+            const mode = document.getElementById('exportRangeMode').value;
+            document.getElementById('exportMonthWrap').classList.toggle('hidden', mode !== 'month');
+            const dates = document.getElementById('exportDatesWrap');
+            dates.classList.toggle('hidden', mode !== 'range');
+            dates.classList.toggle('grid', mode === 'range');
+        }
         function exportToExcel() {
-            const filteredItems = getFilteredAndSortedItems();
-
-            if (!filteredItems.length) {
-                alert('لا توجد وصفات تطابق التصفية الحالية لتصديرها.');
+            if (typeof XLSX === 'undefined') {
+                alert('تعذر تحميل مكتبة Excel. تحقق من اتصال الإنترنت وحاول مرة أخرى.');
                 return;
             }
-
-            let csvContent = "\uFEFFم,رقم الهوية / الإقامة,اسم العميل,شركة التأمين,رقم الجوال,مدة الدورة,تاريخ آخر صرف,تاريخ الاستحقاق,الحالة,الأدوية,الملاحظات\n";
-
-            filteredItems.forEach(({ patient, status }, idx) => {
-                const medsString = (patient.meds || []).join(' | ').replace(/"/g, '""');
-                const displayDispenseDate = formatDateToDisplay(patient.dispenseDate);
-                const row = [
-                    idx + 1,
-                    `"${patient.id || ''}"`,
-                    `"${patient.name || ''}"`,
-                    `"${patient.company || ''}"`,
-                    `"${patient.phone || ''}"`,
-                    patient.cycle || 84,
-                    `"${displayDispenseDate}"`,
-                    `"${status.dueDate}"`,
-                    `"${status.text}"`,
-                    `"${medsString}"`,
-                    `"${(patient.remarks || '').replace(/"/g, '""')}"`
-                ];
-                csvContent += row.join(",") + "\n";
+            const mode = document.getElementById('exportRangeMode').value;
+            const month = document.getElementById('exportMonth').value;
+            const from = document.getElementById('exportFrom').value;
+            const to = document.getElementById('exportTo').value;
+            if (mode === 'month' && !/^\d{4}-\d{2}$/.test(month)) { alert('اختر الشهر المطلوب.'); return; }
+            if (mode === 'range' && (!from || !to || from > to)) { alert('حدد تاريخ بداية ونهاية صحيحين.'); return; }
+            const company = document.getElementById('companyFilter').value;
+            const rows = [];
+            patients.forEach(patient => {
+                if (company && patient.company !== company) return;
+                if (!patient.dispenseDate) return;
+                const dueISO = getPrescriptionStatus(patient.dispenseDate, patient.cycle || 84).dueDateISO;
+                if (mode === 'month' && dueISO.slice(0, 7) !== month) return;
+                if (mode === 'range' && (dueISO < from || dueISO > to)) return;
+                const meds = Array.isArray(patient.meds) ? patient.meds : [];
+                const quantities = Array.isArray(patient.medQuantities) ? patient.medQuantities : [];
+                (meds.length ? meds : ['']).forEach((med, i) => rows.push({
+                    'رقم الهوية': String(patient.id || ''),
+                    'رقم الجوال': String(patient.phone || ''),
+                    'الأصناف': String(med || ''),
+                    'الكمية': quantities[i] === undefined ? '' : String(quantities[i]),
+                    'تاريخ الاستحقاق': dueISO,
+                    'الملاحظات': String(patient.remarks || '')
+                }));
             });
-
-            // Dynamic filename naming rule
-            const compVal = document.getElementById('companyFilter').value;
-            let fileName = "";
-
-            if (compVal) {
-                fileName = `وصفات شركة ${compVal}.csv`;
-            } else {
-                if (currentStatusFilter === 'due') {
-                    fileName = "كل الوصفات المستحقة.csv";
-                } else if (currentStatusFilter === 'valid') {
-                    fileName = "كل الوصفات الغير مستحقة.csv";
-                } else {
-                    fileName = "كل الوصفات.csv";
-                }
-            }
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", fileName);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            showToast(`تم تصدير (${fileName.replace('.csv', '')}) بنجاح 📊`);
+            if (!rows.length) { alert('لا توجد وصفات مستحقة في الفترة المحددة.'); return; }
+            const worksheet = XLSX.utils.json_to_sheet(rows, {header: ['رقم الهوية','رقم الجوال','الأصناف','الكمية','تاريخ الاستحقاق','الملاحظات']});
+            worksheet['!cols'] = [{wch:19},{wch:18},{wch:48},{wch:12},{wch:20},{wch:48}];
+            worksheet['!autofilter'] = {ref: worksheet['!ref']};
+            // Keep IDs and phone numbers as text so Excel never strips leading zeroes.
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'الوصفات');
+            const period = mode === 'month' ? month : mode === 'range' ? `${from}_إلى_${to}` : 'كل_التواريخ';
+            const filename = `وصفات_التأمين_${company ? company + '_' : ''}${period}.xlsx`;
+            XLSX.writeFile(workbook, filename);
+            closeExportModal();
+            showToast(`تم تجهيز ملف Excel (${rows.length} صنف)`);
         }
 
         function showToast(msg) {
