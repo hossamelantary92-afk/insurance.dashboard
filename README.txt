@@ -1,3 +1,5 @@
-Insurance Dashboard — mobile insurer filter icon update.
-On widths under 768px the decorative building icon is hidden in the insurer filter only. Desktop view and dropdown options are unchanged.
-Test on Vercel Preview before production.
+Insurance Dashboard - Light Mode refinement
+
+Changes: light theme background/card/text contrast, insurer filters and status controls, due date control, footer/team management visibility, form inputs. Dark theme CSS remains untouched.
+
+Test on Vercel Preview before production. Firebase functionality not tested live.

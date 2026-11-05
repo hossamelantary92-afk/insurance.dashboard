@@ -225,6 +225,68 @@ html[data-theme="light"] #advancedFields .due-date-control input{color:#102b40;b
 html[data-theme="light"] .dashboard-footer{border-top-color:#dae5ee}
 html[data-theme="light"] #footerTeamSlot #teamToggle{background:#f8fafc!important;color:#0f172a}
 
+
+/* Light-mode contrast refinement — scoped to light theme; approved dark mode is untouched. */
+html[data-theme="light"] { color-scheme: light; }
+html[data-theme="light"] body { background: #f2f6fa !important; color: #17324d !important; }
+html[data-theme="light"] main > .bg-white,
+html[data-theme="light"] main > section.bg-white,
+html[data-theme="light"] #emptyState { background: #fff !important; border-color: #cfdeea !important; box-shadow: 0 3px 14px rgba(21,49,76,.045) !important; }
+html[data-theme="light"] #prescriptionsContainer > div { background:#fff !important; border:1px solid #cbdbe8 !important; box-shadow:0 3px 13px rgba(20,48,75,.045) !important; }
+html[data-theme="light"] .client-identity h3 { color:#172b40 !important; }
+html[data-theme="light"] .client-identity p { color:#40546b !important; }
+html[data-theme="light"] .client-identity p svg { color:#536e88 !important; }
+html[data-theme="light"] .client-expand { background:#e8f1fa !important; color:#17324d !important; }
+html[data-theme="light"] .client-expand:hover { background:#dae9f6 !important; }
+html[data-theme="light"] .client-status:not(.is-due):not(.is-soon) { color:#087968 !important; background:#e6f8f2 !important; border-color:#58c9b0 !important; }
+html[data-theme="light"] .client-status.is-soon { color:#986000 !important; background:#fff3d7 !important; border-color:#e5af41 !important; }
+html[data-theme="light"] .client-status.is-due { color:#a4284b !important; background:#fce9ef !important; border-color:#e46b8a !important; }
+html[data-theme="light"] #prescriptionsContainer [id^="details-"] { background:#f7fafd !important; border-color:#d7e3ec !important; }
+html[data-theme="light"] #searchInput,
+html[data-theme="light"] .insurer-select-trigger,
+html[data-theme="light"] #advPeriod { background:#f8fbfe !important; color:#17324d !important; border-color:#c9d9e6 !important; }
+html[data-theme="light"] #searchInput::placeholder { color:#657c92 !important; opacity:1; }
+html[data-theme="light"] #searchInput + svg { color:#54738a !important; }
+html[data-theme="light"] .insurer-select-menu { background:#fff !important; color:#17324d !important; border-color:#c9d9e6 !important; box-shadow:0 12px 30px rgba(18,48,77,.14) !important; }
+html[data-theme="light"] .insurer-select-option:hover,
+html[data-theme="light"] .insurer-select-option:focus { background:#e4f6f3 !important; color:#0b625d !important; }
+html[data-theme="light"] .insurer-select-option[aria-selected="true"] { background:#e4f6f3 !important; color:#0b625d !important; }
+html[data-theme="light"] #tabAll,
+html[data-theme="light"] #tabDue,
+html[data-theme="light"] #tabValid { color:#3e536b !important; }
+html[data-theme="light"] #tabAll.bg-white,
+html[data-theme="light"] #tabDue.bg-white,
+html[data-theme="light"] #tabValid.bg-white { background:#17324d !important; color:#fff !important; box-shadow:0 2px 5px rgba(23,50,77,.16) !important; }
+html[data-theme="light"] #advancedToggle,
+html[data-theme="light"] .due-heading strong { color:#17324d !important; }
+html[data-theme="light"] .due-heading small,
+html[data-theme="light"] .field-label { color:#4b637a !important; }
+html[data-theme="light"] .due-heading svg { color:#087e84 !important; }
+html[data-theme="light"] #advancedChevron.filter-chevron { border-color:#24556f !important; }
+html[data-theme="light"] .filter-clear { background:#e7eff7 !important; color:#17324d !important; }
+html[data-theme="light"] .filter-confirm { background:#087e84 !important; color:#fff !important; }
+html[data-theme="light"] #advancedFields input,
+html[data-theme="light"] #advancedFields select { background:#f8fbfe !important; color:#17324d !important; border-color:#c9d9e6 !important; }
+html[data-theme="light"] .dashboard-footer { border-top-color:#cbdbe8 !important; color:#344b61 !important; }
+html[data-theme="light"] .footer-total { color:#344b61 !important; }
+html[data-theme="light"] .footer-total strong { color:#142d43 !important; }
+html[data-theme="light"] .footer-total svg { color:#087e84 !important; }
+html[data-theme="light"] #footerTeamSlot #teamToggle { background:#17324d !important; border:1px solid #17324d !important; color:#fff !important; box-shadow:0 2px 6px rgba(23,50,77,.13) !important; }
+html[data-theme="light"] #footerTeamSlot #teamToggle:hover { background:#24506c !important; }
+html[data-theme="light"] #footerTeamSlot #adminRequests { background:#fff !important; color:#17324d !important; border-color:#cbdbe8 !important; box-shadow:0 10px 25px rgba(21,49,76,.14) !important; }
+html[data-theme="light"] #prescriptionModal > div,
+html[data-theme="light"] #deleteConfirmModal > div { background:#fff !important; color:#17324d !important; }
+html[data-theme="light"] #prescriptionModal input,
+html[data-theme="light"] #prescriptionModal select,
+html[data-theme="light"] #prescriptionModal textarea { background:#f8fbfe !important; color:#17324d !important; border-color:#cbdbe8 !important; }
+html[data-theme="light"] #prescriptionModal input::placeholder,
+html[data-theme="light"] #prescriptionModal textarea::placeholder { color:#76889a !important; }
+html[data-theme="light"] #prescriptionModal label { color:#344b61 !important; }
+html[data-theme="light"] #alertBanner { background:#fff0f4 !important; color:#992849 !important; border-color:#ee9bb1 !important; }
+html[data-theme="light"] #alertBannerText { color:#992849 !important; }
+html[data-theme="light"] #accessGate:not(.checking) { background:#f2f6fa !important; }
+html[data-theme="light"] #accessGate:not(.checking)>div { background:#fff !important; }
+
 </style>
 </head>
 <body class="text-slate-800 pb-12 antialiased select-none">
