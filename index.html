@@ -492,6 +492,21 @@ html[data-theme="light"] #accessGate:not(.checking)>div { background:#fff !impor
         </div>
     </div>
 
+    <!-- Confirm renewal: no Firestore write until explicitly confirmed -->
+    <div id="renewConfirmModal" role="dialog" aria-modal="true" aria-labelledby="renewConfirmTitle" class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs z-50 flex items-center justify-center p-3 hidden" onclick="if(event.target===this) closeRenewConfirm()">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl shadow-xl p-5 space-y-4 text-center border border-slate-200 dark:border-slate-700">
+            <div class="w-12 h-12 bg-teal-50 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 rounded-full flex items-center justify-center mx-auto">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.8 9A7 7 0 0 1 18 7l2 5M4 12l2 5a7 7 0 0 0 12.2-2"/></svg>
+            </div>
+            <h4 id="renewConfirmTitle" class="font-bold text-slate-900 dark:text-white text-base">تأكيد صرف دورة جديدة</h4>
+            <p id="renewConfirmMessage" class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed"></p>
+            <div class="flex items-center justify-center gap-2 pt-1">
+                <button type="button" id="renewCancelButton" onclick="closeRenewConfirm()" class="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-white font-bold text-sm transition-colors">إلغاء</button>
+                <button type="button" id="renewConfirmButton" onclick="executeRenewDispense()" class="flex-1 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm transition-colors">تأكيد الصرف</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs font-bold px-4 py-2.5 rounded-2xl shadow-lg flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-3">
         <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -950,27 +965,59 @@ html[data-theme="light"] #accessGate:not(.checking)>div { background:#fff !impor
             return `${get('year')}-${get('month')}-${get('day')}`;
         }
 
-        async function renewDispenseToday(index, event) {
+        let pendingRenewalDocId = null;
+        let renewalInProgress = false;
+
+        function renewDispenseToday(index, event) {
             if (event) event.stopPropagation();
             const patient = patients[index];
-            if (!patient?.__docId) {
-                alert('تعذر تحديد الوصفة. حدّث الصفحة وحاول مرة أخرى.');
+            if (!patient?.__docId || renewalInProgress) {
+                if (!patient?.__docId) alert(langText('تعذر تحديد الوصفة. حدّث الصفحة وحاول مرة أخرى.', 'Prescription not found. Refresh and try again.'));
                 return;
             }
-            const button = event?.currentTarget;
-            if (button) button.disabled = true;
-            const newDate = todayInRiyadh();
+            pendingRenewalDocId = patient.__docId;
+            const displayName = patient.name || patient.patientName || langText('العميل', 'the patient');
+            document.getElementById('renewConfirmTitle').textContent = langText('تأكيد صرف دورة جديدة', 'Confirm new dispense cycle');
+            document.getElementById('renewConfirmMessage').textContent = langText(
+                `هل أنت متأكد من صرف دورة جديدة اليوم للعميل (${displayName})؟ سيتم تحديث تاريخ آخر صرف وموعد الاستحقاق القادم.`,
+                `Confirm a new dispense cycle today for ${displayName}? The last dispense date and next due date will be updated.`
+            );
+            document.getElementById('renewCancelButton').textContent = langText('إلغاء', 'Cancel');
+            document.getElementById('renewConfirmButton').textContent = langText('تأكيد الصرف', 'Confirm dispense');
+            document.getElementById('renewConfirmModal').classList.remove('hidden');
+        }
+
+        function closeRenewConfirm() {
+            if (renewalInProgress) return;
+            pendingRenewalDocId = null;
+            document.getElementById('renewConfirmModal').classList.add('hidden');
+        }
+
+        async function executeRenewDispense() {
+            if (!pendingRenewalDocId || renewalInProgress) return;
+            const documentId = pendingRenewalDocId;
+            const button = document.getElementById('renewConfirmButton');
+            renewalInProgress = true;
+            button.disabled = true;
+            button.textContent = langText('جاري الحفظ...', 'Saving...');
             try {
-                // Update the original Firestore document directly, without mutating a stale UI object.
-                await window.insuranceAccess.renew(patient.__docId, newDate);
-                // Realtime Firestore snapshot is the source of truth for the displayed dates.
-                showToast('تم تحديث تاريخ الصرف بنجاح');
+                // Preserve the existing direct Firestore document update and realtime sync.
+                await window.insuranceAccess.renew(documentId, todayInRiyadh());
+                pendingRenewalDocId = null;
+                document.getElementById('renewConfirmModal').classList.add('hidden');
+                showToast(langText('تم تسجيل الصرف ✔️', 'Dispense recorded ✔️'));
             } catch (e) {
-                alert('تعذر تحديث تاريخ الصرف: ' + e.message);
+                alert(langText('تعذر تحديث تاريخ الصرف: ', 'Could not update dispense date: ') + e.message);
             } finally {
-                if (button?.isConnected) button.disabled = false;
+                renewalInProgress = false;
+                button.disabled = false;
+                button.textContent = langText('تأكيد الصرف', 'Confirm dispense');
             }
         }
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && !document.getElementById('renewConfirmModal').classList.contains('hidden')) closeRenewConfirm();
+        });
 
         function saveDirectRemark(index, event) {
             if (event) event.stopPropagation();
