@@ -1010,7 +1010,7 @@ html[data-theme="light"] .dispense-date-picker-shell{color:#087e84;border-left-c
         }
 
         function parseDispenseDateDMY(value) {
-            const match=/^(\\d{2})-(\\d{2})-(\\d{4})$/.exec(String(value||'').trim());
+            const match=/^(\d{2})-(\d{2})-(\d{4})$/.exec(String(value||'').trim());
             if(!match)return null;
             const day=Number(match[1]),month=Number(match[2]),year=Number(match[3]);
             if(year<1900||year>2100)return null;
