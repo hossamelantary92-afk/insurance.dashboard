@@ -473,6 +473,23 @@ html[data-theme="light"] #teamManagementOverlay .team-request-reject{background:
  #teamManagementOverlay .team-management-dialog{width:100%;max-width:none;max-height:min(77dvh,680px);border-radius:22px}
 }
 
+
+/* Compact footer, visually anchored at the bottom on short prescription lists. */
+body{min-height:100dvh;display:flex;flex-direction:column;padding-bottom:0!important}
+body>header{flex:none}
+body>main{flex:1 0 auto;width:100%;display:flex;flex-direction:column;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+main>.dashboard-footer{margin-top:auto!important;padding:12px 2px 0!important;min-height:0;flex:none;gap:8px;border-top:1px solid #29435a}
+.dashboard-footer .footer-total{display:flex;align-items:center;gap:6px;font-size:12px;line-height:1.4}
+.dashboard-footer .footer-total strong{font-size:16px!important;line-height:1.2}
+.dashboard-footer .footer-total svg{width:17px;height:17px}
+#footerTeamSlot #teamToggle{min-height:38px!important;padding:7px 11px!important;font-size:12px!important;line-height:1.25!important}
+@media(max-width:420px){
+ main>.dashboard-footer{padding-top:10px!important}
+ .dashboard-footer .footer-total{font-size:11px}
+ .dashboard-footer .footer-total strong{font-size:15px!important}
+ #footerTeamSlot #teamToggle{min-height:36px!important;padding:7px 9px!important}
+}
+
 </style>
 </head>
 <body class="text-slate-800 pb-12 antialiased select-none">
