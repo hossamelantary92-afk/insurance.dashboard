@@ -174,6 +174,58 @@ html[data-theme="light"] .dashboard-footer{color:#334155}
 html[data-theme="light"] .footer-total strong{color:#0f172a}
 
     
+/* Keep month and date controls inside the due-period panel on mobile browsers. */
+#advancedFields,
+#advMonthWrap,
+#advDatesWrap,
+#advDatesWrap > div,
+#advancedFields .due-date-control {
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
+}
+#advancedFields .due-date-control {
+  width:100%;
+  overflow:hidden;
+  border-radius:12px;
+}
+#advancedFields .due-date-control input[type="month"],
+#advancedFields .due-date-control input[type="date"] {
+  display:block;
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  box-sizing:border-box !important;
+  margin:0 !important;
+  padding:0 44px 0 12px !important;
+  height:44px;
+  line-height:44px;
+  font-size:16px;
+  text-align:left;
+  direction:ltr;
+  border-radius:12px;
+}
+#advancedFields .due-date-control input::-webkit-date-and-time-value {text-align:left;min-height:1em}
+#advancedFields .due-date-control input::-webkit-datetime-edit {display:inline-flex;max-width:100%;overflow:hidden;align-items:center}
+#advancedFields .due-date-control input::-webkit-calendar-picker-indicator {
+  position:absolute;
+  top:0;
+  right:0;
+  left:auto;
+  width:42px;
+  height:100%;
+  margin:0;
+  padding:0;
+  opacity:0;
+  cursor:pointer;
+  z-index:2;
+}
+#advancedFields .due-date-icon {right:13px;left:auto}
+@media(max-width:600px){
+  #advancedFields{width:100%;min-width:0}
+  #advDatesWrap{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+}
+
 /* Due date range + minimal footer refinement */
 #duePeriodHint.hidden{display:none!important}
 #advancedFields .due-date-control{position:relative;min-width:0}
