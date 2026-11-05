@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
     <!-- Google Font Cairo -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -520,6 +521,24 @@ html[data-theme="light"] .dispense-calendar-weekdays{color:#667f94}
 html[data-theme="light"] .dispense-calendar-day:hover,html[data-theme="light"] .dispense-calendar-day:focus-visible{background:#e0f6f0;color:#087e84}
 html[data-theme="light"] .dispense-date-picker-shell{color:#087e84;border-left-color:#cbdbe8}
 
+
+/* Compact export dropdown consistent with Insurance Dashboard's navy/teal identity. */
+.export-menu-container{position:relative;flex:none}
+.export-format-menu{position:absolute;left:0;right:auto;top:calc(100% + 9px);width:215px;max-width:calc(100vw - 24px);padding:7px;border-radius:15px;border:1px solid #38536d;background:#13263b;box-shadow:0 14px 40px #0008;z-index:1700;display:flex;flex-direction:column;gap:5px}
+.export-format-menu.hidden{display:none!important}
+.export-format-choice{display:flex;align-items:center;gap:10px;direction:ltr;text-align:left;width:100%;padding:9px;border-radius:11px;color:#e9f2fa;min-height:58px}
+.export-format-choice:hover,.export-format-choice:focus-visible{background:#24425a;outline:1px solid #3dc8bd}
+.export-format-mark{width:37px;height:37px;flex:none;display:grid;place-items:center;border-radius:9px;font-size:13px;font-weight:900;color:#fff}
+.export-format-excel{background:#16805b}
+.export-format-pdf{background:#b72b42;font-size:10px}
+.export-format-copy{display:flex;flex-direction:column;gap:2px;min-width:0}
+.export-format-copy strong{font-size:13px;font-weight:800}
+.export-format-copy small{font-size:11px;color:#a9c0d2}
+html[data-theme="light"] .export-format-menu{background:#fff;border-color:#c6d9e6;box-shadow:0 10px 28px #1838532b}
+html[data-theme="light"] .export-format-choice{color:#17324d}
+html[data-theme="light"] .export-format-choice:hover,html[data-theme="light"] .export-format-choice:focus-visible{background:#eaf6f5}
+html[data-theme="light"] .export-format-copy small{color:#587187}
+
 </style>
 </head>
 <body class="text-slate-800 pb-12 antialiased select-none">
@@ -562,9 +581,21 @@ html[data-theme="light"] .dispense-date-picker-shell{color:#087e84;border-left-c
             <div class="flex items-center gap-2">
                 <button id="langToggle" type="button" class="theme-toggle !text-xs !font-bold" onclick="toggleLanguage()" title="Language">EN</button>
                 <button id="themeToggle" type="button" class="theme-toggle" onclick="toggleTheme()" aria-label="تغيير المظهر" title="تغيير المظهر">☀</button>
-                <button onclick="exportToExcel()" title="تصدير الوصفات إلى Excel" class="w-9 h-9 rounded-xl bg-slate-700/60 hover:bg-slate-700 border border-slate-600 flex items-center justify-center text-slate-200 transition-all">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                </button>
+                <div class="export-menu-container" id="exportMenuContainer">
+                    <button type="button" id="exportMenuToggle" onclick="toggleExportMenu(event)" aria-haspopup="true" aria-expanded="false" aria-controls="exportMenu" title="تصدير الوصفات" aria-label="تصدير الوصفات" class="w-9 h-9 rounded-xl bg-slate-700/60 hover:bg-slate-700 border border-slate-600 flex items-center justify-center text-slate-200 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M4 17v3h16v-3"/></svg>
+                    </button>
+                    <div id="exportMenu" class="export-format-menu hidden" role="menu" dir="rtl">
+                        <button type="button" role="menuitem" onclick="startExport('excel')" class="export-format-choice">
+                            <span class="export-format-mark export-format-excel">X</span>
+                            <span class="export-format-copy"><strong>Export Excel</strong><small>ملف قابل للتعديل</small></span>
+                        </button>
+                        <button type="button" role="menuitem" onclick="startExport('pdf')" class="export-format-choice">
+                            <span class="export-format-mark export-format-pdf">PDF</span>
+                            <span class="export-format-copy"><strong>Export PDF</strong><small>جاهز للطباعة · A4</small></span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1557,6 +1588,140 @@ html[data-theme="light"] .dispense-date-picker-shell{color:#087e84;border-left-c
             } finally {
                 submitButton.disabled = false;
             }
+        }
+
+        function closeExportMenu() {
+            const menu=document.getElementById('exportMenu'),button=document.getElementById('exportMenuToggle');
+            if(menu)menu.classList.add('hidden');
+            if(button)button.setAttribute('aria-expanded','false');
+        }
+        function toggleExportMenu(event) {
+            if(event)event.stopPropagation();
+            const menu=document.getElementById('exportMenu');
+            const opening=menu.classList.contains('hidden');
+            closeExportMenu();
+            if(opening){menu.classList.remove('hidden');document.getElementById('exportMenuToggle').setAttribute('aria-expanded','true');}
+        }
+        function startExport(format){
+            closeExportMenu();
+            if(format==='excel')return exportToExcel();
+            if(format==='pdf')return exportToPDF();
+        }
+        document.addEventListener('pointerdown',event=>{
+            const area=document.getElementById('exportMenuContainer');
+            if(area&&!area.contains(event.target))closeExportMenu();
+        });
+        document.addEventListener('keydown',event=>{if(event.key==='Escape')closeExportMenu()});
+
+        function pdfExportEscape(v) {
+            return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+        }
+        async function exportToPDF(){
+            if(typeof html2pdf==='undefined'){
+                alert(langText('تعذر تحميل أداة PDF. تحقق من اتصال الإنترنت.','PDF library unavailable. Check your internet connection.'));
+                return;
+            }
+            const matches=getFilteredAndSortedItems();
+            if(!matches.length){
+                alert(langText('لا توجد وصفات مطابقة للتصدير.','No matching prescriptions to export.'));
+                return;
+            }
+            // Pre-paginate at prescription boundaries. Never repeat customer fields per medicine row.
+            const pages=[];
+            let page=[],used=0;
+            const maxRowsPerPage=13;
+            matches.forEach(item=>{
+                const medicines=Array.isArray(item.patient.meds)&&item.patient.meds.length?item.patient.meds:[''];
+                const weight=medicines.length+1;
+                if(page.length&&used+weight>maxRowsPerPage){pages.push(page);page=[];used=0;}
+                page.push(item);used+=weight;
+            });
+            if(page.length)pages.push(page);
+            const headers=['رقم الهوية','رقم الجوال','الأصناف','الكمية','تاريخ الاستحقاق','الملاحظات'];
+            const container=document.createElement('div');
+            container.setAttribute('dir','ltr');
+            // The export is temporarily rendered off-screen so Arabic shaping works in html2canvas.
+            container.style.cssText='position:fixed;left:-20000px;top:0;width:1050px;background:#fff;color:#17324d;z-index:-1;font-family:Cairo,Arial,sans-serif;';
+            const styles=document.createElement('style');
+            styles.textContent=`
+              .pdf-export-sheet{width:1050px;padding:18px 16px;background:#fff;color:#17324d;box-sizing:border-box;font-family:Cairo,Arial,sans-serif}
+              .pdf-export-head{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:3px solid #17324d;margin-bottom:12px;padding-bottom:9px}
+              .pdf-export-title{font-size:21px;font-weight:900;letter-spacing:.1px}
+              .pdf-export-meta{color:#47657e;font-size:12px;font-weight:700}
+              .pdf-export-table{border-collapse:collapse;table-layout:fixed;width:100%;font-size:12px;line-height:1.5}
+              .pdf-export-table th{background:#17324d;color:#fff;padding:9px 7px;text-align:center;font-weight:900;border:1px solid #17324d}
+              .pdf-export-table td{border-bottom:1px solid #d6e2eb;padding:7px 8px;vertical-align:top;font-weight:600;overflow-wrap:anywhere}
+              .pdf-export-table th:nth-child(1),.pdf-export-table td:nth-child(1){width:15%}
+              .pdf-export-table th:nth-child(2),.pdf-export-table td:nth-child(2){width:15%}
+              .pdf-export-table th:nth-child(3),.pdf-export-table td:nth-child(3){width:30%}
+              .pdf-export-table th:nth-child(4),.pdf-export-table td:nth-child(4){width:9%;text-align:center}
+              .pdf-export-table th:nth-child(5),.pdf-export-table td:nth-child(5){width:15%}
+              .pdf-export-table th:nth-child(6),.pdf-export-table td:nth-child(6){width:16%}
+              .pdf-export-table tbody{break-inside:avoid;page-break-inside:avoid}
+              .pdf-export-table tbody tr:first-child td{border-top:1px solid #8aaaba;background:#f3f8fa}
+              .pdf-export-table tbody tr:last-child td{border-bottom:2px solid #137e83}
+              .pdf-export-table tbody tr td:nth-child(6){direction:rtl;text-align:right}
+              .pdf-export-footer{display:flex;justify-content:space-between;font-size:11px;color:#627b91;padding:12px 2px 0}
+              .pdf-export-page+.pdf-export-page{break-before:page;page-break-before:always}
+              .pdf-export-page{break-inside:avoid;page-break-inside:avoid}
+            `;
+            container.appendChild(styles);
+            const dateString=formatDateToDisplay(todayInRiyadh());
+            pages.forEach((groups,index)=>{
+                const pageEl=document.createElement('section');
+                pageEl.className='pdf-export-sheet pdf-export-page';
+                const head=document.createElement('div');head.className='pdf-export-head';
+                const title=document.createElement('div');title.className='pdf-export-title';title.textContent='Insurance Prescriptions';
+                const meta=document.createElement('div');meta.className='pdf-export-meta';meta.textContent=dateString+'  |  '+matches.length+' prescriptions';
+                head.append(title,meta);pageEl.appendChild(head);
+                const table=document.createElement('table');table.className='pdf-export-table';
+                const colgroup=document.createElement('thead');
+                const heading=document.createElement('tr');headers.forEach(label=>{const cell=document.createElement('th');cell.textContent=label;heading.appendChild(cell);});
+                colgroup.appendChild(heading);table.appendChild(colgroup);
+                groups.forEach(({patient,status})=>{
+                    const body=document.createElement('tbody');
+                    const meds=Array.isArray(patient.meds)&&patient.meds.length?patient.meds:[''];
+                    const quantities=Array.isArray(patient.medQuantities)?patient.medQuantities:[];
+                    meds.forEach((med,mi)=>{
+                        const tr=document.createElement('tr');
+                        const values=[
+                            mi===0?String(patient.id||''):'',
+                            mi===0?String(patient.phone||''):'',
+                            String(med||''),
+                            quantities[mi]==null?'':String(quantities[mi]),
+                            mi===0?formatDateToDisplay(status.dueDateISO||''):'',
+                            mi===0?String(patient.remarks||''):''
+                        ];
+                        values.forEach((value,ci)=>{
+                            const td=document.createElement('td');td.textContent=value;
+                            if(ci===0||ci===1||ci===4)td.style.direction='ltr';
+                            tr.appendChild(td);
+                        });body.appendChild(tr);
+                    });
+                    table.appendChild(body);
+                });
+                pageEl.appendChild(table);
+                const footer=document.createElement('div');footer.className='pdf-export-footer';
+                footer.innerHTML='<span>Insurance Dashboard</span><span>Page '+(index+1)+' / '+pages.length+'</span>';
+                pageEl.appendChild(footer);
+                container.appendChild(pageEl);
+            });
+            document.body.appendChild(container);
+            try{
+                if(document.fonts&&document.fonts.ready)await document.fonts.ready;
+                await html2pdf().set({
+                    margin:[7,7,7,7],
+                    filename:'Insurance_Prescriptions_'+todayInRiyadh()+'.pdf',
+                    image:{type:'jpeg',quality:0.96},
+                    html2canvas:{scale:1.65,backgroundColor:'#ffffff',useCORS:true,scrollX:0,scrollY:0},
+                    jsPDF:{unit:'mm',format:'a4',orientation:'landscape'},
+                    pagebreak:{mode:['css','legacy'],before:'.pdf-export-page:not(:first-of-type)',avoid:'tbody'}
+                }).from(container).save();
+                showToast(langText('تم تجهيز PDF للطباعة ✔️','Print-ready PDF exported ✔️'));
+            }catch(e){
+                console.error('PDF export failed',e);
+                alert(langText('تعذر تجهيز PDF. حاول مرة أخرى.','PDF export failed. Please try again.'));
+            }finally{container.remove();}
         }
 
         async function exportToExcel() {
