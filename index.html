@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -52,6 +52,38 @@
         @keyframes brandPulse { 50% { transform: scale(1.055); box-shadow: 0 18px 55px #14b8a655; } }
         @keyframes brandSlide { from { transform: translateX(-125%); } to { transform: translateX(250%); } }
         @media (prefers-reduced-motion: reduce) { .brandMark, .brandProgress::before { animation: none; } }
+    
+        /* Theme: navy and teal, dark by default */
+        html[data-theme="dark"] { color-scheme: dark; }
+        html[data-theme="dark"] body { background:#07111f !important; color:#e5edf6 !important; }
+        html[data-theme="dark"] .bg-white { background-color:#122236 !important; }
+        html[data-theme="dark"] .bg-slate-50, html[data-theme="dark"] .bg-slate-50\/50 { background-color:#0b192a !important; }
+        html[data-theme="dark"] .bg-slate-100 { background-color:#1b3046 !important; }
+        html[data-theme="dark"] .bg-slate-900 { background-color:#091626 !important; }
+        html[data-theme="dark"] .text-slate-900, html[data-theme="dark"] .text-slate-800, html[data-theme="dark"] .text-slate-700 { color:#e6eff9 !important; }
+        html[data-theme="dark"] .text-slate-600, html[data-theme="dark"] .text-slate-500 { color:#a6b8cc !important; }
+        html[data-theme="dark"] .text-slate-400 { color:#93a9c0 !important; }
+        html[data-theme="dark"] .border-slate-100, html[data-theme="dark"] .border-slate-200, html[data-theme="dark"] .border-slate-200\/80, html[data-theme="dark"] .border-slate-200\/90, html[data-theme="dark"] .border-slate-300 { border-color:#2a4057 !important; }
+        html[data-theme="dark"] .bg-amber-50\/80, html[data-theme="dark"] .bg-amber-50 { background-color:#30291c !important; }
+        html[data-theme="dark"] .text-amber-900, html[data-theme="dark"] .text-amber-950 { color:#ffe3a0 !important; }
+        html[data-theme="dark"] .bg-rose-50 { background-color:#351c2b !important; }
+        html[data-theme="dark"] .bg-emerald-50, html[data-theme="dark"] .bg-teal-50 { background-color:#123b3a !important; }
+        html[data-theme="dark"] .text-teal-800, html[data-theme="dark"] .text-emerald-700 { color:#5eead4 !important; }
+        html[data-theme="dark"] input, html[data-theme="dark"] select, html[data-theme="dark"] textarea { background-color:#0d1c2d !important; color:#e8f2fa !important; border-color:#344a61 !important; }
+        html[data-theme="dark"] input::placeholder, html[data-theme="dark"] textarea::placeholder { color:#91a5ba !important; }
+        html[data-theme="dark"] #accessGate:not(.checking) { background:#07111f !important; }
+        html[data-theme="dark"] #accessGate:not(.checking) > div { background:#122236 !important; }
+        html[data-theme="dark"] #accessGate:not(.checking) h2 { color:#e8f2fa !important; }
+        html[data-theme="dark"] #accessGate:not(.checking) #accessMessage { color:#a6b8cc !important; }
+        html[data-theme="dark"] #teamAdminTools > div { background:#122236 !important; border-color:#344a61 !important; }
+        .theme-toggle {width:36px;height:36px;border-radius:12px;border:1px solid #3b6574;background:#153345;color:#5eead4;display:grid;place-items:center;font-size:19px;transition:transform .18s,background .18s}
+        .theme-toggle:active {transform:scale(.94)}
+        .insurer-mark {display:inline-flex;align-items:center;justify-content:center;min-width:25px;height:22px;border-radius:7px;padding:0 4px;margin-inline-start:5px;font-size:9px;font-weight:900;letter-spacing:-.4px;vertical-align:middle;direction:ltr;border:1px solid #ffffff30}
+        .insurer-mark.bupa {background:#0875bc;color:white}.insurer-mark.tawuniya {background:#ecf7ff;color:#006e91}.insurer-mark.rajhi {background:#164a98;color:white}.insurer-mark.medgulf {background:#076f93;color:white}
+        select {transition:border-color .18s,box-shadow .18s} select:focus {border-color:#14b8a6 !important;box-shadow:0 0 0 3px #14b8a622;outline:none}
+        #exportModal > div, #prescriptionModal > div, #deleteConfirmModal > div {animation:modalAppear .19s ease-out}
+        @keyframes modalAppear {from{opacity:.65;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
+        @media(prefers-reduced-motion:reduce){#exportModal > div,#prescriptionModal > div,#deleteConfirmModal > div{animation:none}}
     </style>
 </head>
 <body class="text-slate-800 pb-12 antialiased select-none">
@@ -78,6 +110,7 @@
 
             <!-- Actions -->
             <div class="flex items-center gap-2">
+                <button id="themeToggle" type="button" class="theme-toggle" onclick="toggleTheme()" aria-label="تغيير المظهر" title="تغيير المظهر">☀</button>
                 <button onclick="openExportModal()" title="تصدير الوصفات إلى Excel" class="w-9 h-9 rounded-xl bg-slate-700/60 hover:bg-slate-700 border border-slate-600 flex items-center justify-center text-slate-200 transition-all">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 </button>
@@ -267,6 +300,28 @@
     </div>
 
     <script>
+        function applyTheme(theme) {
+            document.documentElement.dataset.theme=theme;
+            const b=document.getElementById('themeToggle');
+            if(b){b.textContent=theme==='dark'?'☀':'☾';b.title=theme==='dark'?'الوضع الفاتح':'الوضع الداكن';}
+            try{localStorage.setItem('insurance-theme',theme)}catch(e){}
+        }
+        function toggleTheme(){applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark')}
+        try{applyTheme(localStorage.getItem('insurance-theme')==='light'?'light':'dark')}catch(e){applyTheme('dark')}
+        document.addEventListener('click', e=>{
+            if(e.target.id==='exportModal')closeExportModal();
+            if(e.target.id==='prescriptionModal')closeModal();
+            if(e.target.id==='deleteConfirmModal')closeDeleteModal();
+            const tools=document.getElementById('teamAdminTools');
+            if(tools && tools.style.display!=='none' && !tools.contains(e.target)){
+                const panel=document.getElementById('adminRequests');if(panel)panel.style.display='none';
+            }
+        });
+        document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;
+            if(!document.getElementById('exportModal').classList.contains('hidden'))closeExportModal();
+            else if(!document.getElementById('prescriptionModal').classList.contains('hidden'))closeModal();
+            else if(!document.getElementById('deleteConfirmModal').classList.contains('hidden'))closeDeleteModal();
+        });
         const initialPatients = [
             {
                 name: "سعد حمود سالم السبيعي",
@@ -531,6 +586,16 @@
             document.getElementById('emptyState').classList.toggle('hidden', filteredItems.length > 0);
         }
 
+        function insurerBadge(company) {
+            const brands = {
+                'بوبا': ['bupa','bupa'], 'التعاونية':['tawuniya','T'],
+                'تكافل الراجحي':['rajhi','AR'], 'ميدغلف':['medgulf','medgulf']
+            };
+            const brand=brands[company];
+            const safe=String(company||'تأمين').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+            return brand ? `<span class="insurer-mark ${brand[0]}" aria-hidden="true">${brand[1]}</span>${safe}` : safe;
+        }
+
         function createCustomerCard(patient, index, status) {
             const card = document.createElement('div');
             card.className = `bg-white rounded-2xl border border-slate-200/90 hover:border-slate-300 shadow-2xs transition-all overflow-hidden`;
@@ -548,7 +613,7 @@
 
                     <div class="flex items-center gap-2 flex-shrink-0">
                         <span class="text-[11px] font-bold text-teal-800 bg-teal-50 border border-teal-200 px-2 py-1 rounded-xl">
-                            ${patient.company || 'تأمين'}
+                            ${insurerBadge(patient.company)}
                         </span>
                         <span class="text-[11px] px-2.5 py-1 rounded-xl border font-bold ${status.cssBadge}">
                             ${status.text}
