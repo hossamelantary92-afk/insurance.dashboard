@@ -650,7 +650,7 @@ html[data-theme="light"] #accessGate:not(.checking)>div { background:#fff !impor
             if(!monthSelect||!yearSelect)return;
             const today=new Date();
             const value=document.getElementById('advMonth').value;
-            const parts=/^\\d{4}-\\d{2}$/.test(value)?value.split('-'):[String(today.getFullYear()),String(today.getMonth()+1).padStart(2,'0')];
+            const parts=/^[0-9]{4}-[0-9]{2}$/.test(value)?value.split('-'):[String(today.getFullYear()),String(today.getMonth()+1).padStart(2,'0')];
             const lang=document.documentElement.lang==='en'?'en':'ar';
             monthSelect.replaceChildren();
             (lang==='en'?dueMonthNamesEn:dueMonthNamesAr).forEach((name,i)=>{
