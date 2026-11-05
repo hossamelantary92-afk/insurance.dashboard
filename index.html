@@ -592,16 +592,16 @@ main>.dashboard-footer{margin-top:auto!important;padding:12px 2px 0!important;mi
             <div class="flex items-center gap-2">
                 <select id="companyFilter" onchange="applyFilters()" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-sky-500">
                         <option value="">كل الشركات</option>
-                        <option value="تكافل الراجحي">تكافل الراجحي</option>
+                        <option value="تكافل الراجحي">Al Rajhi Takaful</option>
                         <option value="Arabian Shield">Arabian Shield</option>
-                        <option value="بوبا">بوبا</option>
+                        <option value="بوبا">Bupa Arabia</option>
                         <option value="GIG">GIG</option>
                         <option value="GlobeMed">GlobeMed</option>
                         <option value="Gulf Union">Gulf Union</option>
                         <option value="Malath">Malath</option>
-                        <option value="ميدغلف">ميدغلف</option>
+                        <option value="ميدغلف">MedGulf</option>
                         <option value="SAICO">SAICO</option>
-                        <option value="التعاونية">التعاونية</option>
+                        <option value="التعاونية">Tawuniya</option>
                         <option value="TCS">TCS</option>
                     </select>
 
@@ -679,16 +679,16 @@ main>.dashboard-footer{margin-top:auto!important;padding:12px 2px 0!important;mi
                     <div>
                         <label class="block text-slate-700 font-bold mb-1">شركة التأمين *</label>
                         <select id="insuranceCompany" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs focus:outline-none focus:border-sky-500">
-                        <option value="تكافل الراجحي">تكافل الراجحي</option>
+                        <option value="تكافل الراجحي">Al Rajhi Takaful</option>
                         <option value="Arabian Shield">Arabian Shield</option>
-                        <option value="بوبا">بوبا</option>
+                        <option value="بوبا">Bupa Arabia</option>
                         <option value="GIG">GIG</option>
                         <option value="GlobeMed">GlobeMed</option>
                         <option value="Gulf Union">Gulf Union</option>
                         <option value="Malath">Malath</option>
-                        <option value="ميدغلف">ميدغلف</option>
+                        <option value="ميدغلف">MedGulf</option>
                         <option value="SAICO">SAICO</option>
-                        <option value="التعاونية">التعاونية</option>
+                        <option value="التعاونية">Tawuniya</option>
                         <option value="TCS">TCS</option>
                     </select>
                     </div>
@@ -1133,21 +1133,25 @@ main>.dashboard-footer{margin-top:auto!important;padding:12px 2px 0!important;mi
             'ميدغلف': 'https://companieslogo.com/img/orig/8030.SR_BIG-32d46cc2.png?t=1720244490',
             'Arabian Shield':'https://companieslogo.com/img/orig/8070.SR-0e99c633.png?t=1720244490',
 'GIG':'https://companieslogo.com/img/orig/GINS.KW-8ba97eec.png?t=1720244492',
-'GlobeMed':'https://pbs.twimg.com/profile_images/2036362464477270016/z7J7wAgd.jpg',
+'GlobeMed':'https://www.globemedsaudi.com/assets_web/images/logo.jpg',
 'Gulf Union':'https://companieslogo.com/img/orig/8120.SR-3de37e43.png?t=1720244490',
 'Malath':'https://companieslogo.com/img/orig/8020.SR-cbdf3b5d.png?t=1720244490',
 'SAICO':'https://companieslogo.com/img/orig/8100.SR-846d689e.png?t=1720244490',
 'TCS':'https://www.dallah-hospital.com/Assets/ContentPhotos/Photos/hqVDM6EF_400x400_071303.jpg'
         };
+        const INSURER_DISPLAY_NAMES = {"تكافل الراجحي":"Al Rajhi Takaful","Arabian Shield":"Arabian Shield","بوبا":"Bupa Arabia","GIG":"GIG","GlobeMed":"GlobeMed","Gulf Union":"Gulf Union","Malath":"Malath","ميدغلف":"MedGulf","SAICO":"SAICO","التعاونية":"Tawuniya","TCS":"TCS"};
+        function insurerDisplayName(company) {
+            return INSURER_DISPLAY_NAMES[company] || company || '';
+        }
         function insurerBadge(company) {
-            const safe = escapeHtml(currentLanguage==='en'?(dictionary[company]||company):(company||'تأمين'));
+            const safe = escapeHtml(insurerDisplayName(company)||'Insurance');
             const src = INSURER_LOGOS[company];
             return `<span class="insurer-badge-inner">${src?`<span class="insurer-logo-shell"><img class="insurer-logo" src="${src}" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></span>`:''}<span>${safe}</span></span>`;
         }
 
         function insurerIcon(company) {
             const src=INSURER_LOGOS[company];
-            const safe=escapeHtml(currentLanguage==='en'?(dictionary[company]||company):(company||''));
+            const safe=escapeHtml(insurerDisplayName(company));
             return src ? `<img src="${src}" alt="${safe}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span class="client-logo-fallback" style="display:none">${safe}</span>` : `<span class="client-logo-fallback">${safe}</span>`;
         }
 
@@ -1510,14 +1514,14 @@ onAuthStateChanged(auth,async u=>{stop();user=u;role=null;login.style.display=u?
  'ميدغلف':'https://companieslogo.com/img/orig/8030.SR_BIG-32d46cc2.png?t=1720244490',
  'Arabian Shield':'https://companieslogo.com/img/orig/8070.SR-0e99c633.png?t=1720244490',
 'GIG':'https://companieslogo.com/img/orig/GINS.KW-8ba97eec.png?t=1720244492',
-'GlobeMed':'https://pbs.twimg.com/profile_images/2036362464477270016/z7J7wAgd.jpg',
+'GlobeMed':'https://www.globemedsaudi.com/assets_web/images/logo.jpg',
 'Gulf Union':'https://companieslogo.com/img/orig/8120.SR-3de37e43.png?t=1720244490',
 'Malath':'https://companieslogo.com/img/orig/8020.SR-cbdf3b5d.png?t=1720244490',
 'SAICO':'https://companieslogo.com/img/orig/8100.SR-846d689e.png?t=1720244490',
 'TCS':'https://www.dallah-hospital.com/Assets/ContentPhotos/Photos/hqVDM6EF_400x400_071303.jpg'};
- const en={'بوبا':'Bupa Arabia','التعاونية':'Tawuniya','تكافل الراجحي':'Al Rajhi Takaful','ميدغلف':'Medgulf','Arabian Shield':'Arabian Shield','GIG':'GIG','GlobeMed':'GlobeMed','Gulf Union':'Gulf Union','Malath':'Malath','SAICO':'SAICO','TCS':'TCS','':'All insurers'};
+ const en={'بوبا':'Bupa Arabia','التعاونية':'Tawuniya','تكافل الراجحي':'Al Rajhi Takaful','ميدغلف':'MedGulf','Arabian Shield':'Arabian Shield','GIG':'GIG','GlobeMed':'GlobeMed','Gulf Union':'Gulf Union','Malath':'Malath','SAICO':'SAICO','TCS':'TCS','':'All insurers'};
  const isEn=()=>document.documentElement.lang==='en';
- const name=(v,opt,filter=false)=>{if(!v&&filter)return isEn()?'Insurance company':'شركة التأمين';return isEn()?(en[v]||opt.textContent):(v||'كل الشركات')};
+ const name=(v,opt,filter=false)=>{if(!v&&filter)return isEn()?'Insurance company':'شركة التأمين';if(!v)return isEn()?'All insurers':'كل الشركات';return en[v]||opt.textContent||v;};
  function build(select){
    if(!select || select.dataset.brandedSelect)return;
    select.dataset.brandedSelect='true';
