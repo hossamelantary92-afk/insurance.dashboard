@@ -83,7 +83,7 @@
 
         /* Actual insurer brand images; shared between cards and custom dropdowns. */
         .insurer-badge-inner {display:inline-flex;align-items:center;gap:8px;max-width:100%}
-        .insurer-logo {display:block;width:45px;height:30px;object-fit:contain;flex-shrink:0;background:#f8fafc;border:1px solid #cbd5e1;border-radius:7px;padding:3px}
+        .insurer-logo {display:block;width:24px;height:24px;object-fit:contain;flex-shrink:0;background:transparent;border:0;border-radius:4px;padding:0}
         .insurer-select-native {position:absolute!important;opacity:0!important;pointer-events:none!important;width:1px!important;height:1px!important;overflow:hidden!important}
         .insurer-select-wrap {position:relative;min-width:0;flex:1}
         .insurer-select-trigger {width:100%;min-height:42px;display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid #344a61;border-radius:12px;padding:5px 10px;background:#0d1c2d;color:#e8f2fa;font:inherit;text-align:start}
@@ -93,7 +93,11 @@
         .insurer-select-menu[hidden] {display:none!important}
         .insurer-select-option {width:100%;display:flex;align-items:center;gap:10px;text-align:start;padding:8px;border-radius:9px;color:inherit;font:inherit}
         .insurer-select-option:hover,.insurer-select-option:focus {background:#155e5a;color:white;outline:none}
-        .insurer-select-chevron {font-size:12px;color:#5eead4;flex-shrink:0}
+        .insurer-select-chevron,.filter-chevron {display:inline-block;width:9px;height:9px;border-right:2px solid #5eead4;border-bottom:2px solid #5eead4;transform:rotate(45deg);transition:transform .2s ease;flex-shrink:0;margin:0 5px 4px}
+        .insurer-select-trigger[aria-expanded="true"] .insurer-select-chevron,#advancedToggle[aria-expanded="true"] .filter-chevron{transform:rotate(225deg);margin-bottom:-4px}
+        .filter-clear{width:24px;height:24px;display:grid;place-items:center;border-radius:8px;background:#284257;color:#f1f5f9;font-size:18px}
+        .filter-confirm{min-width:88px;padding:9px 20px;border-radius:11px;background:#0d9488;color:white;font-weight:800;font-size:13px}
+        #activeDuePeriod{color:#5eead4}
         
         select {transition:border-color .18s,box-shadow .18s} select:focus {border-color:#14b8a6 !important;box-shadow:0 0 0 3px #14b8a622;outline:none}
         #exportModal > div, #prescriptionModal > div, #deleteConfirmModal > div {animation:modalAppear .19s ease-out}
@@ -143,7 +147,7 @@
             <div class="flex items-center gap-2">
                 <button id="langToggle" type="button" class="theme-toggle !text-xs !font-bold" onclick="toggleLanguage()" title="Language">EN</button>
                 <button id="themeToggle" type="button" class="theme-toggle" onclick="toggleTheme()" aria-label="تغيير المظهر" title="تغيير المظهر">☀</button>
-                <button onclick="openExportModal()" title="تصدير الوصفات إلى Excel" class="w-9 h-9 rounded-xl bg-slate-700/60 hover:bg-slate-700 border border-slate-600 flex items-center justify-center text-slate-200 transition-all">
+                <button onclick="exportToExcel()" title="تصدير الوصفات إلى Excel" class="w-9 h-9 rounded-xl bg-slate-700/60 hover:bg-slate-700 border border-slate-600 flex items-center justify-center text-slate-200 transition-all">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 </button>
             </div>
@@ -210,17 +214,15 @@
             </div>
         </div>
 
-        <!-- Advanced independent search filters -->
+        <!-- Due-date filter: applied only after confirmation -->
         <section class="advanced-panel bg-white border border-slate-200 rounded-2xl p-3 shadow-sm">
-          <button type="button" id="advancedToggle" onclick="toggleAdvancedFilters()" class="w-full flex items-center justify-between text-xs font-bold text-teal-500" aria-expanded="false"><span data-i18n="advanced">⚙ فلاتر متقدمة</span><span id="advancedChevron">⌄</span></button>
+          <button type="button" id="advancedToggle" onclick="toggleAdvancedFilters()" class="w-full flex items-center justify-between text-xs font-bold text-teal-500" aria-expanded="false"><span data-i18n="duePeriod">فترة الاستحقاق</span><span id="advancedChevron" class="filter-chevron" aria-hidden="true"></span></button>
+          <div id="activeDuePeriod" class="hidden mt-2 flex items-center gap-2 text-xs"><span id="activeDuePeriodText" class="flex-1"></span><button type="button" id="clearDuePeriod" onclick="resetAdvancedFilters()" aria-label="إلغاء فترة الاستحقاق" title="إلغاء فترة الاستحقاق" class="filter-clear">×</button></div>
           <div id="advancedFields" class="hidden mt-3 space-y-3">
-            <div class="grid grid-cols-2 gap-2">
-              <div><label class="field-label" data-i18n="period">الفترة حسب الاستحقاق</label><select id="advPeriod" onchange="updateAdvancedFields();applyFilters()" class="w-full border rounded-xl p-2 text-xs"><option value="all" data-i18n="allDates">كل التواريخ</option><option value="month" data-i18n="specificMonth">شهر معين</option><option value="range" data-i18n="dateRange">من تاريخ إلى تاريخ</option></select></div>
-              <div><label class="field-label" data-i18n="status">الحالة</label><select id="advStatus" onchange="applyFilters()" class="w-full border rounded-xl p-2 text-xs"><option value="all" data-i18n="all">الكل</option><option value="due" data-i18n="due">المستحقة</option><option value="valid" data-i18n="notDue">لم يحن موعدها</option></select></div>
-            </div>
-            <div id="advMonthWrap" class="hidden"><label class="field-label" data-i18n="month">الشهر</label><input id="advMonth" type="month" onchange="applyFilters()" class="w-full border rounded-xl p-2 text-xs"></div>
-            <div id="advDatesWrap" class="hidden grid-cols-2 gap-2"><div><label class="field-label" data-i18n="from">من تاريخ</label><input id="advFrom" type="date" onchange="applyFilters()" class="w-full border rounded-xl p-2 text-xs"></div><div><label class="field-label" data-i18n="to">إلى تاريخ</label><input id="advTo" type="date" onchange="applyFilters()" class="w-full border rounded-xl p-2 text-xs"></div></div>
-            <button type="button" onclick="resetAdvancedFilters()" class="text-xs text-teal-500 underline" data-i18n="resetFilters">إعادة ضبط الفلاتر</button>
+            <div><label class="field-label" data-i18n="duePeriod">فترة الاستحقاق</label><select id="advPeriod" onchange="updateAdvancedFields()" class="w-full border rounded-xl p-2 text-xs"><option value="all" data-i18n="allDates">كل التواريخ</option><option value="month" data-i18n="specificMonth">شهر معين</option><option value="range" data-i18n="dateRange">من تاريخ إلى تاريخ</option></select></div>
+            <div id="advMonthWrap" class="hidden"><label class="field-label" data-i18n="month">الشهر</label><input id="advMonth" type="month" class="w-full border rounded-xl p-2 text-xs"></div>
+            <div id="advDatesWrap" class="hidden grid-cols-2 gap-2"><div><label class="field-label" data-i18n="from">من تاريخ</label><input id="advFrom" type="date" class="w-full border rounded-xl p-2 text-xs"></div><div><label class="field-label" data-i18n="to">إلى تاريخ</label><input id="advTo" type="date" class="w-full border rounded-xl p-2 text-xs"></div></div>
+            <div class="flex justify-end"><button type="button" onclick="confirmDuePeriod()" class="filter-confirm" data-i18n="done">تم</button></div>
           </div>
         </section>
 
@@ -320,22 +322,6 @@
         </div>
     </div>
 
-    <!-- Export Excel filters -->
-    <div id="exportModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden items-center justify-center p-3" role="dialog" aria-modal="true" aria-label="تصدير الوصفات">
-      <div class="bg-white rounded-2xl shadow-xl p-5 w-full max-w-md space-y-4">
-        <div class="flex items-center justify-between"><h3 class="font-bold text-slate-900">تصدير الوصفات إلى Excel</h3><button type="button" onclick="closeExportModal()" aria-label="إغلاق" class="text-slate-500 text-xl">×</button></div>
-        <p class="text-xs text-slate-500">اختر أي فلاتر تريدها بشكل مستقل؛ كل الخيارات افتراضيًا تشمل جميع الوصفات.</p>
-        <div class="grid grid-cols-2 gap-2"><div><label class="field-label" data-i18n="insurance">شركة التأمين</label><select id="exportCompany" class="w-full border rounded-xl p-2 text-sm"><option value="">كل الشركات</option><option value="تكافل الراجحي">تكافل الراجحي</option><option value="بوبا">بوبا</option><option value="التعاونية">التعاونية</option><option value="ميدغلف">ميدغلف</option></select></div><div><label class="field-label" data-i18n="status">الحالة</label><select id="exportStatus" class="w-full border rounded-xl p-2 text-sm"><option value="all" data-i18n="all">الكل</option><option value="due" data-i18n="due">المستحقة</option><option value="valid" data-i18n="notDue">لم يحن موعدها</option></select></div></div>
-        <label class="block text-xs font-bold" data-i18n="period">الفترة</label>
-        <select id="exportRangeMode" onchange="updateExportRangeFields()" class="w-full border rounded-xl p-2 text-sm">
-          <option value="all">كل التواريخ</option><option value="month">شهر معين</option><option value="range">من تاريخ إلى تاريخ</option>
-        </select>
-        <div id="exportMonthWrap" class="hidden"><label class="block text-xs font-semibold mb-1">الشهر</label><input id="exportMonth" type="month" class="w-full border rounded-xl p-2" /></div>
-        <div id="exportDatesWrap" class="hidden grid grid-cols-2 gap-2"><div><label class="block text-xs font-semibold mb-1">من تاريخ</label><input id="exportFrom" type="date" class="w-full border rounded-xl p-2" /></div><div><label class="block text-xs font-semibold mb-1">إلى تاريخ</label><input id="exportTo" type="date" class="w-full border rounded-xl p-2" /></div></div>
-        <div class="flex gap-2 justify-end"><button onclick="closeExportModal()" class="px-4 py-2 rounded-xl bg-slate-100 text-sm">إلغاء</button><button id="exportConfirm" onclick="exportToExcel()" class="px-4 py-2 rounded-xl bg-teal-700 text-white font-bold text-sm">تحميل Excel</button></div>
-      </div>
-    </div>
-
     <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs font-bold px-4 py-2.5 rounded-2xl shadow-lg flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-3">
         <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -345,7 +331,7 @@
     <script>
         let currentLanguage='ar';
         const dictionary={
-          'متابعة صرف وصفات التأمين الدورية':'Recurring insurance prescriptions','إضافة وصفة جديدة':'Add prescription','إجمالي الوصفات':'Total prescriptions','متأخرة ومستحقة':'Due / overdue','لم يحن موعدها':'Not yet due','كل الشركات':'All insurers','تكافل الراجحي':'Al Rajhi Takaful','بوبا':'Bupa Arabia','التعاونية':'Tawuniya','ميدغلف':'Medgulf','الكل':'All','المستحقة':'Due','عرض':'View','إدارة الفريق':'Team management','اسم العميل *':'Patient name *','رقم الهوية / الإقامة *':'Patient ID *','شركة التأمين *':'Insurer *','رقم الجوال':'Phone number','الدورة التأمينية *':'Insurance cycle *','تاريخ آخر صرف *':'Last dispense date *','الملاحظات':'Remarks','قائمة الأدوية والمستلزمات *':'Medicines and supplies *','حفظ الوصفة':'Save prescription','إلغاء':'Cancel','تصدير الوصفات إلى Excel':'Export prescriptions to Excel','الفترة':'Period','كل التواريخ':'All dates','شهر معين':'Specific month','من تاريخ إلى تاريخ':'Custom range','الشهر':'Month','من تاريخ':'From','إلى تاريخ':'To','تحميل Excel':'Download Excel','إضافة صنف':'Add item','الكمية':'Quantity','الوصف':'Description','تعديل بيانات الوصفة':'Edit prescription','بيانات الوصفة':'Prescription details','بحث':'Search','فلاتر متقدمة':'Advanced filters','الحالة':'Status','إعادة ضبط الفلاتر':'Reset filters','صورة الوصفة':'Prescription image','اختياري':'Optional','رفع صورة':'Upload image','تصوير':'Camera','استبدال الصورة':'Replace image','عرض صورة الوصفة':'View prescription image','لم تُرفق صورة':'No image attached','الاسم بالكامل':'Full name','تاريخ آخر صرف':'Last dispensed','تاريخ الاستحقاق':'Due date','الأدوية والمستلزمات المقررة للدورة:':'Medicines and supplies:','تم صرف دورة جديدة اليوم':'Dispensed new cycle today','حفظ الملاحظة':'Save note','ملاحظة الصيدلي:':'Pharmacist note:','تأكيد حذف الوصفة':'Confirm deletion','نعم، احذف':'Delete','طلبات الانضمام':'Join requests','84 يوم':'84 days','28 يوم':'28 days'};
+          'متابعة صرف وصفات التأمين الدورية':'Recurring insurance prescriptions','إضافة وصفة جديدة':'Add prescription','إجمالي الوصفات':'Total prescriptions','متأخرة ومستحقة':'Due / overdue','لم يحن موعدها':'Not yet due','كل الشركات':'All insurers','تكافل الراجحي':'Al Rajhi Takaful','بوبا':'Bupa Arabia','التعاونية':'Tawuniya','ميدغلف':'Medgulf','الكل':'All','المستحقة':'Due','عرض':'View','إدارة الفريق':'Team management','اسم العميل *':'Patient name *','رقم الهوية / الإقامة *':'Patient ID *','شركة التأمين *':'Insurer *','رقم الجوال':'Phone number','الدورة التأمينية *':'Insurance cycle *','تاريخ آخر صرف *':'Last dispense date *','الملاحظات':'Remarks','قائمة الأدوية والمستلزمات *':'Medicines and supplies *','حفظ الوصفة':'Save prescription','إلغاء':'Cancel','تصدير الوصفات إلى Excel':'Export prescriptions to Excel','الفترة':'Period','كل التواريخ':'All dates','شهر معين':'Specific month','من تاريخ إلى تاريخ':'Custom range','الشهر':'Month','من تاريخ':'From','إلى تاريخ':'To','تحميل Excel':'Download Excel','إضافة صنف':'Add item','الكمية':'Quantity','الوصف':'Description','تعديل بيانات الوصفة':'Edit prescription','بيانات الوصفة':'Prescription details','بحث':'Search','فلاتر متقدمة':'Advanced filters','فترة الاستحقاق':'Due Date Range','الحالة':'Status','إعادة ضبط الفلاتر':'Reset filters','صورة الوصفة':'Prescription image','اختياري':'Optional','رفع صورة':'Upload image','تصوير':'Camera','استبدال الصورة':'Replace image','عرض صورة الوصفة':'View prescription image','لم تُرفق صورة':'No image attached','الاسم بالكامل':'Full name','تاريخ آخر صرف':'Last dispensed','تاريخ الاستحقاق':'Due date','الأدوية والمستلزمات المقررة للدورة:':'Medicines and supplies:','تم صرف دورة جديدة اليوم':'Dispensed new cycle today','حفظ الملاحظة':'Save note','ملاحظة الصيدلي:':'Pharmacist note:','تأكيد حذف الوصفة':'Confirm deletion','نعم، احذف':'Delete','طلبات الانضمام':'Join requests','84 يوم':'84 days','28 يوم':'28 days'};
         function langText(ar,en){return currentLanguage==='en'?en:ar}
         function translateString(value){return currentLanguage==='en'?(dictionary[value]||value):value}
         function toggleLanguage(){applyLanguage(currentLanguage==='ar'?'en':'ar')}
@@ -357,7 +343,7 @@
           document.querySelectorAll('button, label, h1, h2, h3, h4, p, option, [data-i18n]').forEach(el=>{
             if(el.children.length && !el.matches('option,[data-i18n]'))return;
             if(!el.dataset.arOriginal)el.dataset.arOriginal=el.textContent.trim();
-            if(el.dataset.i18n){const names={advanced:'فلاتر متقدمة',period:'الفترة',allDates:'كل التواريخ',specificMonth:'شهر معين',dateRange:'من تاريخ إلى تاريخ',status:'الحالة',all:'الكل',due:'المستحقة',notDue:'لم يحن موعدها',month:'الشهر',from:'من تاريخ',to:'إلى تاريخ',resetFilters:'إعادة ضبط الفلاتر',insurance:'شركة التأمين *',meds:'قائمة الأدوية والمستلزمات *',addItem:'إضافة صنف',quantityOptional:'الكمية اختيارية؛ وعند إدخالها يجب أن تكون رقمًا صحيحًا أكبر من صفر.',camera:'تصوير'};const key=names[el.dataset.i18n];if(key)el.dataset.arOriginal=key;}
+            if(el.dataset.i18n){const names={duePeriod:'فترة الاستحقاق',done:'تم',advanced:'فلاتر متقدمة',period:'الفترة',allDates:'كل التواريخ',specificMonth:'شهر معين',dateRange:'من تاريخ إلى تاريخ',status:'الحالة',all:'الكل',due:'المستحقة',notDue:'لم يحن موعدها',month:'الشهر',from:'من تاريخ',to:'إلى تاريخ',resetFilters:'إعادة ضبط الفلاتر',insurance:'شركة التأمين *',meds:'قائمة الأدوية والمستلزمات *',addItem:'إضافة صنف',quantityOptional:'الكمية اختيارية؛ وعند إدخالها يجب أن تكون رقمًا صحيحًا أكبر من صفر.',camera:'تصوير'};const key=names[el.dataset.i18n];if(key)el.dataset.arOriginal=key;}
             el.textContent=lang==='en'?(el.dataset.i18n==='quantityOptional'?'Quantity is optional; if entered it must be a positive whole number.':translateString(el.dataset.arOriginal)):el.dataset.arOriginal;
           });
           const search=document.getElementById('searchInput');if(search)search.placeholder=langText('ابحث برقم الهوية / الإقامة','Search by patient ID');
@@ -373,9 +359,12 @@
           const remove=document.createElement('button');remove.type='button';remove.className='text-rose-500 text-xl px-1';remove.textContent='×';remove.title=langText('حذف الصنف','Remove item');remove.onclick=()=>{row.remove();if(!document.querySelector('.med-row'))addMedicationRow()};
           row.append(description,quantity,remove);document.getElementById('medicationRows').append(row);
         }
-        function toggleAdvancedFilters(){const fields=document.getElementById('advancedFields');const open=fields.classList.toggle('hidden')===false;document.getElementById('advancedToggle').setAttribute('aria-expanded',String(open));document.getElementById('advancedChevron').textContent=open?'⌃':'⌄'}
+        let appliedDuePeriod={mode:'all',month:'',from:'',to:''};
+        function toggleAdvancedFilters(){const fields=document.getElementById('advancedFields');const open=fields.classList.toggle('hidden')===false;document.getElementById('advancedToggle').setAttribute('aria-expanded',String(open))}
         function updateAdvancedFields(){const mode=document.getElementById('advPeriod').value;document.getElementById('advMonthWrap').classList.toggle('hidden',mode!=='month');document.getElementById('advDatesWrap').classList.toggle('hidden',mode!=='range');document.getElementById('advDatesWrap').classList.toggle('grid',mode==='range')}
-        function resetAdvancedFilters(){document.getElementById('advPeriod').value='all';document.getElementById('advStatus').value='all';document.getElementById('advMonth').value='';document.getElementById('advFrom').value='';document.getElementById('advTo').value='';updateAdvancedFields();applyFilters()}
+        function renderDuePeriod(){const el=document.getElementById('activeDuePeriod');const {mode,month,from,to}=appliedDuePeriod;el.classList.toggle('hidden',mode==='all');const en=document.documentElement.lang==='en';document.getElementById('activeDuePeriodText').textContent=mode==='month'?month:mode==='range'?`${from} — ${to}`:'';document.getElementById('clearDuePeriod').title=en?'Clear due-date filter':'إلغاء فترة الاستحقاق'}
+        function confirmDuePeriod(){const mode=document.getElementById('advPeriod').value,month=document.getElementById('advMonth').value,from=document.getElementById('advFrom').value,to=document.getElementById('advTo').value;const en=document.documentElement.lang==='en';if(mode==='month'&&!/^\d{4}-\d{2}$/.test(month)){alert(en?'Choose a month.':'اختر الشهر المطلوب.');return}if(mode==='range'&&(!from||!to||from>to)){alert(en?'Choose a valid date range.':'حدد فترة استحقاق صحيحة.');return}appliedDuePeriod={mode,month,from,to};renderDuePeriod();applyFilters();const fields=document.getElementById('advancedFields');fields.classList.add('hidden');document.getElementById('advancedToggle').setAttribute('aria-expanded','false');showToast('تم ✔️')}
+        function resetAdvancedFilters(){appliedDuePeriod={mode:'all',month:'',from:'',to:''};document.getElementById('advPeriod').value='all';document.getElementById('advMonth').value='';document.getElementById('advFrom').value='';document.getElementById('advTo').value='';updateAdvancedFields();renderDuePeriod();applyFilters()}
         function applyTheme(theme) {
             document.documentElement.dataset.theme=theme;
             const b=document.getElementById('themeToggle');
@@ -385,7 +374,7 @@
         function toggleTheme(){applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark')}
         try{applyTheme(localStorage.getItem('insurance-theme')==='light'?'light':'dark')}catch(e){applyTheme('dark')}
         document.addEventListener('click', e=>{
-            if(e.target.id==='exportModal')closeExportModal();
+            
             if(e.target.id==='prescriptionModal')closeModal();
             if(e.target.id==='deleteConfirmModal')closeDeleteModal();
             const tools=document.getElementById('teamAdminTools');
@@ -394,8 +383,8 @@
             }
         });
         document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;
-            if(!document.getElementById('exportModal').classList.contains('hidden'))closeExportModal();
-            else if(!document.getElementById('prescriptionModal').classList.contains('hidden'))closeModal();
+            
+            if(!document.getElementById('prescriptionModal').classList.contains('hidden'))closeModal();
             else if(!document.getElementById('deleteConfirmModal').classList.contains('hidden'))closeDeleteModal();
         });
         const initialPatients = [
@@ -617,20 +606,15 @@
             return items.filter(({ patient, status }) => {
                 const matchSearch = !searchVal || (patient.id && patient.id.toLowerCase().includes(searchVal));
                 const matchComp = !compVal || patient.company === compVal;
-                const period=document.getElementById('advPeriod')?.value||'all';
+                const {mode:period,month,from,to}=appliedDuePeriod;
                 const dueISO=status.dueDateISO||'';
-                const month=document.getElementById('advMonth')?.value||'';
-                const from=document.getElementById('advFrom')?.value||'';
-                const to=document.getElementById('advTo')?.value||'';
-                const matchPeriod=period==='all'||(period==='month'&&(!month||dueISO.startsWith(month)))||(period==='range'&&(!from||dueISO>=from)&&(!to||dueISO<=to));
-                const advancedStatus=document.getElementById('advStatus')?.value||'all';
-                const matchAdvanced=advancedStatus==='all'||(advancedStatus==='due'?status.isDue:!status.isDue);
+                const matchPeriod=period==='all'||(period==='month'&&dueISO.startsWith(month))||(period==='range'&&dueISO>=from&&dueISO<=to);
 
                 let matchStatus = true;
                 if (currentStatusFilter === 'due') matchStatus = status.isDue;
                 if (currentStatusFilter === 'valid') matchStatus = !status.isDue;
 
-                return matchSearch && matchComp && matchStatus && matchPeriod && matchAdvanced;
+                return matchSearch && matchComp && matchStatus && matchPeriod;
             });
         }
 
@@ -995,46 +979,15 @@
             }
         }
 
-        function openExportModal() {
-            const modal = document.getElementById('exportModal');
-            document.getElementById('exportMonth').value = todayInRiyadh().slice(0, 7);
-            document.getElementById('exportCompany').value='';document.getElementById('exportStatus').value='all';
-            updateExportRangeFields();
-            modal.classList.remove('hidden'); modal.classList.add('flex');
-        }
-        function closeExportModal() {
-            const modal = document.getElementById('exportModal');
-            modal.classList.add('hidden'); modal.classList.remove('flex');
-        }
-        function updateExportRangeFields() {
-            const mode = document.getElementById('exportRangeMode').value;
-            document.getElementById('exportMonthWrap').classList.toggle('hidden', mode !== 'month');
-            const dates = document.getElementById('exportDatesWrap');
-            dates.classList.toggle('hidden', mode !== 'range');
-            dates.classList.toggle('grid', mode === 'range');
-        }
         function exportToExcel() {
             if (typeof XLSX === 'undefined') {
                 alert('تعذر تحميل مكتبة Excel. تحقق من اتصال الإنترنت وحاول مرة أخرى.');
                 return;
             }
-            const mode = document.getElementById('exportRangeMode').value;
-            const month = document.getElementById('exportMonth').value;
-            const from = document.getElementById('exportFrom').value;
-            const to = document.getElementById('exportTo').value;
-            if (mode === 'month' && !/^\d{4}-\d{2}$/.test(month)) { alert('اختر الشهر المطلوب.'); return; }
-            if (mode === 'range' && (!from || !to || from > to)) { alert('حدد تاريخ بداية ونهاية صحيحين.'); return; }
-            const company = document.getElementById('exportCompany').value;
-            const statusChoice = document.getElementById('exportStatus').value;
+            const filteredPatients = getFilteredAndSortedItems();
             const rows = [];
-            patients.forEach(patient => {
-                if (company && patient.company !== company) return;
-                if (!patient.dispenseDate) return;
-                const ps = getPrescriptionStatus(patient.dispenseDate,patient.cycle||84);
-                if(statusChoice==='due'&&!ps.isDue || statusChoice==='valid'&&ps.isDue)return;
-                const dueISO = getPrescriptionStatus(patient.dispenseDate, patient.cycle || 84).dueDateISO;
-                if (mode === 'month' && dueISO.slice(0, 7) !== month) return;
-                if (mode === 'range' && (dueISO < from || dueISO > to)) return;
+            filteredPatients.forEach(({patient,status:ps}) => {
+                const dueISO = ps.dueDateISO || '';
                 const meds = Array.isArray(patient.meds) ? patient.meds : [];
                 const quantities = Array.isArray(patient.medQuantities) ? patient.medQuantities : [];
                 (meds.length ? meds : ['']).forEach((med, i) => rows.push({
@@ -1046,17 +999,15 @@
                     'الملاحظات': String(patient.remarks || '')
                 }));
             });
-            if (!rows.length) { alert('لا توجد وصفات مستحقة في الفترة المحددة.'); return; }
+            if (!rows.length) { alert(document.documentElement.lang==='en'?'No matching prescriptions to export.':'لا توجد وصفات مطابقة للتصدير.'); return; }
             const worksheet = XLSX.utils.json_to_sheet(rows, {header: ['رقم الهوية','رقم الجوال','الأصناف','الكمية','تاريخ الاستحقاق','الملاحظات']});
             worksheet['!cols'] = [{wch:19},{wch:18},{wch:48},{wch:12},{wch:20},{wch:48}];
             worksheet['!autofilter'] = {ref: worksheet['!ref']};
             // Keep IDs and phone numbers as text so Excel never strips leading zeroes.
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, 'الوصفات');
-            const period = mode === 'month' ? month : mode === 'range' ? `${from}_إلى_${to}` : 'كل_التواريخ';
-            const filename = `وصفات_التأمين_${company ? company + '_' : ''}${period}.xlsx`;
+            const filename = `وصفات_التأمين_${todayInRiyadh()}.xlsx`;
             XLSX.writeFile(workbook, filename);
-            closeExportModal();
             showToast(`تم تجهيز ملف Excel (${rows.length} صنف)`);
         }
 
@@ -1066,7 +1017,7 @@
             toast.classList.remove('opacity-0', 'translate-y-3', 'pointer-events-none');
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'translate-y-3', 'pointer-events-none');
-            }, 3000);
+            }, msg==='تم ✔️'?2000:3000);
         }
         try{applyLanguage(localStorage.getItem('insurance-language')==='en'?'en':'ar')}catch(e){console.warn('Language initialization:',e)}
     </script>
@@ -1115,7 +1066,7 @@ onAuthStateChanged(auth,async u=>{stop();user=u;role=null;login.style.display=u?
    const menu=document.createElement('div');menu.className='insurer-select-menu';menu.setAttribute('role','listbox');menu.hidden=true;
    wrap.append(trigger,menu);
    const item=(v,label)=>{const row=document.createElement('span');row.className='insurer-badge-inner';if(logos[v]){const img=document.createElement('img');img.className='insurer-logo';img.alt='';img.src=logos[v];img.onerror=()=>img.remove();row.append(img)}const text=document.createElement('span');text.textContent=label;row.append(text);return row};
-   const refresh=()=>{trigger.replaceChildren(item(select.value,name(select.value,select.selectedOptions[0]||{textContent:''})));const chev=document.createElement('span');chev.className='insurer-select-chevron';chev.textContent='⌄';trigger.append(chev);menu.replaceChildren();[...select.options].forEach(opt=>{const b=document.createElement('button');b.type='button';b.className='insurer-select-option';b.setAttribute('role','option');b.setAttribute('aria-selected',String(select.value===opt.value));b.append(item(opt.value,name(opt.value,opt)));b.onclick=()=>{select.value=opt.value;select.dispatchEvent(new Event('change',{bubbles:true}));close();refresh()};menu.append(b)})};
+   const refresh=()=>{trigger.replaceChildren(item(select.value,name(select.value,select.selectedOptions[0]||{textContent:''})));const chev=document.createElement('span');chev.className='insurer-select-chevron';chev.setAttribute('aria-hidden','true');trigger.append(chev);menu.replaceChildren();[...select.options].forEach(opt=>{const b=document.createElement('button');b.type='button';b.className='insurer-select-option';b.setAttribute('role','option');b.setAttribute('aria-selected',String(select.value===opt.value));b.append(item(opt.value,name(opt.value,opt)));b.onclick=()=>{select.value=opt.value;select.dispatchEvent(new Event('change',{bubbles:true}));close();refresh()};menu.append(b)})};
    const close=()=>{menu.hidden=true;trigger.setAttribute('aria-expanded','false')};
    trigger.onclick=()=>{const open=menu.hidden;document.querySelectorAll('.insurer-select-menu').forEach(m=>m.hidden=true);menu.hidden=!open;trigger.setAttribute('aria-expanded',String(open));if(open)refresh()};
    select.addEventListener('change',refresh);
