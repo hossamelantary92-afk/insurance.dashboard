@@ -497,6 +497,15 @@ main>.dashboard-footer{margin-top:auto!important;padding:12px 2px 0!important;mi
 .insurer-select-option .insurer-badge-inner > span:last-child{min-width:0;overflow-wrap:anywhere}
 @media(max-width:600px){.insurer-select-menu{max-height:min(410px,52dvh)}}
 
+/* Explicit DD-MM-YYYY date display and optional native calendar selector. */
+.dispense-date-wrap{position:relative;min-width:0}
+#dispenseDate{width:100%;min-width:0;box-sizing:border-box;padding-right:52px!important;text-align:left;direction:ltr;font-variant-numeric:tabular-nums;font-size:14px}
+.dispense-date-picker-shell{position:absolute;top:0;right:0;width:46px;height:100%;display:grid;place-items:center;color:#5eead4;border-left:1px solid #36526b;overflow:hidden;border-radius:0 12px 12px 0}
+.dispense-date-picker-shell svg{width:20px;height:20px;pointer-events:none}
+.dispense-date-picker-shell input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;box-sizing:border-box}
+.dispense-date-picker-shell input::-webkit-calendar-picker-indicator{position:absolute;inset:0;width:100%;height:100%;cursor:pointer;opacity:0}
+html[data-theme="light"] .dispense-date-picker-shell{color:#087e84;border-left-color:#cbdbe8}
+
 </style>
 </head>
 <body class="text-slate-800 pb-12 antialiased select-none">
@@ -710,7 +719,13 @@ main>.dashboard-footer{margin-top:auto!important;padding:12px 2px 0!important;mi
 
                 <div>
                     <label class="block text-slate-700 font-bold mb-1">تاريخ آخر صرف *</label>
-                    <input type="date" id="dispenseDate" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-sky-500">
+                    <div class="dispense-date-wrap">
+                        <input type="text" id="dispenseDate" required inputmode="numeric" maxlength="10" autocomplete="off" placeholder="DD-MM-YYYY" pattern="[0-9]{2}-[0-9]{2}-[0-9]{4}" aria-label="تاريخ آخر صرف DD-MM-YYYY" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-sky-500" dir="ltr">
+                        <span class="dispense-date-picker-shell" title="اختيار التاريخ">
+                            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg>
+                            <input id="dispenseDatePicker" type="date" tabindex="-1" aria-label="اختيار تاريخ آخر صرف" onchange="syncDispenseDateFromPicker(this)" />
+                        </span>
+                    </div>
                 </div>
 
                 <div>
@@ -994,11 +1009,23 @@ main>.dashboard-footer{margin-top:auto!important;padding:12px 2px 0!important;mi
             return window.insuranceAccess.save(patient, isNew);
         }
 
+        function parseDispenseDateDMY(value) {
+            const match=/^(\\d{2})-(\\d{2})-(\\d{4})$/.exec(String(value||'').trim());
+            if(!match)return null;
+            const day=Number(match[1]),month=Number(match[2]),year=Number(match[3]);
+            if(year<1900||year>2100)return null;
+            const d=new Date(Date.UTC(year,month-1,day));
+            if(d.getUTCFullYear()!==year||d.getUTCMonth()!==month-1||d.getUTCDate()!==day)return null;
+            return `${match[3]}-${match[2]}-${match[1]}`;
+        }
+        function syncDispenseDateFromPicker(picker) {
+            document.getElementById('dispenseDate').value=formatDateToDisplay(picker.value);
+        }
         function formatDateToDisplay(isoDateStr) {
             if (!isoDateStr) return '';
             const parts = isoDateStr.split('-');
             if (parts.length === 3) {
-                return `${parts[2]} - ${parts[1]} - ${parts[0]}`;
+                return `${parts[2]}-${parts[1]}-${parts[0]}`;
             }
             return isoDateStr;
         }
@@ -1370,6 +1397,7 @@ main>.dashboard-footer{margin-top:auto!important;padding:12px 2px 0!important;mi
             document.getElementById('medicationRows').replaceChildren();addMedicationRow();
             document.getElementById('cycleDuration').value = "84";
             document.getElementById('dispenseDate').value = ''; // Deliberately blank: user must choose the actual dispense date.
+            document.getElementById('dispenseDatePicker').value = '';
             document.getElementById('prescriptionModal').classList.remove('hidden');
         }
 
@@ -1384,7 +1412,8 @@ main>.dashboard-footer{margin-top:auto!important;padding:12px 2px 0!important;mi
             document.getElementById('insuranceCompany').value = p.company || 'تكافل الراجحي';
             document.getElementById('phoneNumber').value = p.phone || '';
             document.getElementById('cycleDuration').value = p.cycle || '84';
-            document.getElementById('dispenseDate').value = p.dispenseDate || '';
+            document.getElementById('dispenseDate').value = formatDateToDisplay(p.dispenseDate || '');
+            document.getElementById('dispenseDatePicker').value = p.dispenseDate || '';
             document.getElementById('patientRemarks').value = p.remarks || '';
             document.getElementById('medicationRows').replaceChildren();
             (p.meds||[]).forEach((m,i)=>addMedicationRow(m,(p.medQuantities||[])[i]));
@@ -1415,6 +1444,14 @@ main>.dashboard-footer{margin-top:auto!important;padding:12px 2px 0!important;mi
                 }
             }
             const idx = parseInt(document.getElementById('editIndex').value, 10);
+            const enteredDispenseDate = document.getElementById('dispenseDate').value.trim();
+            const dispenseDateISO = parseDispenseDateDMY(enteredDispenseDate);
+            if(!dispenseDateISO){
+                const field=document.getElementById('dispenseDate');
+                field.focus();
+                alert(langText('أدخل تاريخًا صحيحًا بصيغة DD-MM-YYYY.','Enter a valid date in DD-MM-YYYY format.'));
+                return;
+            }
             const parsedMeds=[...document.querySelectorAll('#medicationRows .med-row')].map(row=>({name:row.querySelector('.med-name').value.trim(),quantity:row.querySelector('.med-qty').value.trim()}));
             if(parsedMeds.some(m=>m.quantity && (!/^\d+$/.test(m.quantity)||Number(m.quantity)<1))){alert(langText('الكمية يجب أن تكون رقمًا صحيحًا أكبر من صفر','Quantity must be a positive whole number'));return;}
             const validMeds=parsedMeds.filter(m=>m.name);
@@ -1428,7 +1465,7 @@ main>.dashboard-footer{margin-top:auto!important;padding:12px 2px 0!important;mi
                 company: document.getElementById('insuranceCompany').value,
                 phone: document.getElementById('phoneNumber').value.trim(),
                 cycle: parseInt(document.getElementById('cycleDuration').value, 10) || 84,
-                dispenseDate: document.getElementById('dispenseDate').value,
+                dispenseDate: dispenseDateISO,
                 remarks: document.getElementById('patientRemarks').value.trim(),
                 meds: meds,
                 medQuantities: medQuantities
