@@ -8,7 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     <!-- Google Font Cairo -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -1625,7 +1626,7 @@ html[data-theme="light"] .export-format-copy small{color:#587187}
             return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
         }
         async function exportToPDF(){
-            if(typeof html2pdf==='undefined'){
+            if(typeof html2canvas==='undefined'||!window.jspdf?.jsPDF){
                 alert(langText('تعذر تحميل أداة PDF. تحقق من اتصال الإنترنت.','PDF library unavailable. Check your internet connection.'));
                 return;
             }
@@ -1649,7 +1650,7 @@ html[data-theme="light"] .export-format-copy small{color:#587187}
             const container=document.createElement('div');
             container.setAttribute('dir','ltr');
             // Render a real, measurable HTML layout at the document origin; far-offscreen positioning causes blank PDF canvases on iOS.
-            container.style.cssText='position:absolute;left:0;top:0;width:1050px;background:#fff;color:#17324d;z-index:-1;pointer-events:none;font-family:Cairo,Arial,sans-serif;';
+            container.style.cssText='position:fixed;left:0;top:0;width:1050px;max-height:100vh;overflow:hidden;background:#fff;color:#17324d;z-index:20000;pointer-events:none;font-family:Cairo,Arial,sans-serif;';
             const styles=document.createElement('style');
             styles.textContent=`
               .pdf-export-sheet{width:1050px;padding:18px 16px;background:#fff;color:#17324d;box-sizing:border-box;font-family:Cairo,Arial,sans-serif}
@@ -1714,26 +1715,56 @@ html[data-theme="light"] .export-format-copy small{color:#587187}
                 pageEl.appendChild(footer);
                 container.appendChild(pageEl);
             });
+            const oldOverflow=document.body.style.overflow;
             document.body.appendChild(container);
+            document.body.style.overflow='hidden';
             try{
-                if(document.fonts&&document.fonts.ready)await document.fonts.ready;
-                // Confirm actual prescription rows are available to the renderer.
-                if (!container.querySelector('.pdf-export-table tbody tr td') || !container.getBoundingClientRect().width) {
-                    throw new Error('PDF table could not be rendered');
+                if(document.fonts?.ready)await document.fonts.ready;
+                const pdf=new window.jspdf.jsPDF({orientation:'landscape',unit:'mm',format:'a4',compress:true});
+                const pageElements=[...container.querySelectorAll('.pdf-export-page')];
+                if(!pageElements.length || !container.querySelector('.pdf-export-table tbody tr td'))throw Error('No PDF table rows');
+                // Render each page fully visible at the origin. Capturing far-offscreen content
+                // with html2pdf created blank documents in iOS Safari.
+                for(let i=0;i<pageElements.length;i++){
+                    pageElements.forEach((p,n)=>p.style.display=n===i?'block':'none');
+                    const element=pageElements[i];
+                    const canvas=await html2canvas(element,{
+                        scale:1.5,
+                        backgroundColor:'#ffffff',
+                        useCORS:false,
+                        scrollX:0,scrollY:0,
+                        windowWidth:1100,
+                        windowHeight:800,
+                        logging:false
+                    });
+                    if(!canvas.width||!canvas.height)throw Error('Empty PDF canvas');
+                    // The navy report heading must produce visible nonwhite pixels.
+                    // Don't let a silently blank PDF be downloaded.
+                    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+                    const sample=ctx.getImageData(0,0,Math.min(canvas.width,1400),Math.min(canvas.height,220)).data;
+                    let nonWhite=0;
+                    for(let p=0;p<sample.length;p+=48){
+                        if(sample[p]<225||sample[p+1]<225||sample[p+2]<225)nonWhite++;
+                    }
+                    if(nonWhite<25)throw Error('PDF page is blank');
+                    if(i>0)pdf.addPage('a4','landscape');
+                    const pageWidth=pdf.internal.pageSize.getWidth();
+                    const pageHeight=pdf.internal.pageSize.getHeight();
+                    const availableW=pageWidth-14,availableH=pageHeight-14;
+                    const renderedH=Math.min(availableH,availableW*canvas.height/canvas.width);
+                    const renderedW=Math.min(availableW,availableH*canvas.width/canvas.height);
+                    const image=canvas.toDataURL('image/jpeg',0.92);
+                    pdf.addImage(image,'JPEG',(pageWidth-renderedW)/2,7,renderedW,renderedH);
                 }
-                await html2pdf().set({
-                    margin:[7,7,7,7],
-                    filename:'Insurance_Prescriptions_'+todayInRiyadh()+'.pdf',
-                    image:{type:'jpeg',quality:0.96},
-                    html2canvas:{scale:1.65,backgroundColor:'#ffffff',useCORS:true,scrollX:0,scrollY:0},
-                    jsPDF:{unit:'mm',format:'a4',orientation:'landscape'},
-                    pagebreak:{mode:['css','legacy'],before:'.pdf-export-page:not(:first-of-type)',avoid:'tbody'}
-                }).from(container).save();
+                pdf.save('Insurance_Prescriptions_'+todayInRiyadh()+'.pdf');
                 showToast(langText('تم تجهيز PDF للطباعة ✔️','Print-ready PDF exported ✔️'));
             }catch(e){
                 console.error('PDF export failed',e);
-                alert(langText('تعذر تجهيز PDF. حاول مرة أخرى.','PDF export failed. Please try again.'));
-            }finally{container.remove();}
+                alert(langText('تعذر إنشاء PDF بشكل صحيح. لم يتم تنزيل ملف فارغ.','PDF could not be generated correctly. No blank file was downloaded.'));
+            }finally{
+                document.body.style.overflow=oldOverflow;
+                container.remove();
+            }
         }
 
         async function exportToExcel() {
